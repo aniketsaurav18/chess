@@ -1,0 +1,117 @@
+.game-main{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    /* background-color: #ff0000; */
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+.game-board{
+    width: 60%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* background-color: #0000ff; */
+    margin: 0;
+    padding: 0;
+}
+.player-metadata{
+    width: 700px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    align-items: center;
+    margin: 1rem 0 1rem 0;
+}
+
+.player-profile{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    /* background-color: #0000ff; */
+    width: 60%;
+    height: 3rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0 5rem 0 0;
+
+}
+.player-profile img{
+    height: 100%;
+    /* margin: 0 0.5rem 0 0; */
+}
+
+.game-detail-interface {
+    width: 40%;
+    height: 100%; /* Ensure it takes up the full height */
+    display: flex;
+    flex-direction: column;
+    /* background-color: #0000ff; */
+    margin: 0;
+    padding: 0;
+}
+
+.detail-interface-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    /* background-color: #ff00ff; */
+    width: 100%;
+    height: 5rem;
+    margin: 1rem 0 1rem 0;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+}
+
+.game-status{
+
+}
+
+.game-history{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffff00;
+    width: 100%;
+    overflow-y: scroll;
+    min-height: 60%;
+    height: 60%;
+    margin: 0;
+    padding: 0;
+}
+.history-move{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #ff0000;
+    width: 100%;
+    height: 20rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0 0 1rem 0;
+}
+
+
+.game-timer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: gray;
+    width: 6rem;
+    height: 3rem;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+    /* margin: 0 0 1rem 0; */
+}
