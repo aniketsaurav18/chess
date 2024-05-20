@@ -21,30 +21,39 @@ export class GameManager{
         this.users.filter(user => user !== socket);
     }
     private handleInit(socket: WebSocket){
-        socket.on("message", data => {
-            const msg = JSON.parse(data.toString());
-            if(msg.type === INIT_GAME && this.pendingUser !== null){
-                // if(this.pendingUser === null){
-                //     throw "INIT_GAME error: No pending user.";
-                // }
-                console.log("init game" + msg.type);
-                const game = new Game(this.pendingUser, socket);
-                this.games.push(game);
-                this.pendingUser = null;
-
-
-            }else if(msg.type === INIT_GAME){
-                console.log("user added to pending user");
-                this.pendingUser = socket;
-            }
-            if(msg.type === MOVE){
-                const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
-                if(game){
-                    game.makeMove(socket, msg.move);
+        try{
+            socket.on("message", data => {
+                const msg = JSON.parse(data.toString());
+                console.log(msg);
+                if(msg.type === INIT_GAME && this.pendingUser !== null){
+                    // if(this.pendingUser === null){
+                    //     throw "INIT_GAME error: No pending user.";
+                    // }
+                    console.log("init game" + msg.type);
+                    const game = new Game(this.pendingUser, socket);
+                    this.games.push(game);
+                    this.pendingUser = null;
+                }else if(msg.type === INIT_GAME){
+                    console.log("user added to pending user");
+                    this.pendingUser = socket;
+                }else if(msg.type === MOVE){
+                    console.log("move1" + msg.payload.move);
+                    const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+                    if(game){
+                        game.makeMove(socket, msg.payload.move);
+                    }else{
+                        socket.send(JSON.stringify({
+                            type: "error",
+                            payload: {
+                                message: "Game not found"
+                            }
+                        }));
+                    }
                 }
-                
-            }
-        })
+            })
+        }catch(e:any){
+            console.log(e.message);
+        }
     }
 
 }

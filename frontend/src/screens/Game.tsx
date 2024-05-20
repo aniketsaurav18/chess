@@ -6,6 +6,7 @@ import { Chess, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import defaultUserImage from "../assets/default-user.jpg";
+import GameInfo from "../components/GameInfo";
 export const INIT_GAME = "init_game";
 export const MOVE = "move";
 export const OPPONENT_DISCONNECTED = "opponent_disconnected";
@@ -21,17 +22,10 @@ const GAME_TIME_LIMIT = 600000; // 10 minutes
 
 // const WS_URL = "ws://localhost:8080";
 
-interface MoveHistory {
-  p1Move: string;
-  p2Move: string | null;
-  p1Time: number;
-  p2Time: number | null;
-}
-interface GameMetadata {
-  player1: string;
-  player2: string;
-  moveHistory: MoveHistory[] | [];
-}
+// interface GameMetadata {
+//   player1: string;
+//   player2: string;
+// }
 
 export function Game() {
   const socket = useSocket();
@@ -41,12 +35,13 @@ export function Game() {
   const [game, setGame] = useState(new Chess());
   const [started, setStarted] = useState(false);
   const [waiting, setWaiting] = useState(false);
-  const [gameMetadata, setGameMetadata] = useState<GameMetadata | null>(null);
+  // const [gameMetadata, setGameMetadata] = useState<GameMetadata | null>(null);
   const [side, setSide] = useState<BoardOrientation>("white");
   const [player1timer, setPlayer1Timer] = useState<number>(0);
   const [player2timer, setPlayer2Timer] = useState<number>(0);
   // const player1timerRef = useRef(player1timer);
   // const player2timerRef = useRef(player2timer);
+  const [gameHistory, setGameHistory] = useState<any>([]);
 
   const startGame = () => {
     if (!socket) {
@@ -57,8 +52,13 @@ export function Game() {
       console.log("start game");
       socket.send(JSON.stringify({ type: INIT_GAME }));
       setWaiting(true);
+      safeGameMutate((game: { reset: () => void }) => {
+        game.reset();
+      });
+      chessboardRef.current.clearPremoves();
       return true;
     } catch (e) {
+      setWaiting(false);
       return null;
     }
   };
@@ -89,23 +89,41 @@ export function Game() {
           setStarted((started) => !started);
           // console.log("init started ", started);
           setWaiting(false);
-          setGameMetadata({
-            player1: "white",
-            player2: "black",
-            moveHistory: [],
-          });
           break;
         case MOVE:
           console.log("move", message.payload.move);
-          // console.log("started", started);
-          makeMove(message.payload.move.from, message.payload.move.to);
+          // makeMove(message.payload.move.from, message.payload.move.to);
+          const gameCopy = { ...game };
+          const move = gameCopy.move({
+            from: message.payload.move.from,
+            to: message.payload.move.to,
+            promotion: "q", // always promote to a queen for example simplicity
+          });
+          if (!move) {
+            break;
+          }
+          console.log("move", move);
+          setGame(gameCopy);
+          let lastMoveWithTime;
+          if (move.color === "w") {
+            lastMoveWithTime = {
+              ...game.history({ verbose: true })[game.history().length - 1],
+              time: player1timer,
+            };
+          } else {
+            lastMoveWithTime = {
+              ...game.history({ verbose: true })[game.history().length - 1],
+              time: player2timer,
+            };
+          }
+          setGameHistory((history: any) => [...history, lastMoveWithTime]);
+          break;
+        case GAME_OVER:
+          console.log("game over");
           break;
       }
     };
-  }, [socket]);
-  useEffect(() => {
-    console.log("started state change", gameMetadata?.moveHistory);
-  }, [gameMetadata]);
+  }, [socket, player1timer, player2timer]);
 
   useEffect(() => {
     if (!started) return;
@@ -141,6 +159,7 @@ export function Game() {
   };
 
   const makeMove = (sourceSquare: Square, targetSquare: Square) => {
+    if (game.get(sourceSquare)?.color !== game.turn()) return false;
     console.log(started);
     if (!socket) return false;
     const gameCopy = { ...game };
@@ -170,39 +189,19 @@ export function Game() {
       return false;
     }
     setGame(gameCopy);
-    setGameMetadata((metadata) => {
-      if (!metadata) return null;
-      const updatedMetadata = { ...metadata };
-      const moveHistory = [...updatedMetadata.moveHistory];
-
-      const currentMove = game.history().length % 2 === 0 ? "p2Move" : "p1Move";
-      const currentTime = game.history().length % 2 === 0 ? "p2Time" : "p1Time";
-
-      if (game.history().length % 2 === 0 && moveHistory.length > 0) {
-        moveHistory[moveHistory.length - 1] = {
-          ...moveHistory[moveHistory.length - 1],
-          [currentMove]: game.history()[game.history().length - 1],
-          [currentTime]: player2timer,
-        };
-        // console.log("player2timerup", player2timerRef.current);
-        // console.log("player1timerup", player1timerRef.current);
-      } else {
-        moveHistory.push({
-          p1Move:
-            game.history().length % 2 !== 0
-              ? game.history()[game.history().length - 1]
-              : "",
-          p2Move: null,
-          p1Time: player1timer,
-          p2Time: null,
-        });
-        // console.log("player1timer", player1timerRef.current);
-        // console.log("player2timer", player2timerRef.current);
-      }
-
-      updatedMetadata.moveHistory = moveHistory;
-      return updatedMetadata;
-    });
+    let lastMoveWithTime;
+    if (move.color === "w") {
+      lastMoveWithTime = {
+        ...game.history({ verbose: true })[game.history().length - 1],
+        time: player1timer,
+      };
+    } else {
+      lastMoveWithTime = {
+        ...game.history({ verbose: true })[game.history().length - 1],
+        time: player2timer,
+      };
+    }
+    setGameHistory((history: any) => [...history, lastMoveWithTime]);
     return true;
   };
 
@@ -239,36 +238,13 @@ export function Game() {
           {side === "white" ? gameTimer(player1timer) : gameTimer(player2timer)}
         </div>
       </div>
-
-      <div className="game-detail-interface">
-        <div className="detail-interface-top">
-          <div className="game-status">
-            {waiting ? "waiting..." : ""}
-            {started ? "game started.." : ""}
-            {socket ? "socket connected" : "socket not connected"}
-          </div>
-          <button
-            className="rc-button"
-            onClick={() => {
-              startGame();
-              safeGameMutate((game: { reset: () => void }) => {
-                game.reset();
-              });
-              chessboardRef.current.clearPremoves();
-            }}
-          >
-            start
-          </button>
-        </div>
-        <div className="game-history">
-          <h3>Game History</h3>
-          <div className="history-moves">
-            {game.history().map((move, index) => (
-              <div key={index}>{move}</div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <GameInfo
+        socket={socket}
+        startGame={startGame}
+        started={started}
+        waiting={waiting}
+        gameHistory={gameHistory}
+      />
     </div>
   );
 }
