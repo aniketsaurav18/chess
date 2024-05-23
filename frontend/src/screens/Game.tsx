@@ -7,18 +7,9 @@ import { Chessboard } from "react-chessboard";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import defaultUserImage from "../assets/default-user.jpg";
 import GameInfo from "../components/GameInfo";
-export const INIT_GAME = "init_game";
-export const MOVE = "move";
-export const OPPONENT_DISCONNECTED = "opponent_disconnected";
-export const GAME_OVER = "game_over";
-export const JOIN_ROOM = "join_room";
-export const GAME_JOINED = "game_joined";
-export const GAME_ALERT = "game_alert";
-export const GAME_ADDED = "game_added";
-export const USER_TIMEOUT = "user_timeout";
-export const GAME_TIME = "game_time";
+import { INIT_GAME, MOVE, GAME_OVER, TIMEOUT } from "../utils/messages";
 
-const GAME_TIME_LIMIT = 600000; // 10 minutes
+const GAME_TIME_LIMIT = 1 * 60 * 1000; // 10 minutes
 
 // const WS_URL = "ws://localhost:8080";
 
@@ -33,7 +24,9 @@ export function Game() {
   const chessboardRef = useRef<any>();
   const [boardWidth, setBoardWidth] = useState<number>(500);
   const [game, setGame] = useState(new Chess());
-  const [started, setStarted] = useState(false);
+  const [gameStatus, setGameStatus] = useState<
+    "STARTED" | "OVER" | "WAITING" | "IDEAL"
+  >("IDEAL");
   const [waiting, setWaiting] = useState(false);
   // const [gameMetadata, setGameMetadata] = useState<GameMetadata | null>(null);
   const [side, setSide] = useState<BoardOrientation>("white");
@@ -50,7 +43,7 @@ export function Game() {
     }
     try {
       console.log("start game");
-      socket.send(JSON.stringify({ type: INIT_GAME }));
+      socket.send(JSON.stringify({ t: INIT_GAME }));
       setWaiting(true);
       safeGameMutate((game: { reset: () => void }) => {
         game.reset();
@@ -61,6 +54,16 @@ export function Game() {
       setWaiting(false);
       return null;
     }
+  };
+
+  const updateHistory = (move: any) => {
+    setGameHistory((history: any) => {
+      const lastMoveWithTime = {
+        ...game.history({ verbose: true })[game.history().length - 1],
+        time: move.color === "w" ? player1timer : player2timer,
+      };
+      return [...history, lastMoveWithTime];
+    });
   };
 
   useEffect(() => {
@@ -83,50 +86,41 @@ export function Game() {
     socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
       console.log("incoming message", message);
-      switch (message.type) {
+      switch (message.t) {
         case INIT_GAME:
-          setSide(message.payload.color);
-          setStarted((started) => !started);
-          // console.log("init started ", started);
+          setSide(message.d.color);
+          setGameStatus("STARTED");
+          // console.log("init gameStatus ", gameStatus);
           setWaiting(false);
           break;
         case MOVE:
-          console.log("move", message.payload.move);
-          // makeMove(message.payload.move.from, message.payload.move.to);
+          console.log("move", message.d.san);
+          // makeMove(message.d.move.from, message.d.move.to);
           const gameCopy = { ...game };
-          const move = gameCopy.move({
-            from: message.payload.move.from,
-            to: message.payload.move.to,
-            promotion: "q", // always promote to a queen for example simplicity
-          });
+          const move = gameCopy.move(message.d.san);
           if (!move) {
             break;
           }
           console.log("move", move);
           setGame(gameCopy);
-          let lastMoveWithTime;
-          if (move.color === "w") {
-            lastMoveWithTime = {
-              ...game.history({ verbose: true })[game.history().length - 1],
-              time: player1timer,
-            };
-          } else {
-            lastMoveWithTime = {
-              ...game.history({ verbose: true })[game.history().length - 1],
-              time: player2timer,
-            };
-          }
-          setGameHistory((history: any) => [...history, lastMoveWithTime]);
+          setPlayer1Timer(message.clock.white);
+          setPlayer2Timer(message.clock.black);
+          updateHistory(move);
           break;
         case GAME_OVER:
           console.log("game over");
           break;
+        case TIMEOUT:
+          if (gameStatus) {
+            setGameStatus("OVER");
+          }
+          break;
       }
     };
-  }, [socket, player1timer, player2timer]);
+  }, [socket]);
 
   useEffect(() => {
-    if (!started) return;
+    if (gameStatus !== "STARTED") return;
     const interval = setInterval(() => {
       if (game.turn() === "w") {
         setPlayer1Timer((t) => t + 100);
@@ -135,7 +129,7 @@ export function Game() {
       }
     }, 100);
     return () => clearInterval(interval);
-  }, [started, game.turn()]);
+  }, [gameStatus, game.turn()]);
 
   function safeGameMutate(modify: any) {
     setGame((g) => {
@@ -160,7 +154,7 @@ export function Game() {
 
   const makeMove = (sourceSquare: Square, targetSquare: Square) => {
     if (game.get(sourceSquare)?.color !== game.turn()) return false;
-    console.log(started);
+    console.log(gameStatus);
     if (!socket) return false;
     const gameCopy = { ...game };
     const move = gameCopy.move({
@@ -174,12 +168,9 @@ export function Game() {
     console.log("move", move);
     try {
       const msgsend = JSON.stringify({
-        type: MOVE,
-        payload: {
-          move: {
-            from: sourceSquare,
-            to: targetSquare,
-          },
+        t: MOVE,
+        d: {
+          m: move.san,
         },
       });
       console.log(msgsend);
@@ -189,19 +180,7 @@ export function Game() {
       return false;
     }
     setGame(gameCopy);
-    let lastMoveWithTime;
-    if (move.color === "w") {
-      lastMoveWithTime = {
-        ...game.history({ verbose: true })[game.history().length - 1],
-        time: player1timer,
-      };
-    } else {
-      lastMoveWithTime = {
-        ...game.history({ verbose: true })[game.history().length - 1],
-        time: player2timer,
-      };
-    }
-    setGameHistory((history: any) => [...history, lastMoveWithTime]);
+    updateHistory(move);
     return true;
   };
 
@@ -241,7 +220,7 @@ export function Game() {
       <GameInfo
         socket={socket}
         startGame={startGame}
-        started={started}
+        status={gameStatus}
         waiting={waiting}
         gameHistory={gameHistory}
       />

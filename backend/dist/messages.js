@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GAME_TIME = exports.USER_TIMEOUT = exports.GAME_ADDED = exports.GAME_ALERT = exports.GAME_JOINED = exports.JOIN_ROOM = exports.GAME_REMATCH_TIMEOUT = exports.GAME_REMATCH_CANCEL = exports.GAME_REMATCH_DECLINE = exports.GAME_REMATCH_ACCEPT = exports.GAME_REMATCH_OFFER = exports.GAME_REMATCH = exports.GAME_RESIGN = exports.GAME_ABORT = exports.GAME_DRAW_OFFER = exports.GAME_DRAW = exports.GAME_OVER = exports.MOVE = exports.INIT_GAME = void 0;
+exports.GAME_TIME = exports.TIMEOUT = exports.GAME_ADDED = exports.GAME_ALERT = exports.GAME_JOINED = exports.JOIN_ROOM = exports.GAME_REMATCH_TIMEOUT = exports.GAME_REMATCH_CANCEL = exports.GAME_REMATCH_DECLINE = exports.GAME_REMATCH_ACCEPT = exports.GAME_REMATCH_OFFER = exports.GAME_REMATCH = exports.GAME_RESIGN = exports.GAME_ABORT = exports.GAME_DRAW_OFFER = exports.GAME_DRAW = exports.GAME_OVER = exports.MOVE = exports.INIT_GAME = void 0;
 exports.INIT_GAME = "init_game";
 exports.MOVE = "move";
 exports.GAME_OVER = "game_over";
@@ -18,5 +18,5 @@ exports.JOIN_ROOM = "join_room";
 exports.GAME_JOINED = "game_joined";
 exports.GAME_ALERT = "game_alert";
 exports.GAME_ADDED = "game_added";
-exports.USER_TIMEOUT = "user_timeout";
+exports.TIMEOUT = "timeout";
 exports.GAME_TIME = "game_time";

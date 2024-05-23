@@ -15,38 +15,35 @@ class GameManager {
     }
     removeUser(socket) {
         //logic to remove user;
-        this.users.filter(user => user !== socket);
+        this.users.filter((user) => user !== socket);
     }
     handleInit(socket) {
         try {
-            socket.on("message", data => {
+            socket.on("message", (data) => {
                 const msg = JSON.parse(data.toString());
                 console.log(msg);
-                if (msg.type === messages_1.INIT_GAME && this.pendingUser !== null) {
-                    // if(this.pendingUser === null){
-                    //     throw "INIT_GAME error: No pending user.";
-                    // }
-                    console.log("init game" + msg.type);
+                if (msg.t === messages_1.INIT_GAME && this.pendingUser !== null) {
+                    console.log("init game" + msg.t);
                     const game = new game_1.Game(this.pendingUser, socket);
                     this.games.push(game);
                     this.pendingUser = null;
                 }
-                else if (msg.type === messages_1.INIT_GAME) {
+                else if (msg.t === messages_1.INIT_GAME) {
                     console.log("user added to pending user");
                     this.pendingUser = socket;
                 }
-                else if (msg.type === messages_1.MOVE) {
-                    console.log("move1" + msg.payload.move);
-                    const game = this.games.find(game => game.player1 === socket || game.player2 === socket);
+                else if (msg.t === messages_1.MOVE) {
+                    console.log("move1" + msg.d.m);
+                    const game = this.games.find((game) => game.player1 === socket || game.player2 === socket);
                     if (game) {
-                        game.makeMove(socket, msg.payload.move);
+                        game.makeMove(socket, msg.d.m);
                     }
                     else {
                         socket.send(JSON.stringify({
-                            type: "error",
-                            payload: {
-                                message: "Game not found"
-                            }
+                            t: "error",
+                            d: {
+                                message: "Game not found",
+                            },
                         }));
                     }
                 }

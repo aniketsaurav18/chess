@@ -18,7 +18,7 @@ interface Move {
 
 interface GameInfoProps {
   waiting: boolean;
-  started: boolean;
+  status: "STARTED" | "OVER" | "WAITING" | "IDEAL";
   socket: WebSocket | null;
   startGame: () => void;
   gameHistory: Move[];
@@ -26,7 +26,7 @@ interface GameInfoProps {
 
 const GameInfo = ({
   waiting,
-  started,
+  status,
   socket,
   startGame,
   gameHistory,
@@ -35,7 +35,7 @@ const GameInfo = ({
 
   useEffect(() => {
     if (gameHistory.length === 0) return;
-    // console.log(gameHistory);
+    console.log(gameHistory);
     // console.log(gameHistory[0].after);
     // console.log(gameHistory[0].before);
 
@@ -59,7 +59,7 @@ const GameInfo = ({
       <div className="detail-interface-top">
         <div className="game-status">
           {waiting ? "waiting..." : ""}
-          {started ? "game started.." : ""}
+          {status ? status : ""}
           {socket ? "socket connected" : "socket not connected"}
         </div>
         <button className="rc-button" onClick={startGame}>
