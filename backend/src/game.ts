@@ -1,6 +1,13 @@
 import { WebSocket } from "ws";
 import { Chess, Move } from "chess.js";
-import { GAME_OVER, INIT_GAME, MOVE, GAME_DRAW, TIMEOUT } from "./messages";
+import {
+  GAME_OVER,
+  INIT_GAME,
+  MOVE,
+  GAME_DRAW,
+  TIMEOUT,
+  RESIGN,
+} from "./messages";
 import { randomUUID } from "crypto";
 // import { GameMove } from "./types/types";
 export interface GameMove {
@@ -12,7 +19,7 @@ export type Result = "white" | "black" | "draw";
 export type GameStatus = "active" | "over";
 
 // Time in milliseconds
-export const TIME_LIMIT = 1 * 60 * 1000; // 10 minutes
+export const TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 export class Game {
   public gameId: string;
   public player1: WebSocket | null;
@@ -179,10 +186,12 @@ export class Game {
     }
   }
 
-  gameEnd(type: string, msg: string) {
+  private gameEnd(type: string, msg: string) {
     if (this.gameTimer) {
       clearInterval(this.gameTimer);
     }
+    this.gameStatus = "over";
+    this.gameResult = msg as Result;
     this.player1?.send(
       JSON.stringify({
         t: type,
@@ -222,5 +231,17 @@ export class Game {
       console.log(turn === "w" ? "black" : "white", "timeout");
       this.gameEnd(TIMEOUT, turn === "w" ? "black" : "white");
     }, timeRemain);
+  }
+
+  resign(socket: WebSocket) {
+    if (socket === this.player1) {
+      this.gameEnd(RESIGN, "black");
+    } else {
+      this.gameEnd(RESIGN, "white");
+    }
+  }
+
+  gameDraw() {
+    this.gameEnd(GAME_DRAW, "draw");
   }
 }

@@ -5,7 +5,7 @@ const chess_js_1 = require("chess.js");
 const messages_1 = require("./messages");
 const crypto_1 = require("crypto");
 // Time in milliseconds
-exports.TIME_LIMIT = 1 * 60 * 1000; // 10 minutes
+exports.TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 class Game {
     constructor(p1, p2, gameId) {
         var _a, _b;
@@ -183,6 +183,14 @@ class Game {
             console.log(turn === "w" ? "black" : "white", "timeout");
             this.gameEnd(messages_1.TIMEOUT, turn === "w" ? "black" : "white");
         }, timeRemain);
+    }
+    resign(socket) {
+        if (socket === this.player1) {
+            this.gameEnd(messages_1.GAME_OVER, "black");
+        }
+        else {
+            this.gameEnd(messages_1.GAME_OVER, "white");
+        }
     }
 }
 exports.Game = Game;

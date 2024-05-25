@@ -7,9 +7,16 @@ import { Chessboard } from "react-chessboard";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import defaultUserImage from "../assets/default-user.jpg";
 import GameInfo from "../components/GameInfo";
-import { INIT_GAME, MOVE, GAME_OVER, TIMEOUT } from "../utils/messages";
+import {
+  INIT_GAME,
+  MOVE,
+  GAME_OVER,
+  TIMEOUT,
+  OFFER_DRAW,
+  DRAW_OFFERED,
+} from "../utils/messages";
 
-const GAME_TIME_LIMIT = 1 * 60 * 1000; // 10 minutes
+const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 
 // const WS_URL = "ws://localhost:8080";
 
@@ -32,40 +39,11 @@ export function Game() {
   const [side, setSide] = useState<BoardOrientation>("white");
   const [player1timer, setPlayer1Timer] = useState<number>(0);
   const [player2timer, setPlayer2Timer] = useState<number>(0);
-  // const player1timerRef = useRef(player1timer);
-  // const player2timerRef = useRef(player2timer);
+  const [moveFrom, setMoveFrom] = useState<Square | null>(null);
+  const [optionSquares, setOptionSquares] = useState<any>({}); // for highlighting possible moves
   const [gameHistory, setGameHistory] = useState<any>([]);
-
-  const startGame = () => {
-    if (!socket) {
-      console.log("no socket found");
-      return null;
-    }
-    try {
-      console.log("start game");
-      socket.send(JSON.stringify({ t: INIT_GAME }));
-      setWaiting(true);
-      safeGameMutate((game: { reset: () => void }) => {
-        game.reset();
-      });
-      chessboardRef.current.clearPremoves();
-      return true;
-    } catch (e) {
-      setWaiting(false);
-      return null;
-    }
-  };
-
-  const updateHistory = (move: any) => {
-    setGameHistory((history: any) => {
-      const lastMoveWithTime = {
-        ...game.history({ verbose: true })[game.history().length - 1],
-        time: move.color === "w" ? player1timer : player2timer,
-      };
-      return [...history, lastMoveWithTime];
-    });
-  };
-
+  const [offerDraw, setOfferDraw] = useState<boolean>(false); // player offered a draw
+  const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
   useEffect(() => {
     if (windowDimensions.width === null) return;
     if (windowDimensions.width < 500) {
@@ -115,6 +93,13 @@ export function Game() {
             setGameStatus("OVER");
           }
           break;
+        case DRAW_OFFERED:
+          if (drawOffered) break;
+          console.log("draw offered");
+          setDrawOffered(true);
+          setTimeout(() => {
+            setDrawOffered(false);
+          }, 5000);
       }
     };
   }, [socket]);
@@ -153,7 +138,11 @@ export function Game() {
   };
 
   const makeMove = (sourceSquare: Square, targetSquare: Square) => {
-    if (game.get(sourceSquare)?.color !== game.turn()) return false;
+    if (
+      game.get(sourceSquare)?.color !== game.turn() ||
+      game.turn() !== side[0]
+    )
+      return false;
     console.log(gameStatus);
     if (!socket) return false;
     const gameCopy = { ...game };
@@ -184,6 +173,100 @@ export function Game() {
     return true;
   };
 
+  const offerDrawfn = () => {
+    if (offerDraw) return;
+    setOfferDraw(true);
+    const msgsend = JSON.stringify({
+      t: OFFER_DRAW,
+      d: {
+        player: side[0],
+      },
+    });
+    socket?.send(msgsend);
+    setTimeout(() => {
+      setOfferDraw(false);
+    }, 5000);
+  };
+
+  const startGame = () => {
+    if (!socket) {
+      console.log("no socket found");
+      return null;
+    }
+    try {
+      console.log("start game");
+      socket.send(JSON.stringify({ t: INIT_GAME }));
+      setWaiting(true);
+      safeGameMutate((game: { reset: () => void }) => {
+        game.reset();
+      });
+      chessboardRef.current.clearPremoves();
+      return true;
+    } catch (e) {
+      setWaiting(false);
+      return null;
+    }
+  };
+
+  const updateHistory = (move: any) => {
+    setGameHistory((history: any) => {
+      const lastMoveWithTime = {
+        ...game.history({ verbose: true })[game.history().length - 1],
+        time: move.color === "w" ? player1timer : player2timer,
+      };
+      return [...history, lastMoveWithTime];
+    });
+  };
+
+  function getMoveOptions(square: Square) {
+    if (game.turn() !== side[0] && gameStatus !== "STARTED") return;
+
+    const moves = game.moves({
+      square,
+      verbose: true,
+    });
+    if (moves.length === 0) {
+      return;
+    }
+
+    const newSquares: any = {};
+    moves.map((move) => {
+      newSquares[move.to] = {
+        background:
+          game.get(move.to) &&
+          game.get(move.to)?.color !== game.get(square)?.color
+            ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
+            : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
+        borderRadius: "50%",
+      };
+      return move;
+    });
+    newSquares[square] = {
+      background: "rgba(255, 255, 0, 0.4)",
+    };
+    console.log("newSquare", newSquares);
+    setOptionSquares(newSquares);
+  }
+
+  const onSquareClick = (square: Square) => {
+    if (game.turn() !== side[0]) return;
+    if (!moveFrom) {
+      if (game.get(square)?.color !== game.turn()) return;
+      getMoveOptions(square);
+      setMoveFrom(square);
+    } else {
+      if (!Object.keys(optionSquares).includes(square)) {
+        getMoveOptions(square);
+        setMoveFrom(square);
+        return;
+      }
+      if (makeMove(moveFrom, square)) {
+        setMoveFrom(null);
+        setOptionSquares({});
+      }
+    }
+  };
+
   return (
     <div className="game-main">
       <div className="game-board">
@@ -206,6 +289,12 @@ export function Game() {
             }}
             ref={chessboardRef}
             boardOrientation={side}
+            areArrowsAllowed={true}
+            arePremovesAllowed={true}
+            onSquareClick={onSquareClick}
+            customSquareStyles={{
+              ...optionSquares,
+            }}
           />
         </div>
 
@@ -218,11 +307,16 @@ export function Game() {
         </div>
       </div>
       <GameInfo
+        side={side}
         socket={socket}
         startGame={startGame}
         status={gameStatus}
         waiting={waiting}
         gameHistory={gameHistory}
+        drawOffered={drawOffered}
+        setDrawOffered={setDrawOffered}
+        offerDrawfn={offerDrawfn}
+        offerDraw={offerDraw}
       />
     </div>
   );
