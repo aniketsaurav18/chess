@@ -236,3 +236,10 @@
   white-space: nowrap;
   margin: 0 1rem 0 0;
 }
+
+@media screen and (max-width: 1250px){
+  .game-detail-interface{
+      width: 90%;
+      height: 50rem;
+  }
+}

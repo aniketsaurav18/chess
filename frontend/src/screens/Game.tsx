@@ -7,6 +7,7 @@ import { Chessboard } from "react-chessboard";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import defaultUserImage from "../assets/default-user.jpg";
 import GameInfo from "../components/GameInfo";
+import Sidebar from "../components/Sidebar";
 import {
   INIT_GAME,
   MOVE,
@@ -15,6 +16,7 @@ import {
   OFFER_DRAW,
   DRAW_OFFERED,
 } from "../utils/messages";
+import Topbar from "../components/Topbar";
 
 const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 
@@ -44,17 +46,14 @@ export function Game() {
   const [gameHistory, setGameHistory] = useState<any>([]);
   const [offerDraw, setOfferDraw] = useState<boolean>(false); // player offered a draw
   const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   useEffect(() => {
-    if (windowDimensions.width === null) return;
-    if (windowDimensions.width < 500) {
-      setBoardWidth(windowDimensions.width - 20);
-    } else {
-      if (windowDimensions.height !== null) {
-        setBoardWidth(windowDimensions.height - 200);
-      } else {
-        setBoardWidth(600);
-      }
-    }
+    if (windowDimensions.width === null || windowDimensions.height === null)
+      return;
+
+    const width = document.getElementsByClassName("game-board")[0].clientWidth;
+    const height = windowDimensions.height;
+    setBoardWidth(Math.min(width - 40, height - 165));
   }, [windowDimensions.width]);
 
   useEffect(() => {
@@ -268,56 +267,67 @@ export function Game() {
   };
 
   return (
-    <div className="game-main">
-      <div className="game-board">
-        <div className="player-metadata" style={{ width: boardWidth }}>
-          <div className="player-profile">
-            <img src={defaultUserImage} alt={defaultUserImage} />
-            <span>Username</span>
-          </div>
-          {side === "white" ? gameTimer(player2timer) : gameTimer(player1timer)}
-        </div>
-        <div className="chessboard">
-          <Chessboard
-            id="PlayVsPlay"
-            boardWidth={boardWidth}
-            position={game.fen()}
-            onPieceDrop={makeMove}
-            customBoardStyle={{
-              borderRadius: "4px",
-              boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
-            }}
-            ref={chessboardRef}
-            boardOrientation={side}
-            areArrowsAllowed={true}
-            arePremovesAllowed={true}
-            onSquareClick={onSquareClick}
-            customSquareStyles={{
-              ...optionSquares,
-            }}
-          />
-        </div>
-
-        <div className="player-metadata" style={{ width: boardWidth }}>
-          <div className="player-profile">
-            <img src={defaultUserImage} alt={defaultUserImage} />
-            <span>Username</span>
-          </div>
-          {side === "white" ? gameTimer(player1timer) : gameTimer(player2timer)}
-        </div>
-      </div>
-      <GameInfo
-        side={side}
-        socket={socket}
-        startGame={startGame}
-        status={gameStatus}
-        waiting={waiting}
-        gameHistory={gameHistory}
-        drawOffered={drawOffered}
-        setDrawOffered={setDrawOffered}
-        offerDrawfn={offerDrawfn}
-        offerDraw={offerDraw}
+    <main className="main">
+      <Sidebar
+        sidebar={sidebarOpen}
+        windowSize={windowDimensions.width ? windowDimensions.width : 1251}
       />
-    </div>
+      <Topbar setSidebarOpen={setSidebarOpen} sidebar={sidebarOpen} />
+      <div className="game-main">
+        <div className="game-board">
+          <div className="player-metadata" style={{ width: boardWidth }}>
+            <div className="player-profile">
+              <img src={defaultUserImage} alt={defaultUserImage} />
+              <span>Username</span>
+            </div>
+            {side === "white"
+              ? gameTimer(player2timer)
+              : gameTimer(player1timer)}
+          </div>
+          <div className="chessboard">
+            <Chessboard
+              id="PlayVsPlay"
+              boardWidth={boardWidth}
+              position={game.fen()}
+              onPieceDrop={makeMove}
+              customBoardStyle={{
+                borderRadius: "4px",
+                boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
+              }}
+              ref={chessboardRef}
+              boardOrientation={side}
+              areArrowsAllowed={true}
+              arePremovesAllowed={true}
+              onSquareClick={onSquareClick}
+              customSquareStyles={{
+                ...optionSquares,
+              }}
+            />
+          </div>
+
+          <div className="player-metadata" style={{ width: boardWidth }}>
+            <div className="player-profile">
+              <img src={defaultUserImage} alt={defaultUserImage} />
+              <span>Username</span>
+            </div>
+            {side === "white"
+              ? gameTimer(player1timer)
+              : gameTimer(player2timer)}
+          </div>
+        </div>
+        <GameInfo
+          side={side}
+          socket={socket}
+          startGame={startGame}
+          status={gameStatus}
+          waiting={waiting}
+          gameHistory={gameHistory}
+          drawOffered={drawOffered}
+          setDrawOffered={setDrawOffered}
+          offerDrawfn={offerDrawfn}
+          offerDraw={offerDraw}
+        />
+      </div>
+    </main>
   );
 }
