@@ -1,13 +1,75 @@
 .sidebar {
     height: 100vh;
     width: 10%;
-    /* position: absolute; */
-    z-index: 1;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
     top: 0;
     left: 0;
     background-color: #111;
     overflow-x: hidden;
     padding-top: 20px;
+}
+
+.sidebar-content{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    color: white;
+    width: 90%;
+    padding: 1rem;
+    text-decoration: none;
+    background-color: #333; /* Changed to a neutral background color */
+    text-align: left;
+    margin: 0.5rem 0;
+    border-radius: 4px; /* Added rounded corners */
+    transition: background-color 0.3s ease; /* Added transition for hover effect */
+}
+.sidebar-link:hover {
+background-color: #444; /* Darken background on hover */
+}
+
+.sidebar-icon {
+color: white;
+height: 24px; /* Adjusted icon size */
+width: 24px; /* Adjusted icon size */
+margin-right: 12px; /* Added space between icon and text */
+flex-shrink: 0;
+}
+
+.sidebar-text {
+font-size: 16px; /* Adjusted text size */
+}
+.user-functions{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 2rem;
+    bottom: 0;
+}
+.userfn-btn{
+    width: 90%;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #333;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 @media screen and (max-width: 1250px){

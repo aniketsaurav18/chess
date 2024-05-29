@@ -16,7 +16,6 @@ import {
   OFFER_DRAW,
   DRAW_OFFERED,
 } from "../utils/messages";
-import Topbar from "../components/Topbar";
 
 const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 
@@ -46,11 +45,22 @@ export function Game() {
   const [gameHistory, setGameHistory] = useState<any>([]);
   const [offerDraw, setOfferDraw] = useState<boolean>(false); // player offered a draw
   const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
       return;
-
+    const sidebarEle = document.getElementsByClassName(
+      "sidebar"
+    )[0] as HTMLElement;
+    if (sidebarEle) {
+      sidebarEle.style.width = `${windowDimensions.width < 1251 ? 250 : 250}px`;
+      const mainEle = document.getElementsByClassName("main")[0] as HTMLElement;
+      mainEle.style.marginLeft = `${windowDimensions.width < 1251 ? 0 : 250}px`;
+      mainEle.style.width = `${
+        windowDimensions.width < 1251
+          ? windowDimensions.width
+          : windowDimensions.width - 250
+      }px`;
+    }
     const width = document.getElementsByClassName("game-board")[0].clientWidth;
     const height = windowDimensions.height;
     setBoardWidth(Math.min(width - 40, height - 165));
@@ -267,13 +277,11 @@ export function Game() {
   };
 
   return (
-    <main className="main">
+    <>
       <Sidebar
-        sidebar={sidebarOpen}
         windowSize={windowDimensions.width ? windowDimensions.width : 1251}
       />
-      <Topbar setSidebarOpen={setSidebarOpen} sidebar={sidebarOpen} />
-      <div className="game-main">
+      <main className="main">
         <div className="game-board">
           <div className="player-metadata" style={{ width: boardWidth }}>
             <div className="player-profile">
@@ -327,7 +335,7 @@ export function Game() {
           offerDrawfn={offerDrawfn}
           offerDraw={offerDraw}
         />
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
