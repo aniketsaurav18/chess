@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  name         String?
+  email        String    @unique
+  password     String
+  rating       Int       @default(1200)
+  gamesAsWhite Game[]    @relation("GamesAsWhite")
+  gamesAsBlack Game[]    @relation("GamesAsBlack")
+  createdAt    DateTime  @default(now())
+  lastLogin    DateTime?
+
+  @@index([rating])
+}
+
+model Game {
+  id            String      @id @default(uuid())
+  whitePlayerId String
+  blackPlayerId String
+  whitePlayer   User        @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
+  blackPlayer   User        @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
+  status        GameStatus
+  result        GameResult?
+  timeControl   TimeControl
+  moves         Json        @default("[]")
+  pgn           String?
+  currentFen    String?
+  startAt       DateTime    @default(now())
+  endAt         DateTime?
+  opening       String?
+  event         String?
+
+  @@index([status, result])
+}
+
+enum GameStatus {
+  OPEN
+  IN_PROGRESS
+  FINISHED
+}
+
+enum GameResult {
+  WHITE
+  BLACK
+  DRAW
+  WHITE_TIMEOUT
+  BLACK_TIMEOUT
+  WHITE_ABANDONED
+  BLACK_ABANDONED
+}
+
+enum TimeControl {
+  BULLET
+  BLITZ
+  RAPID
+  CLASSICAL
+}

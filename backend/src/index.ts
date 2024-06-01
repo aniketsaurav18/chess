@@ -1,14 +1,18 @@
-import { WebSocketServer } from 'ws';
-import { GameManager } from './gameManager';
+import express from "express";
+import dotenv from "dotenv";
+import authrouter from "./routers/auth";
 
-const wss = new WebSocketServer({ port: 8080 });
-const gameManager = new GameManager();
+const app = express();
+dotenv.config();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-wss.on('connection', function connection(ws) {
-  console.log("client connected");
-  gameManager.addUser(ws);
-  ws.on("close", () => {
-    gameManager.removeUser(ws);
-    console.log("client disconnected");
-  })
+app.get("/health-check", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.use("/api", authrouter);
+
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on http://localhost:${process.env.PORT}`);
 });
