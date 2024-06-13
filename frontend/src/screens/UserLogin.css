@@ -1,0 +1,82 @@
+.userlogin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  /* background-color: #f0f2f5;  */
+}
+
+.login-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px; /* Set a max-width for the form */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #ffffff; /* White background for the form */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-form h1 {
+  margin-bottom: 20px; /* Add margin below the heading */
+  font-size: 2rem; /* Increase the font size of the heading */
+  color: #333; /* Dark color for the heading text */
+}
+
+.login-element {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 15px; /* Space between form elements */
+}
+
+.login-element label {
+  align-self: flex-start; /* Align label to the left */
+  margin-bottom: 5px; /* Space between label and input */
+  font-size: 1rem; /* Increase the font size of labels */
+  color: #333; /* Dark color for the labels */
+}
+
+.login-element input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem; /* Increase the font size of inputs */
+}
+
+button[type="submit"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px; /* Space above the button */
+  border: none;
+  border-radius: 5px;
+  background-color: #2a7f22; /* Blue background color for the button */
+  color: #ffffff; /* White color for the button text */
+  font-size: 1rem; /* Increase the font size of the button */
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #144c10; /* Darker blue on hover */
+}
+
+p {
+  margin-top: 15px; /* Space above the paragraph */
+  font-size: 1rem; /* Increase the font size of the paragraph */
+  color: #333; /* Dark color for the text */
+}
+
+p a {
+  color: #007bff; /* Blue color for the link */
+  text-decoration: none; /* Remove underline from the link */
+}
+
+p a:hover {
+  text-decoration: underline; /* Underline the link on hover */
+}

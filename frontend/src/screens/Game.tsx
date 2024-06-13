@@ -51,19 +51,24 @@ export function Game() {
     const sidebarEle = document.getElementsByClassName(
       "sidebar"
     )[0] as HTMLElement;
+    const sidebarWidth = sidebarEle.clientWidth;
     if (sidebarEle) {
-      sidebarEle.style.width = `${windowDimensions.width < 1251 ? 250 : 250}px`;
+      // sidebarEle.style.width = `${
+      //   windowDimensions.width < 1251 ? 250 : sidebarWidth
+      // }px`;
       const mainEle = document.getElementsByClassName("main")[0] as HTMLElement;
-      mainEle.style.marginLeft = `${windowDimensions.width < 1251 ? 0 : 250}px`;
+      mainEle.style.marginLeft = `${
+        windowDimensions.width < 1250 ? 0 : sidebarWidth
+      }px`;
       mainEle.style.width = `${
-        windowDimensions.width < 1251
+        windowDimensions.width < 1250
           ? windowDimensions.width
-          : windowDimensions.width - 250
+          : windowDimensions.width - sidebarWidth
       }px`;
     }
     const width = document.getElementsByClassName("game-board")[0].clientWidth;
     const height = windowDimensions.height;
-    setBoardWidth(Math.min(width - 40, height - 165));
+    setBoardWidth(Math.min(width - 40, height - 145));
   }, [windowDimensions.width]);
 
   useEffect(() => {
@@ -312,7 +317,6 @@ export function Game() {
               }}
             />
           </div>
-
           <div className="player-metadata" style={{ width: boardWidth }}>
             <div className="player-profile">
               <img src={defaultUserImage} alt={defaultUserImage} />

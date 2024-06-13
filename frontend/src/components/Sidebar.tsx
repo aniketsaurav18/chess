@@ -13,8 +13,38 @@ const Sidebar = ({ windowSize }: { windowSize: number }) => {
           display: windowSize < 1250 ? (sidebar ? "block" : "none") : "block",
         }}
       >
+        {windowSize < 1250 && (
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+              padding: "0 1rem",
+            }}
+          >
+            <button className="sidebar-close-btn">
+              <svg
+                className="sidebar-close"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                onClick={() => setSidebar(false)}
+                style={{ width: "2rem", height: "2rem" }}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
         <div className="sidebar-header">
-          <h1>Chess</h1>
+          <img src="/chess-logo.png" alt="chess-logo" />
+          chess
         </div>
         <div className="sidebar-content">
           <Link
@@ -82,10 +112,10 @@ const Sidebar = ({ windowSize }: { windowSize: number }) => {
           </Link>
         </div>
         <div className="user-functions">
-          <Link to="/login" className="sidebar-link userfn-btn">
+          <Link to="/login" className="sidebar-link userfn-btn sidebar-text">
             Login
           </Link>
-          <Link to="/signup" className="sidebar-link userfn-btn">
+          <Link to="/signup" className="sidebar-link userfn-btn sidebar-text">
             Signup
           </Link>
         </div>
