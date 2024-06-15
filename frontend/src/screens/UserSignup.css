@@ -56,14 +56,14 @@ button[type="submit"] {
   margin-top: 10px; /* Space above the button */
   border: none;
   border-radius: 5px;
-  background-color: #007bff; /* Blue background color for the button */
+  background-color: #3db338; /* Blue background color for the button */
   color: #ffffff; /* White color for the button text */
   font-size: 1rem; /* Increase the font size of the button */
   cursor: pointer;
 }
 
 button[type="submit"]:hover {
-  background-color: #0056b3; /* Darker blue on hover */
+  background-color: #2d8e38; /* Darker blue on hover */
 }
 
 p {
