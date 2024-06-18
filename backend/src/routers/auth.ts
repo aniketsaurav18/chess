@@ -38,7 +38,9 @@ router.post("/login", async (req, res) => {
 router.post("/signup", async (req, res) => {
   const { email, password, userName } = req.body;
   if (!email || !password || !userName) {
-    return res.status(400).send("Data Incorrect, email, password and username");
+    return res
+      .status(400)
+      .json({ message: "Data Incorrect, email, password and username" });
   }
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,12 +51,15 @@ router.post("/signup", async (req, res) => {
         username: userName,
       },
     });
-    res.status(200).send("Signup successful");
+    console.log(user);
+    res.status(200).json({ message: "Signup successful" });
   } catch (err: any) {
     if (err.code === "P2002") {
-      return res.status(500).send("Email already exists");
+      return res.status(500).json({ message: "Email already exists" });
     }
-    return res.status(500).send("An error occurred while signing up");
+    return res
+      .status(500)
+      .json({ message: "An error occurred while signing up" });
   }
 });
 
