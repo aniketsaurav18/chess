@@ -39,8 +39,11 @@ const UserLogin = () => {
       const data = await response.json();
       console.log(data);
       setLoading(false);
-      if (response.ok) {
+      if (response.status === 200) {
         setSuccess(data.message);
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.userId);
+        window.location.href = "/game";
       } else {
         setError(data.message || "An error occurred");
       }
