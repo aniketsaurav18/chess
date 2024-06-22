@@ -2,6 +2,9 @@ import "./UserSignup.css";
 import { useState } from "react";
 
 const UserSignup = () => {
+<<<<<<< HEAD
+  
+=======
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,6 +49,7 @@ const UserSignup = () => {
       setError("An error occurred");
     }
   };
+>>>>>>> f718739e5e697a51ea5f69edcb8316776d5b4b86
   return (
     <main className="userlogin">
       <form action="" className="signup-form">
