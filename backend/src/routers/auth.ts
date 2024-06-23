@@ -25,7 +25,7 @@ router.post("/login", async (req, res) => {
 
   const token = createToken({ id: user.id, email: user.email }, "30d");
 
-  res.status(200).json({ message: "Login successful", userId: user.id, token });
+  res.status(200).json({ message: "Login successful", userId: user.id, token: token, email: user.email });
 });
 
 router.post("/signup", async (req, res) => {
@@ -47,8 +47,9 @@ router.post("/signup", async (req, res) => {
 
     const token = createToken({ id: user.id, email: user.email }, "30d");
 
-    res.status(200).json({ message: "Signup successful", token });
+    res.status(200).json({ message: "Signup successful", token: token, userId: user.id, email: user.email });
   } catch (err: any) {
+    console.log(err);
     if (err.code === "P2002") {
       return res.status(500).json({ message: "Email already exists" });
     }

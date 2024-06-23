@@ -2,6 +2,7 @@ import "./Game.css";
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../hooks/useSocket";
 import useWindowDimensions from "../hooks/useWindowDimensions";
+import useUser from "../hooks/useUser";
 import { Chess, Square } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
@@ -28,6 +29,7 @@ const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 
 export function Game() {
   const socket = useSocket();
+  const user = useUser();
   const windowDimensions = useWindowDimensions();
   const chessboardRef = useRef<any>();
   const [boardWidth, setBoardWidth] = useState<number>(500);
@@ -285,6 +287,7 @@ export function Game() {
     <>
       <Sidebar
         windowSize={windowDimensions.width ? windowDimensions.width : 1251}
+        user = {user}
       />
       <main className="main">
         <div className="game-board">

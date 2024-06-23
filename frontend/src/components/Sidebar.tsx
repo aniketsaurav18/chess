@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import Topbar from "./Topbar";
 import "./Sidebar.css";
 import { useState } from "react";
-const Sidebar = ({ windowSize }: { windowSize: number }) => {
+const Sidebar = ({ windowSize, user }: { windowSize: number, user: any }) => {
   const [sidebar, setSidebar] = useState(false);
   return (
     <>
@@ -111,14 +111,18 @@ const Sidebar = ({ windowSize }: { windowSize: number }) => {
             <span className="sidebar-text">About</span>
           </Link>
         </div>
-        <div className="user-functions">
-          <Link to="/login" className="sidebar-link userfn-btn sidebar-text">
-            Login
-          </Link>
-          <Link to="/signup" className="sidebar-link userfn-btn sidebar-text">
-            Signup
-          </Link>
-        </div>
+        if(user.type === "guest"){
+           <div className="user-functions">
+           <Link to="/login" className="sidebar-link userfn-btn sidebar-text">
+             Login
+           </Link>
+           <Link to="/signup" className="sidebar-link userfn-btn sidebar-text">
+             Signup
+           </Link>
+         </div>
+        }else{
+          
+        }
       </div>
     </>
   );

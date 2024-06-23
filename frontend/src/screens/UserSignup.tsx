@@ -2,9 +2,6 @@ import "./UserSignup.css";
 import { useState } from "react";
 
 const UserSignup = () => {
-<<<<<<< HEAD
-  
-=======
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +9,7 @@ const UserSignup = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;  
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -34,13 +31,17 @@ const UserSignup = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, userName: username }),
+        body: JSON.stringify({ email: email, password: password, userName: username }),
       });
       const data = await response.json();
       console.log(data);
       setLoading(false);
       if (response.ok) {
         setSuccess(data.message);
+        localStorage.setItem("token", data.token)
+        localStorage.setItem("userId", data.userId);
+        localStorage.setItem("email", data.email);
+        window.location.href = "/game"
       } else {
         setError(data.message || "An error occurred");
       }
@@ -49,7 +50,6 @@ const UserSignup = () => {
       setError("An error occurred");
     }
   };
->>>>>>> f718739e5e697a51ea5f69edcb8316776d5b4b86
   return (
     <main className="userlogin">
       <form action="" className="signup-form">
