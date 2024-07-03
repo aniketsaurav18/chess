@@ -47,6 +47,13 @@ export function Game() {
   const [gameHistory, setGameHistory] = useState<any>([]);
   const [offerDraw, setOfferDraw] = useState<boolean>(false); // player offered a draw
   const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
+
+  useEffect(() => {
+    setTimeout(() => {
+      console.log(user);
+    }, 3000);
+    // console.log("game user", user);
+  }, []);
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
       return;
@@ -287,7 +294,7 @@ export function Game() {
     <>
       <Sidebar
         windowSize={windowDimensions.width ? windowDimensions.width : 1251}
-        user = {user}
+        user={user}
       />
       <main className="main">
         <div className="game-board">

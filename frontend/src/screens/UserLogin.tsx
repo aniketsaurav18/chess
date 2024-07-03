@@ -43,6 +43,7 @@ const UserLogin = () => {
         setSuccess(data.message);
         localStorage.setItem("token", data.token);
         localStorage.setItem("userId", data.userId);
+        localStorage.setItem("userEmail", data.email);
         window.location.href = "/game";
       } else {
         setError(data.message || "An error occurred");

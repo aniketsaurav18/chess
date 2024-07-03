@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import Topbar from "./Topbar";
 import "./Sidebar.css";
 import { useState } from "react";
-const Sidebar = ({ windowSize, user }: { windowSize: number, user: any }) => {
+const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
   const [sidebar, setSidebar] = useState(false);
   return (
     <>
@@ -111,18 +111,32 @@ const Sidebar = ({ windowSize, user }: { windowSize: number, user: any }) => {
             <span className="sidebar-text">About</span>
           </Link>
         </div>
-        if(user.type === "guest"){
-           <div className="user-functions">
-           <Link to="/login" className="sidebar-link userfn-btn sidebar-text">
-             Login
-           </Link>
-           <Link to="/signup" className="sidebar-link userfn-btn sidebar-text">
-             Signup
-           </Link>
-         </div>
-        }else{
-          
-        }
+        <div>
+          {user ? (
+            <div className="user-functions">
+              <Link
+                to="/login"
+                className="sidebar-link userfn-btn sidebar-text"
+              >
+                Login
+              </Link>
+              <Link
+                to="/signup"
+                className="sidebar-link userfn-btn sidebar-text"
+              >
+                Signup
+              </Link>
+            </div>
+          ) : (
+            <div className="user-details">
+              <img src="./default_user.jpg" alt="" className="user-image" />
+              <div className="user-details-text">
+                <h4 className="sidebar-text">{user?.username}</h4>
+                <p className="sidebar-text">{user?.email}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </>
   );
