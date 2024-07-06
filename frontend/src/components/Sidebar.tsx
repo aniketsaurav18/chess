@@ -10,7 +10,7 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
       <div
         className="sidebar"
         style={{
-          display: windowSize < 1250 ? (sidebar ? "block" : "none") : "block",
+          display: windowSize < 1250 ? (sidebar ? "flex" : "none") : "flex",
         }}
       >
         {windowSize < 1250 && (
@@ -111,23 +111,18 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
             <span className="sidebar-text">About</span>
           </Link>
         </div>
-        <div>
-          {user ? (
-            <div className="user-functions">
-              <Link
-                to="/login"
-                className="sidebar-link userfn-btn sidebar-text"
-              >
-                Login
-              </Link>
-              <Link
-                to="/signup"
-                className="sidebar-link userfn-btn sidebar-text"
-              >
-                Signup
-              </Link>
-            </div>
-          ) : (
+
+        {user.user === "guest" ? (
+          <div className="user-functions">
+            <Link to="/login" className="sidebar-link userfn-btn sidebar-text">
+              Login
+            </Link>
+            <Link to="/signup" className="sidebar-link userfn-btn sidebar-text">
+              Signup
+            </Link>
+          </div>
+        ) : (
+          <div className="user-container">
             <div className="user-details">
               <img src="./default_user.jpg" alt="" className="user-image" />
               <div className="user-details-text">
@@ -135,8 +130,9 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
                 <p className="sidebar-text">{user?.email}</p>
               </div>
             </div>
-          )}
-        </div>
+            <button className="logout-btn">Logout</button>
+          </div>
+        )}
       </div>
     </>
   );

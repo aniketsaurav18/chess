@@ -7,18 +7,23 @@ interface User {
   type: "guest" | "user";
 }
 
-const useUser = (): User | null => {
-  const [user, setUser] = useState<User | null>(null);
+const useUser = (): User => {
+  const [user, setUser] = useState<User>({
+    userId: "",
+    email: "",
+    token: "",
+    type: "guest",
+  });
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
-    const email = localStorage.getItem("email");
+    const email = localStorage.getItem("userEmail");
     const token = localStorage.getItem("token");
 
     if (userId && email && token) {
-      setUser({ userId, email, token, type: "user" });
-    } else {
-      setUser({ userId: "", email: "", token: "", type: "guest" });
+      setUser(() => {
+        return { userId: userId, email: email, token: token, type: "user" };
+      });
     }
   }, []);
 

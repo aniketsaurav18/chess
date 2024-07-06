@@ -30,6 +30,7 @@ const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 export function Game() {
   const socket = useSocket();
   const user = useUser();
+  // const [user, setUser] = useState<User | null>(null);
   const windowDimensions = useWindowDimensions();
   const chessboardRef = useRef<any>();
   const [boardWidth, setBoardWidth] = useState<number>(500);
@@ -49,11 +50,9 @@ export function Game() {
   const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
 
   useEffect(() => {
-    setTimeout(() => {
-      console.log(user);
-    }, 3000);
-    // console.log("game user", user);
+    console.log("user details", user);
   }, []);
+
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
       return;
