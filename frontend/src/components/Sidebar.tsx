@@ -43,8 +43,7 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
           </div>
         )}
         <div className="sidebar-header">
-          <img src="/chess-logo.png" alt="chess-logo" />
-          chess
+          <img src="/Chess-logo.png" alt="chess-logo" />
         </div>
         <div className="sidebar-content">
           <Link
