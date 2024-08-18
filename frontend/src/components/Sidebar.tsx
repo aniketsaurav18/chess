@@ -1,35 +1,44 @@
 import { Link } from "react-router-dom";
 import Topbar from "./Topbar";
 import "./Sidebar.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { viewportWidthBreakpoint } from "../utils/config";
 const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
-  const [sidebar, setSidebar] = useState(false);
+  const [sidebar, setSidebar] = useState(true);
+  useEffect(() => {
+    console.log("Window size:", windowSize);
+    // Ensure sidebar is open on large screens by default
+    if (windowSize > viewportWidthBreakpoint) {
+      setSidebar(true);
+    } else {
+      setSidebar(false);
+    }
+  }, [windowSize]);
+
+  const setSidebarOpen = () => {
+    console.log("setSidebarOpen");
+    setSidebar((d) => !d);
+  };
+
+  const handleLinkClick = () => {
+    // Collapse sidebar only on small devices
+    if (windowSize <= viewportWidthBreakpoint) {
+      setSidebar(false);
+    }
+  };
   return (
     <>
-      <Topbar sidebar={sidebar} setSidebarOpen={setSidebar} />
-      <div
-        className="sidebar"
-        style={{
-          display: windowSize < 1250 ? (sidebar ? "flex" : "none") : "flex",
-        }}
-      >
-        {windowSize < 1250 && (
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "flex-end",
-              padding: "0 1rem",
-            }}
-          >
-            <button className="sidebar-close-btn">
+      <Topbar setSidebarOpen={setSidebarOpen} />
+      <div className={`sidebar ${sidebar ? "open" : "closed"}`}>
+        {windowSize <= viewportWidthBreakpoint && (
+          <div className="sidebar-close-btn">
+            <button onClick={() => setSidebar(false)}>
               <svg
                 className="sidebar-close"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                onClick={() => setSidebar(false)}
                 style={{ width: "2rem", height: "2rem" }}
               >
                 <path
@@ -43,14 +52,10 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
           </div>
         )}
         <div className="sidebar-header">
-          <img src="/Chess-logo.png" alt="chess-logo" />
+          <img src="/Chess-logo-2.png" alt="chess-logo" />
         </div>
         <div className="sidebar-content">
-          <Link
-            to="/"
-            className="sidebar-link"
-            onClick={() => setSidebar(false)}
-          >
+          <Link to="/" className="sidebar-link" onClick={handleLinkClick}>
             <svg
               className="sidebar-icon"
               xmlns="http://www.w3.org/2000/svg"

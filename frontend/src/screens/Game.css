@@ -4,10 +4,11 @@
   justify-content: flex-start;
   align-items: center;
   background-color: #302e2b;
-  width: 100%;
   height: 100vh;
-  margin: 0 4rem 0 4rem;
-  padding: 1rem 0;
+  margin: 0; /* Remove fixed margin */
+  padding: 1rem;
+  box-sizing: border-box; /* Include padding in width/height calculations */
+  overflow: hidden; /* Prevent content from overflowing */
 }
 
 .game-board {
@@ -17,16 +18,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  /* background-color: #0000ff; */
   margin: 0;
   padding: 0;
 }
 .chessboard {
+  width: 100%;
+  flex-grow: 1;
   margin: 0.7rem 0;
   padding: 0;
+  display: grid;
+  place-items: center;
 }
 .player-metadata {
   width: 100%;
+  height: 2.5rem;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
@@ -41,11 +46,15 @@
   align-items: center;
   /* background-color: #0000ff; */
   width: 55%;
-  height: 3rem;
+  height: 100%;
   font-size: 1.2rem;
   font-weight: bold;
   color: #ffffff;
   margin: 0 5rem 0 0;
+}
+.player-profile span {
+  margin-left: 0.5rem;
+  font-size: medium;
 }
 .player-profile img {
   height: 100%;
@@ -65,7 +74,24 @@
   /* margin: 0 0 1rem 0; */
 }
 
-@media screen and (max-width: 1250px) {
+@media screen and (max-width: 1024px) {
+  .main {
+    height: auto;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+  }
+  .game-board {
+    width: 100%;
+    height: 90vh;
+  }
+  .chessboard {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
   .main {
     height: auto;
     flex-direction: column;
@@ -81,17 +107,11 @@
     display: none;
   }
 }
-@media screen and (max-width: 800px) {
-  .player-profile {
-    font-size: 1.1rem;
-    height: 2.5rem;
-  }
-  .game-timer {
-    font-size: 1.3rem;
-  }
-}
 
 @media screen and (max-width: 500px) {
+  .game-board {
+    height: auto;
+  }
   .player-profile {
     font-size: 0.9rem;
     height: 2rem;

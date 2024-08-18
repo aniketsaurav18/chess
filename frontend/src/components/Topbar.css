@@ -28,7 +28,7 @@
   height: 100%;
 }
 
-@media screen and (min-width: 1250px) {
+@media screen and (min-width: 1024px) {
   .topbar {
     display: none;
   }
