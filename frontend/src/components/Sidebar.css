@@ -1,7 +1,7 @@
 .sidebar {
   height: 100vh;
   width: 200px;
-  position: absolute;
+  position: fixed; /* Stick with fixed positioning */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -11,7 +11,15 @@
   left: 0;
   background-color: #111;
   overflow-x: hidden;
-  padding-top: 20px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.open {
+  transform: translateX(0); /* Sidebar is visible */
+}
+
+.sidebar.closed {
+  transform: translateX(-100%); /* Sidebar is off-screen */
 }
 
 .sidebar-content {
@@ -75,25 +83,37 @@
 }
 
 .sidebar-close-btn {
+  width: 100%;
+  height: 2rem;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1rem;
+  margin-top: 20px;
+}
+
+.sidebar-close-btn button {
   width: 2rem;
   height: 2rem;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  &:hover {
+    cursor: pointer;
+  }
 }
 
 .sidebar-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  place-items: center;
   width: 100%;
-  height: 8rem;
+  height: 6rem;
   /* background-color: #383737; */
 }
 
 .sidebar-header img {
-  height: 100%;
+  height: auto;
+  width: 60%;
 }
 
 /* User Details Styles */
@@ -161,11 +181,4 @@ p.sidebar-text {
 
 .logout-btn:hover {
   background-color: rgb(239, 73, 73);
-}
-
-@media screen and (max-width: 1250px) {
-  .sidebar {
-    position: fixed;
-    display: none;
-  }
 }

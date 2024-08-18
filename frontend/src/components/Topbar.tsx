@@ -1,23 +1,9 @@
 import "./Topbar.css";
 
-const Topbar = ({
-  setSidebarOpen,
-  sidebar,
-}: {
-  setSidebarOpen: (val: boolean) => void;
-  sidebar: boolean;
-}) => {
-  const openSidebar = () => {
-    if (sidebar) {
-      setSidebarOpen(false);
-      return;
-    }
-    setSidebarOpen(true);
-  };
-
+const Topbar = ({ setSidebarOpen }: { setSidebarOpen: () => void }) => {
   return (
     <div className="topbar">
-      <button onClick={openSidebar}>
+      <button onClick={setSidebarOpen}>
         <svg
           className="topbar-icon"
           viewBox="0 0 24 24"
