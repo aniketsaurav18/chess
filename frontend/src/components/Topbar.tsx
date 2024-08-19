@@ -2,10 +2,13 @@ import "./Topbar.css";
 
 const Topbar = ({ setSidebarOpen }: { setSidebarOpen: () => void }) => {
   return (
-    <div className="topbar">
-      <button onClick={setSidebarOpen}>
+    <div className="justify-between items-center h-[35px] w-full text-[#555] sticky top-0 z-5 px-4 hidden lg:flex sm:h-[30px]">
+      <button
+        onClick={setSidebarOpen}
+        className="bg-transparent border-none text-[#555] cursor-pointer text-[1.2rem] h-full"
+      >
         <svg
-          className="topbar-icon"
+          className="flex items-center h-full"
           viewBox="0 0 24 24"
           fill="white"
           xmlns="http://www.w3.org/2000/svg"

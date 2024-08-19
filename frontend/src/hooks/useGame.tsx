@@ -12,7 +12,7 @@ import {
   DRAW_ACCEPTED,
 } from "../utils/messages";
 
-const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
+// const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 
 export function useChessGame(user: any) {
   const socket = useSocket();

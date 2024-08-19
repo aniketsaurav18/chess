@@ -1,4 +1,3 @@
-import "./Game.css";
 import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../hooks/useSocket";
 import useWindowDimensions from "../hooks/useWindowDimensions";
@@ -28,7 +27,6 @@ export function Game() {
     player1timer,
     player2timer,
     optionSquares,
-    moveFrom,
     makeMove,
     setDrawOffered,
     offerDraw,
@@ -56,7 +54,7 @@ export function Game() {
       "sidebar"
     )[0] as HTMLElement;
     const sidebarWidth = sidebarEle.clientWidth;
-    const mainEle = document.getElementsByClassName("main")[0] as HTMLElement;
+    const mainEle = document.getElementById("main") as HTMLElement;
     mainEle.style.marginLeft = `${
       windowDimensions.width < viewportWidthBreakpoint ? 0 : sidebarWidth
     }px`;
@@ -95,7 +93,7 @@ export function Game() {
     const timeINMinutes = Math.floor(timeLeftMs / 60000);
     const timeInSeconds = Math.floor((timeLeftMs % 60000) / 1000);
     return (
-      <div className="game-timer">
+      <div className="flex justify-center items-center bg-gray-500 w-[6rem] h-5/6 text-[1.5rem] font-bold text-white">
         {timeINMinutes < 10 ? "0" : ""}
         {timeINMinutes}:{timeInSeconds < 10 ? "0" : ""}
         {timeInSeconds}
@@ -109,18 +107,31 @@ export function Game() {
         windowSize={windowDimensions.width ? windowDimensions.width : 1251}
         user={user}
       />
-      <main className="main">
-        <div className="game-board">
-          <div className="player-metadata" style={{ width: boardWidth }}>
-            <div className="player-profile">
-              <img src={defaultUserImage} alt={defaultUserImage} />
-              <span>Username</span>
+      <main
+        id="main"
+        className="flex flex-row justify-start items-center bg-[#302e2b] h-screen m-0 p-4 box-border overflow-hidden lg:h-auto lg:flex-col lg:relative lg:w-full"
+      >
+        <div className="w-[60%] h-full flex flex-col items-center justify-center m-0 p-0 lg:w-full lg:h-[90vh] md:h-auto">
+          <div
+            className="w-full h-[2.5rem] flex flex-row justify-between items-center md:w-full"
+            style={{ width: boardWidth }}
+          >
+            <div className="flex flex-row justify-start items-center w-[55%] h-full text-[1.2rem] font-bold text-white mr-[5rem] sm:text-[2rem] sm:h-[2rem]">
+              <img
+                className="h-full"
+                src={defaultUserImage}
+                alt={defaultUserImage}
+              />
+              <span className="ml-[0.5rem] text-base">Username</span>
             </div>
             {side === "white"
               ? gameTimer(player2timer)
               : gameTimer(player1timer)}
           </div>
-          <div className="chessboard" ref={chessboardDivRef}>
+          <div
+            className="w-full flex-grow my-2 p-0 grid place-items-center lg:w-full lg:h-full"
+            ref={chessboardDivRef}
+          >
             <div className="chessboard-container">
               <Chessboard
                 id="PlayVsPlay"
@@ -142,10 +153,17 @@ export function Game() {
               />
             </div>
           </div>
-          <div className="player-metadata" style={{ width: boardWidth }}>
-            <div className="player-profile">
-              <img src={defaultUserImage} alt={defaultUserImage} />
-              <span>Username</span>
+          <div
+            className="player-metadata w-full h-[2.5rem] flex flex-row justify-between items-center md:w-full"
+            style={{ width: boardWidth }}
+          >
+            <div className="flex flex-row justify-start items-center w-[55%] h-full text-[1.2rem] font-bold text-white mr-[5rem] sm:text-[2rem] sm:h-[2rem]">
+              <img
+                className="h-full"
+                src={defaultUserImage}
+                alt={defaultUserImage}
+              />
+              <span className="ml-[0.5rem] text-base">Username</span>
             </div>
             {side === "white"
               ? gameTimer(player1timer)
