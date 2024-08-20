@@ -1,4 +1,3 @@
-import "./UserLogin.css";
 import { useState } from "react";
 
 const UserLogin = () => {
@@ -55,36 +54,62 @@ const UserLogin = () => {
   };
 
   return (
-    <main className="userlogin">
-      <form action="" className="login-form">
-        <h1>Login</h1>
-        <div className="login-element">
-          <label htmlFor="email">Email or Username</label>
+    <main className="flex justify-center items-center flex-col w-full h-[100vh]">
+      <form
+        action=""
+        className="flex justify-center items-center flex-col w-full max-w-[400px] p-5 border border-gray-300 rounded-[10px] bg-white shadow-md"
+      >
+        <h1 className="mb-5 text-[2rem] text-gray-800">Login</h1>
+        <div className="flex flex-col w-full mb-[15px]">
+          <label
+            htmlFor="email"
+            className="self-start mb-[5px] text-[1rem] text-gray-800"
+          >
+            Email or Username
+          </label>
           <input
             type="text"
             id="email"
             name="email"
+            className="w-full p-[10px] border border-gray-300 rounded-[5px] text-[1rem]"
             required
             onChange={(e) => setUsername(e.currentTarget.value)}
           />
         </div>
-        <div className="login-element">
-          <label htmlFor="password">Password</label>
+        <div className="flex flex-col w-full mb-[15px]">
+          <label
+            htmlFor="password"
+            className="self-start mb-[5px] text-[1rem] text-gray-800"
+          >
+            Password
+          </label>
           <input
             type="password"
             id="password"
             name="password"
+            className="w-full p-[10px] border border-gray-300 rounded-[5px] text-[1rem]"
             required
             onChange={(e) => setPassword(e.currentTarget.value)}
           />
         </div>
-        <button type="submit" disabled={loading} onClick={onSubmit}>
+        <button
+          type="submit"
+          className="w-full p-[10px] mt-[10px] border-none rounded-[5px] bg-[#2a7f22] text-white text-[1rem] cursor-pointer hover:bg-[#144c10]"
+          disabled={loading}
+          onClick={onSubmit}
+        >
           {loading ? "Logging in..." : "Login"}
         </button>
-        {error && <p className="error">{error}</p>}
-        {success && <p className="success">{success}</p>}
-        <p>
-          New Player? <a href="/signup">Sign Up</a>
+        {error && <p className="text-red-500 mt-[10px]">{error}</p>}
+        {success && <p className="text-green-500 mt-[10px]">{success}</p>}
+        <p className="mt-[15px] text-[1rem] text-gray-800">
+          New Player?{" "}
+          <a
+            href="/signup"
+            className="text-[#007bff] no-underline hover:underline"
+          >
+            Sign Up
+          </a>
         </p>
       </form>
     </main>
