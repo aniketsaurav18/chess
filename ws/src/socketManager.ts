@@ -1,0 +1,223 @@
+import { WebSocket } from "ws";
+import {
+  GameMessagePayload,
+  InitGamePayload,
+  MovePayload,
+  GameDrawPayload,
+  GameOverPayload,
+  TimeoutPayload,
+  ResignPayload,
+  GameMove,
+  GameOverType,
+} from "./types/types";
+import {
+  GAME_DRAW,
+  GAME_OVER,
+  INIT_GAME,
+  MOVE,
+  RESIGN,
+  TIMEOUT,
+} from "./messages";
+
+// Custom error class
+class SocketError extends Error {
+  constructor(public message: string, public details?: any) {
+    super(message);
+    this.name = "SocketError";
+  }
+}
+
+export class Socket {
+  private player1: WebSocket;
+  private player2: WebSocket;
+  public gameId: string;
+
+  constructor(gameId: string, p1: WebSocket, p2: WebSocket) {
+    this.player1 = p1;
+    this.player2 = p2;
+    this.gameId = gameId;
+  }
+
+  comparePlayer1(ws: WebSocket): boolean {
+    return this.player1 === ws;
+  }
+
+  comparePlayer2(ws: WebSocket): boolean {
+    return this.player2 === ws;
+  }
+
+  sendInitMsg(clockWhite: number, clockBlack: number) {
+    try {
+      const whitepayload: InitGamePayload = {
+        t: INIT_GAME,
+        d: {
+          id: this.gameId,
+          color: "white",
+          clock: {
+            w: clockWhite,
+            b: clockBlack,
+          },
+        },
+      };
+      this.sendMessageToP1(whitepayload);
+      this.sendMessageToP2({
+        t: INIT_GAME,
+        d: {
+          id: this.gameId,
+          color: "black",
+          clock: {
+            w: clockWhite,
+            b: clockBlack,
+          },
+        },
+      });
+    } catch (error) {
+      this.handleError(error, "Failed to send initialization message.");
+    }
+  }
+
+  sendMove(m: GameMove, whiteClock: number, blackClock: number) {
+    try {
+      this.sendMessage({
+        t: MOVE,
+        d: {
+          san: m.san,
+          f: m.after,
+          t: m.time,
+          clock: {
+            w: whiteClock,
+            b: blackClock,
+          },
+        },
+      });
+    } catch (error) {
+      this.handleError(error, "Failed to send move message.");
+    }
+  }
+
+  sendGameDraw(whiteClock: number, blackClock: number) {
+    try {
+      const payload: GameDrawPayload = {
+        t: GAME_DRAW,
+        d: {
+          winner: "draw",
+          clock: {
+            w: whiteClock,
+            b: blackClock,
+          },
+        },
+      };
+      this.sendMessage(payload);
+    } catch (error) {
+      this.handleError(error, "Failed to send game draw message.");
+    }
+  }
+
+  sendGameOver(
+    type: GameOverType,
+    winner: "white" | "black",
+    whiteClock: number,
+    blackClock: number
+  ) {
+    try {
+      const payload: GameOverPayload = {
+        t: GAME_OVER,
+        d: {
+          type: type,
+          winner: winner,
+          clock: {
+            w: whiteClock,
+            b: blackClock,
+          },
+        },
+      };
+      this.sendMessage(payload);
+    } catch (error) {
+      this.handleError(error, "Failed to send game over message.");
+    }
+  }
+
+  sendTimeout(
+    winner: "white" | "black",
+    whiteClock: number,
+    blackClock: number
+  ) {
+    try {
+      const payload: TimeoutPayload = {
+        t: TIMEOUT,
+        d: {
+          winner: winner,
+          clock: {
+            w: whiteClock,
+            b: blackClock,
+          },
+        },
+      };
+      this.sendMessage(payload);
+    } catch (error) {
+      this.handleError(error, "Failed to send timeout message.");
+    }
+  }
+
+  sendResign(
+    winner: "white" | "black",
+    whiteClock: number,
+    blackClock: number
+  ) {
+    try {
+      const payload: ResignPayload = {
+        t: RESIGN,
+        d: {
+          winner: winner,
+          clock: {
+            w: whiteClock,
+            b: blackClock,
+          },
+        },
+      };
+      this.sendMessage(payload);
+    } catch (error) {
+      this.handleError(error, "Failed to send resignation message.");
+    }
+  }
+
+  private sendMessage(payload: GameMessagePayload): boolean {
+    const p = JSON.stringify(payload);
+    try {
+      this.player1.send(p);
+      this.player2.send(p);
+      return true;
+    } catch (error) {
+      this.handleError(error, "Failed to send message to both players.");
+      return false;
+    }
+  }
+
+  private sendMessageToP1(payload: GameMessagePayload): boolean {
+    const p = JSON.stringify(payload);
+    try {
+      this.player1.send(p);
+      return true;
+    } catch (error) {
+      this.handleError(error, "Failed to send message to player 1.");
+      return false;
+    }
+  }
+
+  private sendMessageToP2(payload: GameMessagePayload): boolean {
+    const p = JSON.stringify(payload);
+    try {
+      this.player2.send(p);
+      return true;
+    } catch (error) {
+      this.handleError(error, "Failed to send message to player 2.");
+      return false;
+    }
+  }
+
+  private handleError(error: any, context: string) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    console.error(new SocketError(`${context} Error: ${errorMessage}`, error));
+  }
+}

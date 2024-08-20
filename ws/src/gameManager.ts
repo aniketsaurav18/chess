@@ -32,7 +32,7 @@ export class GameManager {
     try {
       socket.on("message", (data) => {
         const msg = JSON.parse(data.toString());
-        console.log(msg);
+        console.log("game manager incoming message \n", msg);
         switch (msg.t) {
           case INIT_GAME:
             if (this.pendingUser !== null) {
@@ -47,9 +47,7 @@ export class GameManager {
             break;
           case MOVE:
             console.log("move1" + msg.d.m);
-            const game = this.games.find(
-              (game) => game.player1 === socket || game.player2 === socket
-            );
+            const game = this.games.find((game) => game.gameId === msg.gameId);
             if (game) {
               game.makeMove(socket, msg.d.m);
             } else {
