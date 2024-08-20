@@ -1,71 +1,50 @@
-import { WebSocket } from "ws";
+import WebSocket from "ws";
 import { Chess, Move } from "chess.js";
-import {
-  GAME_OVER,
-  INIT_GAME,
-  MOVE,
-  GAME_DRAW,
-  TIMEOUT,
-  RESIGN,
-} from "./messages";
+import { Socket } from "./socketManager";
 import { randomUUID } from "crypto";
-// import { GameMove } from "./types/types";
-export interface GameMove {
-  t: number;
-  f: string;
-  m: string;
-}
-export type Result = "white" | "black" | "draw";
-export type GameStatus = "active" | "over";
+import { GameMove, GameOverType, GameStatus, Result } from "./types/types";
 
 // Time in milliseconds
 export const TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 export class Game {
   public gameId: string;
-  public player1: WebSocket | null;
-  public player2: WebSocket | null;
+  private socket: Socket;
   public gameResult: Result | null = null;
   public gameStatus: GameStatus = "active";
+  public gameOverType: GameOverType | null = null;
   private board: Chess;
   private moveHistry: GameMove[] = [];
   private startTime = new Date(Date.now());
   private lastMoveTime = new Date(Date.now());
-  private player1TimeConsumed = 0;
-  private player2TimeConsumed = 0;
+  private gameTimeLimit = TIME_LIMIT;
+  private player1TimeLeft = 0;
+  private player2TimeLeft = 0;
   private gameTimer: NodeJS.Timeout | null = null;
 
-  constructor(p1: WebSocket | null, p2: WebSocket | null, gameId?: string) {
-    this.gameId = randomUUID();
-    this.player1 = p1;
-    this.player2 = p2;
+  constructor(
+    p1: WebSocket,
+    p2: WebSocket,
+    timeLimit?: number,
+    gameId?: string
+  ) {
+    this.gameId = randomUUID() as string;
+    this.socket = new Socket(this.gameId, p1, p2);
     this.board = new Chess();
+    this.gameTimeLimit = timeLimit ? timeLimit : TIME_LIMIT;
+    this.player1TimeLeft = this.gameTimeLimit;
+    this.player2TimeLeft = this.gameTimeLimit;
     console.log("game created, message sending");
-    this.player1?.send(
-      JSON.stringify({
-        t: INIT_GAME,
-        d: {
-          color: "white",
-        },
-      })
-    );
-    this.player2?.send(
-      JSON.stringify({
-        t: INIT_GAME,
-        d: {
-          color: "black",
-        },
-      })
-    );
+    this.socket.sendInitMsg(this.player1TimeLeft, this.player2TimeLeft);
     this.setGameTimer();
     console.log("send messages init_game");
   }
 
   makeMove(socket: WebSocket, move: string) {
-    if (this.board.turn() === "w" && socket !== this.player1) {
+    if (this.board.turn() === "w" && !this.socket.comparePlayer1(socket)) {
       console.log("not your turn w", this.board.turn());
       return;
     }
-    if (this.board.turn() === "b" && socket !== this.player2) {
+    if (this.board.turn() === "b" && !this.socket.comparePlayer2(socket)) {
       console.log("not your turn b", this.board.turn());
       return;
     }
@@ -77,137 +56,75 @@ export class Game {
     }
     //calculating curr time and remaining time of players
     const diff = currTime.getTime() - this.lastMoveTime.getTime();
-
-    this.moveHistry.push({
-      m: m.san,
-      f: m.after,
-      t: currTime.getTime() - this.lastMoveTime.getTime(),
-    }); // Pushing the move into move history.
+    const newMove: GameMove = {
+      ...m,
+      time: diff,
+    };
+    this.moveHistry.push(newMove);
 
     this.lastMoveTime = currTime;
     if (this.board.turn() === "w") {
-      this.player2TimeConsumed += diff;
+      this.player2TimeLeft -= diff;
     } else {
-      this.player1TimeConsumed += diff;
+      this.player1TimeLeft -= diff;
     }
 
     //TODO - send move to a kafka server for inserting into DB
 
     console.log(this.board.turn());
-    if (this.board.turn() === "b") {
-      this.player2?.send(
-        JSON.stringify({
-          t: MOVE,
-          d: {
-            san: m.san,
-            f: m.after,
-            ply: this.moveHistry.length,
-          },
-          clock: {
-            white: this.player1TimeConsumed,
-            black: this.player2TimeConsumed,
-          },
-        })
-      );
-    } else {
-      this.player1?.send(
-        JSON.stringify({
-          t: MOVE,
-          d: {
-            san: m.san,
-            f: m.after,
-            ply: this.moveHistry.length,
-          },
-          clock: {
-            white: this.player1TimeConsumed,
-            black: this.player2TimeConsumed,
-          },
-        })
-      );
-    }
-    if (this.board.isDraw()) {
-      this.player1?.send(
-        JSON.stringify({
-          t: GAME_DRAW,
-          d: {
-            winner: "draw",
-          },
-        })
-      );
-      this.player2?.send(
-        JSON.stringify({
-          t: GAME_DRAW,
-          d: {
-            winner: "draw",
-          },
-        })
-      );
-    }
+
+    this.socket.sendMove(newMove, this.player1TimeLeft, this.player2TimeLeft); //send move to both players
+
     if (this.board.isGameOver()) {
-      if (
-        this.board.isStalemate() ||
-        this.board.isThreefoldRepetition() ||
-        this.board.isInsufficientMaterial()
-      ) {
-        this.player1?.send(
-          JSON.stringify({
-            t: GAME_DRAW,
-            d: {
-              winner: "draw",
-            },
-          })
-        );
-        this.player2?.send(
-          JSON.stringify({
-            t: GAME_DRAW,
-            d: {
-              winner: "draw",
-            },
-          })
-        );
+      let type: GameOverType | "unknown";
+      let winner: Result;
+      if (this.board.isCheckmate()) {
+        console.log("checkmate", this.board.turn());
+        type =
+          this.board.turn() === "w" ? "black_checkmate" : "white_checkmate";
+        winner = this.board.turn() === "w" ? "black" : "white";
+      } else if (this.board.isDraw()) {
+        console.log("draw", this.board.turn());
+        type = "draw";
+        winner = "draw";
+      } else if (this.board.isThreefoldRepetition()) {
+        console.log("threefold repetition", this.board.turn());
+        type = "threefoled_repetition";
+        winner = "draw";
+      } else if (this.board.isInsufficientMaterial()) {
+        console.log("insufficient material", this.board.turn());
+        type = "insufficient_material";
+        winner = "draw";
+      } else if (this.board.isStalemate()) {
+        console.log("stalemate", this.board.turn());
+        type =
+          this.board.turn() === "w" ? "black_stalemate" : "white_stalemate";
+        winner = "draw";
       } else {
-        this.player1?.send(
-          JSON.stringify({
-            t: GAME_OVER,
-            d: {
-              winner: this.board.turn() === "w" ? "white" : "black",
-            },
-          })
-        );
-        this.player2?.send(
-          JSON.stringify({
-            t: GAME_OVER,
-            d: {
-              winner: this.board.turn() === "w" ? "white" : "black",
-            },
-          })
-        );
+        console.log("game over", this.board.turn());
+        type = "unknown";
+        winner = "draw";
       }
+      this.gameEnd(type, winner);
     }
   }
 
-  private gameEnd(type: string, msg: string) {
+  private gameEnd(type: GameOverType, winner: Result) {
     if (this.gameTimer) {
       clearInterval(this.gameTimer);
     }
     this.gameStatus = "over";
-    this.gameResult = msg as Result;
-    this.player1?.send(
-      JSON.stringify({
-        t: type,
-        d: {
-          winner: msg,
-        },
-      })
-    );
-    this.player2?.send(
-      JSON.stringify({
-        t: type,
-        d: {
-          winner: msg,
-        },
-      })
-    );
+    this.gameResult = winner as Result;
+    if (winner === "draw") {
+      this.socket.sendGameDraw(this.player1TimeLeft, this.player2TimeLeft);
+    } else {
+      this.socket.sendGameOver(
+        type,
+        winner,
+        this.player1TimeLeft,
+        this.player2TimeLeft
+      );
+    }
   }
 
   clearGameTimer() {
@@ -223,25 +140,28 @@ export class Game {
     const turn = this.board.turn();
     let timeRemain;
     if (turn === "w") {
-      timeRemain = TIME_LIMIT - this.player1TimeConsumed;
+      timeRemain = this.player1TimeLeft;
     } else {
-      timeRemain = TIME_LIMIT - this.player2TimeConsumed;
+      timeRemain = this.player2TimeLeft;
     }
     this.gameTimer = setTimeout(() => {
       console.log(turn === "w" ? "black" : "white", "timeout");
-      this.gameEnd(TIMEOUT, turn === "w" ? "black" : "white");
+      this.gameEnd(
+        turn === "w" ? "white_timeout" : "black_timeout",
+        turn === "w" ? "black" : "white"
+      );
     }, timeRemain);
   }
 
   resign(socket: WebSocket) {
-    if (socket === this.player1) {
-      this.gameEnd(RESIGN, "black");
+    if (this.socket.comparePlayer1(socket)) {
+      this.gameEnd("white_resign", "black");
     } else {
-      this.gameEnd(RESIGN, "white");
+      this.gameEnd("black_resign", "white");
     }
   }
 
   gameDraw() {
-    this.gameEnd(GAME_DRAW, "draw");
+    this.gameEnd("draw", "draw");
   }
 }
