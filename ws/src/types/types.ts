@@ -1,9 +1,11 @@
 import { Move } from "chess.js";
 import {
+  DRAW_OFFERED,
   GAME_DRAW,
   GAME_OVER,
   INIT_GAME,
   MOVE,
+  OFFER_DRAW,
   RESIGN,
   TIMEOUT,
 } from "../messages";
@@ -50,6 +52,14 @@ export interface MovePayload {
       w: number;
       b: number;
     };
+  };
+}
+
+//draw offer sent to a player.
+export interface DrawOfferPayload {
+  t: typeof DRAW_OFFERED;
+  d: {
+    color: "black" | "white";
   };
 }
 
@@ -101,6 +111,7 @@ export interface ResignPayload {
 export type GameMessagePayload =
   | InitGamePayload
   | MovePayload
+  | DrawOfferPayload
   | GameDrawPayload
   | GameOverPayload
   | TimeoutPayload
