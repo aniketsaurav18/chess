@@ -9,8 +9,6 @@ import Sidebar from "../components/Sidebar";
 import { viewportWidthBreakpoint } from "../utils/config";
 import { useChessGame } from "../hooks/useGame";
 
-const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
-
 // const WS_URL = "ws://localhost:8080";
 
 // interface GameMetadata {
@@ -22,6 +20,7 @@ export function Game() {
   const socket = useSocket();
   const user = useUser();
   const {
+    gameId,
     gameState,
     gameStatus,
     player1timer,
@@ -30,6 +29,7 @@ export function Game() {
     makeMove,
     setDrawOffered,
     offerDraw,
+    gameResign,
     drawOffered,
     gameHistory,
     chessboardRef,
@@ -38,6 +38,7 @@ export function Game() {
     onSquareClick,
     startGame,
     offerDrawfn,
+    drawAcceptedfn,
   } = useChessGame(user);
   // const [user, setUser] = useState<User | null>(null);
   const windowDimensions = useWindowDimensions();
@@ -89,7 +90,7 @@ export function Game() {
   }, []);
 
   const gameTimer = (timeConsumed: number) => {
-    const timeLeftMs = GAME_TIME_LIMIT - timeConsumed;
+    const timeLeftMs = timeConsumed;
     const timeINMinutes = Math.floor(timeLeftMs / 60000);
     const timeInSeconds = Math.floor((timeLeftMs % 60000) / 1000);
     return (
@@ -181,6 +182,8 @@ export function Game() {
           setDrawOffered={setDrawOffered}
           offerDrawfn={offerDrawfn}
           offerDraw={offerDraw}
+          gameResignfn={gameResign}
+          drawAcceptedfn={drawAcceptedfn}
         />
       </main>
     </>

@@ -9,12 +9,15 @@ import {
   ResignPayload,
   GameMove,
   GameOverType,
+  DrawOfferPayload,
 } from "./types/types";
 import {
+  DRAW_OFFERED,
   GAME_DRAW,
   GAME_OVER,
   INIT_GAME,
   MOVE,
+  OFFER_DRAW,
   RESIGN,
   TIMEOUT,
 } from "./messages";
@@ -92,6 +95,28 @@ export class Socket {
       });
     } catch (error) {
       this.handleError(error, "Failed to send move message.");
+    }
+  }
+
+  sendDrawOffer(socket: WebSocket) {
+    try {
+      if (this.player1 === socket) {
+        this.sendMessageToP2({
+          t: DRAW_OFFERED,
+          d: {
+            color: "white",
+          },
+        });
+      } else {
+        this.sendMessageToP1({
+          t: DRAW_OFFERED,
+          d: {
+            color: "black",
+          },
+        });
+      }
+    } catch (e) {
+      this.handleError(e, "Failed to send draw offer");
     }
   }
 
@@ -213,6 +238,11 @@ export class Socket {
       this.handleError(error, "Failed to send message to player 2.");
       return false;
     }
+  }
+
+  private closeConnection() {
+    this.player1.close();
+    this.player2.close();
   }
 
   private handleError(error: any, context: string) {

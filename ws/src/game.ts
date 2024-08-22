@@ -8,7 +8,7 @@ import { GameMove, GameOverType, GameStatus, Result } from "./types/types";
 export const TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 export class Game {
   public gameId: string;
-  private socket: Socket;
+  private gameSocket: Socket;
   public gameResult: Result | null = null;
   public gameStatus: GameStatus = "active";
   public gameOverType: GameOverType | null = null;
@@ -28,23 +28,23 @@ export class Game {
     gameId?: string
   ) {
     this.gameId = randomUUID() as string;
-    this.socket = new Socket(this.gameId, p1, p2);
+    this.gameSocket = new Socket(this.gameId, p1, p2);
     this.board = new Chess();
     this.gameTimeLimit = timeLimit ? timeLimit : TIME_LIMIT;
     this.player1TimeLeft = this.gameTimeLimit;
     this.player2TimeLeft = this.gameTimeLimit;
     console.log("game created, message sending");
-    this.socket.sendInitMsg(this.player1TimeLeft, this.player2TimeLeft);
+    this.gameSocket.sendInitMsg(this.player1TimeLeft, this.player2TimeLeft);
     this.setGameTimer();
     console.log("send messages init_game");
   }
 
   makeMove(socket: WebSocket, move: string) {
-    if (this.board.turn() === "w" && !this.socket.comparePlayer1(socket)) {
+    if (this.board.turn() === "w" && !this.gameSocket.comparePlayer1(socket)) {
       console.log("not your turn w", this.board.turn());
       return;
     }
-    if (this.board.turn() === "b" && !this.socket.comparePlayer2(socket)) {
+    if (this.board.turn() === "b" && !this.gameSocket.comparePlayer2(socket)) {
       console.log("not your turn b", this.board.turn());
       return;
     }
@@ -73,7 +73,11 @@ export class Game {
 
     console.log(this.board.turn());
 
-    this.socket.sendMove(newMove, this.player1TimeLeft, this.player2TimeLeft); //send move to both players
+    this.gameSocket.sendMove(
+      newMove,
+      this.player1TimeLeft,
+      this.player2TimeLeft
+    ); //send move to both players
 
     if (this.board.isGameOver()) {
       let type: GameOverType | "unknown";
@@ -109,6 +113,10 @@ export class Game {
     }
   }
 
+  handleDrawOffer(socket: WebSocket) {
+    this.gameSocket.sendDrawOffer(socket);
+  }
+
   private gameEnd(type: GameOverType, winner: Result) {
     if (this.gameTimer) {
       clearInterval(this.gameTimer);
@@ -116,9 +124,9 @@ export class Game {
     this.gameStatus = "over";
     this.gameResult = winner as Result;
     if (winner === "draw") {
-      this.socket.sendGameDraw(this.player1TimeLeft, this.player2TimeLeft);
+      this.gameSocket.sendGameDraw(this.player1TimeLeft, this.player2TimeLeft);
     } else {
-      this.socket.sendGameOver(
+      this.gameSocket.sendGameOver(
         type,
         winner,
         this.player1TimeLeft,
@@ -154,7 +162,7 @@ export class Game {
   }
 
   resign(socket: WebSocket) {
-    if (this.socket.comparePlayer1(socket)) {
+    if (this.gameSocket.comparePlayer1(socket)) {
       this.gameEnd("white_resign", "black");
     } else {
       this.gameEnd("black_resign", "white");

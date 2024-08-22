@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./GameInfo.css";
 import MoveHistory from "./MoveHistory";
-import { DRAW_ACCEPTED, DRAW_DECLINED, RESIGN } from "../utils/messages";
+import { DRAW_DECLINED } from "../utils/messages";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 
 interface Move {
@@ -29,6 +29,8 @@ interface GameInfoProps {
   setDrawOffered: (val: boolean) => void;
   offerDrawfn: () => void;
   offerDraw: boolean;
+  gameResignfn: () => void;
+  drawAcceptedfn: () => void;
 }
 
 const GameInfo = ({
@@ -42,6 +44,8 @@ const GameInfo = ({
   setDrawOffered,
   offerDrawfn,
   offerDraw,
+  gameResignfn,
+  drawAcceptedfn,
 }: GameInfoProps) => {
   const [moveHistory, setMoveHistory] = useState<Move[][]>([]);
 
@@ -70,21 +74,6 @@ const GameInfo = ({
     setMoveHistory(history);
   }, [gameHistory]);
 
-  const resignFn = () => {
-    if (status !== "STARTED" || !socket) {
-      return;
-    }
-    socket.send(JSON.stringify({ t: RESIGN, d: { color: side[0] } }));
-  };
-
-  const drawAccepted = () => {
-    if (status !== "STARTED" || !socket) {
-      return;
-    }
-    socket.send(JSON.stringify({ t: DRAW_ACCEPTED, d: { color: side[0] } }));
-    setDrawOffered(false);
-  };
-
   const drawDeclined = () => {
     if (status !== "STARTED" || !socket) {
       return;
@@ -111,7 +100,7 @@ const GameInfo = ({
         {drawOffered ? (
           <div className="draw-offered-dialogue">
             <span>Oponent offered a Draw</span>
-            <button className="draw-offered-btn" onClick={drawAccepted}>
+            <button className="draw-offered-btn" onClick={drawAcceptedfn}>
               Accept
             </button>
             <button className="draw-offered-btn" onClick={drawDeclined}>
@@ -121,7 +110,7 @@ const GameInfo = ({
         ) : null}
       </div>
       <div className="user-control">
-        <button className="btn-resign" onClick={resignFn}>
+        <button className="btn-resign" onClick={gameResignfn}>
           Resign
         </button>
         <button
