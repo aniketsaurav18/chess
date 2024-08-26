@@ -3,6 +3,19 @@ import "./GameInfo.css";
 import MoveHistory from "./MoveHistory";
 import { DRAW_DECLINED } from "../utils/messages";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
+import { Tabs, Tab } from "@nextui-org/tabs";
+import { Select, SelectItem } from "@nextui-org/select";
+import { Button, ButtonGroup } from "@nextui-org/button";
+import { GameTimeLimit } from "../utils/config";
+import "../../public/cardinal.css";
+import {
+  FaFastBackward,
+  FaFastForward,
+  FaFlag,
+  FaHandshake,
+  FaStepBackward,
+  FaStepForward,
+} from "react-icons/fa";
 
 interface Move {
   from: string;
@@ -48,6 +61,7 @@ const GameInfo = ({
   drawAcceptedfn,
 }: GameInfoProps) => {
   const [moveHistory, setMoveHistory] = useState<Move[][]>([]);
+  const [selectedTimeLimit, setSelectedTimeLimit] = useState("10");
 
   useEffect(() => {
     console.log(drawOffered);
@@ -83,45 +97,128 @@ const GameInfo = ({
   };
 
   return (
-    <div className="game-detail-interface">
-      <div className="detail-interface-top">
-        <div className="game-status">
-          {waiting ? "waiting..." : ""}
-          {status ? status : ""}
-          {socket ? "socket connected" : "socket not connected"}
-        </div>
-        <button className="rc-button" onClick={startGame}>
-          start
-        </button>
-      </div>
-      <div className="game-history">
-        <div className="game-history-top">History</div>
-        <MoveHistory moveHistory={moveHistory} />
-        {drawOffered ? (
-          <div className="draw-offered-dialogue">
-            <span>Oponent offered a Draw</span>
-            <button className="draw-offered-btn" onClick={drawAcceptedfn}>
-              Accept
-            </button>
-            <button className="draw-offered-btn" onClick={drawDeclined}>
-              Decline
-            </button>
+    <div className="w-[35%] md:w-11/12 lg:w-11/12 md:min-h-[30rem] lg:min-h-[30rem] h-full flex flex-col bg-[#262522] m-0 p-0 rounded-[1.6%] pb-2">
+      <Tabs
+        aria-label="Options"
+        fullWidth={true}
+        color="primary"
+        classNames={{
+          tabList: "bg-[#21201D]",
+          tab: "h-10",
+          panel: "h-full rounded-[1.6%]",
+          cursor: "w-full bg-[#262522]",
+          // base: "bg-red-400",
+          tabContent: "text-8 text-white",
+        }}
+      >
+        <Tab key="play" title="Play">
+          <div className="flex flex-col items-center">
+            <Select
+              label="Select a Time Limit"
+              className="max-w-[20rem] w-full m-4"
+              classNames={{
+                listbox: "bg-[#3C3B39] text-white",
+                popoverContent: "bg-[#3C3B39]",
+                // mainWrapper: "bg-[#3C3B39]",
+                // base: "bg-[#3C3B39]",[#3C3B39]
+                trigger: "bg-[#3C3B39]",
+                // innerWrapper: "bg-[#3C3B39]",
+              }}
+              selectedKeys={[selectedTimeLimit]}
+              onSelectionChange={(e) => {
+                e.anchorKey && setSelectedTimeLimit(e.anchorKey);
+              }}
+            >
+              {GameTimeLimit.map((timeLimit) => (
+                <SelectItem key={timeLimit.key}>{timeLimit.label}</SelectItem>
+              ))}
+            </Select>
+            <Button
+              color="primary"
+              onClick={startGame}
+              className="max-w-[20rem] w-full bg-[#2ea44f] hover:bg-[#2c974b] text-lg font-medium"
+            >
+              Start
+            </Button>
           </div>
-        ) : null}
-      </div>
-      <div className="user-control">
-        <button className="btn-resign" onClick={gameResignfn}>
-          Resign
-        </button>
-        <button
-          className="btn-draw"
-          onClick={offerDrawfn}
-          style={offerDraw ? { opacity: 0.5, cursor: "not-allowed" } : {}}
-          disabled={offerDraw}
-        >
-          Draw
-        </button>
-      </div>
+        </Tab>
+        <Tab key="history" title="History">
+          <div
+            id="game-history"
+            className="flex flex-col justify-start items-center w-full overflow-y-scroll min-h-[60%] h-[80%] m-0 p-0"
+          >
+            <MoveHistory moveHistory={moveHistory} />
+            {drawOffered ? (
+              <div className="draw-offered-dialogue">
+                <span>Oponent offered a Draw</span>
+                <button className="draw-offered-btn" onClick={drawAcceptedfn}>
+                  Accept
+                </button>
+                <button className="draw-offered-btn" onClick={drawDeclined}>
+                  Decline
+                </button>
+              </div>
+            ) : null}
+          </div>
+          <div id="user-control" className="flex items-center justify-between">
+            <div className="flex flex-row mr-6 ml-6 gap-2">
+              <Button
+                color="primary"
+                onClick={gameResignfn}
+                radius="none"
+                className="w-30 bg-[#3f4040] hover:bg-[#353636] p-0 h-8 rounded-md"
+                startContent={<FaFlag />}
+              >
+                Resign
+              </Button>
+              <Button
+                color="primary"
+                onClick={offerDrawfn}
+                radius="none"
+                disabled={offerDraw}
+                className="w-30 bg-[#3f4040] hover:bg-[#353636] p-0 h-8 rounded-md"
+                startContent={<FaHandshake size={20} />}
+              >
+                Draw
+              </Button>
+            </div>
+
+            <div className="flex flex-row p-0">
+              <Button
+                isIconOnly
+                className="hover:bg-[#353636] p-0 w-2"
+                variant="light"
+              >
+                <FaFastBackward />
+              </Button>
+              <Button
+                isIconOnly
+                variant="light"
+                className="hover:bg-[#353636] p-0"
+              >
+                <FaStepBackward />
+              </Button>
+              <Button
+                isIconOnly
+                variant="light"
+                className="hover:bg-[#353636] p-0"
+              >
+                <FaStepForward />
+              </Button>
+              <Button
+                isIconOnly
+                variant="light"
+                className="hover:bg-[#353636] p-0"
+              >
+                <FaFastForward />
+              </Button>
+            </div>
+          </div>
+        </Tab>
+        <Tab key="games" title="Games">
+          <p>this is history page</p>
+        </Tab>
+      </Tabs>
     </div>
   );
 };
