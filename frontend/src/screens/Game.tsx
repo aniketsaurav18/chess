@@ -8,6 +8,7 @@ import GameInfo from "../components/GameInfo";
 import Sidebar from "../components/Sidebar";
 import { viewportWidthBreakpoint } from "../utils/config";
 import { useChessGame } from "../hooks/useGame";
+import GameModal from "../components/GameOverModal";
 
 // const WS_URL = "ws://localhost:8080";
 
@@ -110,9 +111,9 @@ export function Game() {
       />
       <main
         id="main"
-        className="flex flex-row justify-start items-center bg-[#302e2b] h-screen m-0 p-4 box-border overflow-hidden lg:h-auto lg:flex-col lg:relative lg:w-full"
+        className="flex flex-row justify-start items-center bg-[#302e2b] h-screen m-0 p-4 md:p-1 box-border overflow-hidden lg:h-auto lg:flex-col lg:relative lg:w-full"
       >
-        <div className="w-[60%] h-full flex flex-col items-center justify-center m-0 p-0 lg:w-full lg:h-[90vh] md:h-auto">
+        <div className="w-[60%] h-full flex flex-col items-center justify-center m-0 p-0 lg:w-full lg:h-[90vh] md:h-[40rem] sm:h-[30rem]">
           <div
             className="w-full h-[2.5rem] flex flex-row justify-between items-center md:w-full"
             style={{ width: boardWidth }}
@@ -133,7 +134,8 @@ export function Game() {
             className="w-full flex-grow my-2 p-0 grid place-items-center lg:w-full lg:h-full"
             ref={chessboardDivRef}
           >
-            <div className="chessboard-container">
+            <div className="relative">
+              <GameModal isOpen={true} />
               <Chessboard
                 id="PlayVsPlay"
                 boardWidth={boardWidth}

@@ -1,8 +1,10 @@
 /** @type {import('tailwindcss').Config} */
+const {nextui} = require("@nextui-org/theme");
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/@nextui-org/theme/dist/components/(button|card|modal|select|tabs|ripple|spinner|listbox|divider|popover|scroll-shadow).js"
   ],
   theme: {
     screens: {
@@ -18,10 +20,10 @@ export default {
       'md': {'max': '768px'},
       // => @media (max-width: 767px) { ... }
 
-      'sm': {'max': '639px'},
+      'sm': {'max': '500px'},
       // => @media (max-width: 639px) { ... }
     }
   },
-  plugins: [],
+  plugins: [nextui()],
 }
 
