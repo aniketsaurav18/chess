@@ -30,7 +30,7 @@ export class Game {
     this.gameId = randomUUID() as string;
     this.gameSocket = new Socket(this.gameId, p1, p2);
     this.board = new Chess();
-    this.gameTimeLimit = timeLimit ? timeLimit : TIME_LIMIT;
+    this.gameTimeLimit = timeLimit ? timeLimit * 60 * 1000 : TIME_LIMIT; //time limit should be in miliseconds
     this.player1TimeLeft = this.gameTimeLimit;
     this.player2TimeLeft = this.gameTimeLimit;
     console.log("game created, message sending");
@@ -85,7 +85,7 @@ export class Game {
       if (this.board.isCheckmate()) {
         console.log("checkmate", this.board.turn());
         type =
-          this.board.turn() === "w" ? "black_checkmate" : "white_checkmate";
+          this.board.turn() === "w" ? "white_checkmate" : "black_checkmate";
         winner = this.board.turn() === "w" ? "black" : "white";
       } else if (this.board.isDraw()) {
         console.log("draw", this.board.turn());
@@ -93,7 +93,7 @@ export class Game {
         winner = "draw";
       } else if (this.board.isThreefoldRepetition()) {
         console.log("threefold repetition", this.board.turn());
-        type = "threefoled_repetition";
+        type = "threefold_repetition";
         winner = "draw";
       } else if (this.board.isInsufficientMaterial()) {
         console.log("insufficient material", this.board.turn());
@@ -123,15 +123,15 @@ export class Game {
     }
     this.gameStatus = "over";
     this.gameResult = winner as Result;
-    if (winner === "draw") {
-      this.gameSocket.sendGameDraw(this.player1TimeLeft, this.player2TimeLeft);
-    } else {
-      this.gameSocket.sendGameOver(
+    try {
+      this.gameSocket.sendGameOverMsg(
         type,
         winner,
         this.player1TimeLeft,
         this.player2TimeLeft
       );
+    } catch (error: any) {
+      this.handleError(error, "Error while sending Game Over Message");
     }
   }
 
@@ -171,5 +171,14 @@ export class Game {
 
   gameDraw() {
     this.gameEnd("draw", "draw");
+  }
+
+  private handleError(error: any, context: string) {
+    console.error(
+      `Error GameId:${this.gameId} error-message: ${context} err: ${
+        error.message || error
+      }`
+    );
+    // TODO: send the error to a monitoring service
   }
 }

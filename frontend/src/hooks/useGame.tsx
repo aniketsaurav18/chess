@@ -70,13 +70,7 @@ export function useChessGame(user: any) {
           updateHistory(move);
           break;
         case GAME_OVER:
-          gameEndfn();
-          break;
-        case GAME_DRAW:
-          gameEndfn();
-          break;
-        case TIMEOUT:
-          gameEndfn();
+          gameEndfn(message.d);
           break;
         case DRAW_OFFERED:
           if (drawOffered) break;
@@ -84,9 +78,6 @@ export function useChessGame(user: any) {
           setTimeout(() => {
             setDrawOffered(false);
           }, 5000);
-          break;
-        case DRAW_ACCEPTED:
-          gameEndfn();
           break;
       }
     };
@@ -96,17 +87,23 @@ export function useChessGame(user: any) {
     if (gameStatus !== "STARTED") {
       return;
     }
+    console.log("status", gameStatus, "game turn", game.turn());
     clearAllInterval();
     setPlayerTimer();
     return () => clearAllInterval();
   }, [gameStatus, game.turn()]);
 
   const setPlayerTimer = () => {
+    if (gameStatus === "OVER") {
+      return;
+    }
     if (game.turn() === "w") {
+      console.log("setting white timer");
       player1TimerRef.current = setInterval(() => {
         setPlayer1Timer((t) => t - 100);
       }, 100);
     } else if (game.turn() === "b") {
+      console.log("setting black timer");
       player2TimerRef.current = setInterval(() => {
         setPlayer2Timer((t) => t - 100);
       }, 100);
@@ -124,7 +121,11 @@ export function useChessGame(user: any) {
       player2TimerRef.current = null;
     }
   };
-  const gameEndfn = () => {
+  const gameEndfn = (msgPayload: any) => {
+    if (msgPayload == null) {
+      clearAllInterval();
+      return;
+    }
     if (gameStatus === "STARTED") {
       setGameStatus("OVER");
     }
@@ -170,16 +171,20 @@ export function useChessGame(user: any) {
     if (gameStatus !== "STARTED") {
       return;
     }
-    socket?.send(
-      JSON.stringify({
-        t: RESIGN,
-        d: {
-          gameId: gameId,
-          player: side[0],
-        },
-      })
-    );
-    gameEndfn();
+    try {
+      socket?.send(
+        JSON.stringify({
+          t: RESIGN,
+          d: {
+            gameId: gameId,
+            player: side[0],
+          },
+        })
+      );
+      clearAllInterval();
+    } catch (e: any) {
+      console.log(e.message);
+    }
   };
 
   const offerDrawfn = () => {
@@ -210,23 +215,30 @@ export function useChessGame(user: any) {
       })
     );
     setDrawOffered(false);
-    gameEndfn();
+    gameEndfn(null);
   };
 
-  const startGame = () => {
+  const startGame = (timeLimit: number): boolean => {
     if (!socket) {
       console.log("no socket found");
-      return null;
+      return false;
     }
     try {
-      socket.send(JSON.stringify({ t: INIT_GAME }));
       setWaiting(true);
+      socket.send(
+        JSON.stringify({
+          t: INIT_GAME,
+          d: {
+            tl: timeLimit,
+          },
+        })
+      );
       game.reset();
       chessboardRef.current.clearPremoves();
       return true;
     } catch (e) {
       setWaiting(false);
-      return null;
+      return false;
     }
   };
 

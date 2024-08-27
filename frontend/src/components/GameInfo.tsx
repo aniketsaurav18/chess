@@ -5,7 +5,7 @@ import { DRAW_DECLINED } from "../utils/messages";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { Tabs, Tab } from "@nextui-org/tabs";
 import { Select, SelectItem } from "@nextui-org/select";
-import { Button, ButtonGroup } from "@nextui-org/button";
+import { Button } from "@nextui-org/button";
 import { GameTimeLimit } from "../utils/config";
 import "../../public/cardinal.css";
 import {
@@ -36,7 +36,7 @@ interface GameInfoProps {
   waiting: boolean;
   status: "STARTED" | "OVER" | "WAITING" | "IDEAL";
   socket: WebSocket | null;
-  startGame: () => void;
+  startGame: (timeLimit: number) => boolean;
   gameHistory: Move[];
   drawOffered: boolean;
   setDrawOffered: (val: boolean) => void;
@@ -135,8 +135,11 @@ const GameInfo = ({
             </Select>
             <Button
               color="primary"
-              onClick={startGame}
+              onClick={() => {
+                startGame(Number(selectedTimeLimit));
+              }}
               className="max-w-[20rem] w-full bg-[#2ea44f] hover:bg-[#2c974b] text-lg font-medium"
+              disabled={waiting}
             >
               Start
             </Button>

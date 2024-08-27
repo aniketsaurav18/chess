@@ -44,10 +44,18 @@ export function Game() {
   // const [user, setUser] = useState<User | null>(null);
   const windowDimensions = useWindowDimensions();
   const [boardWidth, setBoardWidth] = useState<number>(500);
+  const [isGameOverModal, setIsGameOverModal] = useState<boolean>(false);
 
   useEffect(() => {
     console.log("user details", user);
   }, []);
+
+  useEffect(() => {
+    if (gameStatus === "OVER") {
+      console.log("game over");
+      setIsGameOverModal(true);
+    }
+  }, [gameStatus]);
 
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
@@ -60,16 +68,9 @@ export function Game() {
     mainEle.style.marginLeft = `${
       windowDimensions.width < viewportWidthBreakpoint ? 0 : sidebarWidth
     }px`;
-    // const chessboardEle = document.getElementsByClassName(
-    //   "chessboard"
-    // )[0] as HTMLElement;
-    // const boardH = chessboardEle.clientHeight;
-    // const boardW = chessboardEle.clientWidth;
-    // console.log("boardH", boardH, "boardW", boardW);
-    // setBoardWidth(boardH < boardW ? boardH : boardW);
   }, [windowDimensions.width]);
-  const chessboardDivRef = useRef<any>();
 
+  const chessboardDivRef = useRef<any>();
   useEffect(() => {
     const chessboardEle = chessboardDivRef.current;
     if (!chessboardEle) return;
@@ -135,7 +136,7 @@ export function Game() {
             ref={chessboardDivRef}
           >
             <div className="relative">
-              <GameModal isOpen={true} />
+              <GameModal isGameOverModal={isGameOverModal} />
               <Chessboard
                 id="PlayVsPlay"
                 boardWidth={boardWidth}
