@@ -80,10 +80,9 @@ export class GameManager {
       );
     }
   }
-
   private handleInitGame(socket: WebSocket, msg: any) {
     if (this.pendingUser !== null) {
-      const game = new Game(this.pendingUser, socket);
+      const game = new Game(this.pendingUser, socket, Number(msg.d.tl));
       this.games.push(game);
       this.pendingUser = null;
     } else {
