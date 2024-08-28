@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import "./GameInfo.css";
 import MoveHistory from "./MoveHistory";
-import { DRAW_DECLINED } from "../utils/messages";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { Tabs, Tab } from "@nextui-org/tabs";
 import { Select, SelectItem } from "@nextui-org/select";
@@ -15,6 +14,8 @@ import {
   FaHandshake,
   FaStepBackward,
   FaStepForward,
+  FaCheck,
+  FaTimes,
 } from "react-icons/fa";
 
 interface Move {
@@ -44,21 +45,23 @@ interface GameInfoProps {
   offerDraw: boolean;
   gameResignfn: () => void;
   drawAcceptedfn: () => void;
+  drawDeclinefn: () => void;
 }
 
 const GameInfo = ({
-  side,
+  // side,
   waiting,
-  status,
-  socket,
+  // status,
+  // socket,
   startGame,
   gameHistory,
   drawOffered,
-  setDrawOffered,
+  // setDrawOffered,
   offerDrawfn,
   offerDraw,
   gameResignfn,
   drawAcceptedfn,
+  drawDeclinefn,
 }: GameInfoProps) => {
   const [moveHistory, setMoveHistory] = useState<Move[][]>([]);
   const [selectedTimeLimit, setSelectedTimeLimit] = useState("10");
@@ -88,14 +91,6 @@ const GameInfo = ({
     setMoveHistory(history);
   }, [gameHistory]);
 
-  const drawDeclined = () => {
-    if (status !== "STARTED" || !socket) {
-      return;
-    }
-    socket.send(JSON.stringify({ t: DRAW_DECLINED, d: { color: side[0] } }));
-    setDrawOffered(false);
-  };
-
   return (
     <div className="w-[35%] md:w-11/12 lg:w-11/12 md:min-h-[30rem] lg:min-h-[30rem] h-full flex flex-col bg-[#262522] m-0 p-0 rounded-[1.6%] pb-2">
       <Tabs
@@ -105,14 +100,14 @@ const GameInfo = ({
         classNames={{
           tabList: "bg-[#21201D]",
           tab: "h-10",
-          panel: "h-full rounded-[1.6%]",
+          panel: "h-full rounded-[1.6%] flex-grow",
           cursor: "w-full bg-[#262522]",
           // base: "bg-red-400",
           tabContent: "text-8 text-white",
         }}
       >
         <Tab key="play" title="Play">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center h-full flex-grow">
             <Select
               label="Select a Time Limit"
               className="max-w-[20rem] w-full m-4"
@@ -145,21 +140,29 @@ const GameInfo = ({
             </Button>
           </div>
         </Tab>
-        <Tab key="history" title="History">
+        <Tab key="history" title="History" className="flex flex-col">
           <div
             id="game-history"
-            className="flex flex-col justify-start items-center w-full overflow-y-scroll min-h-[60%] h-[80%] m-0 p-0"
+            className="flex flex-col justify-start flex-grow items-center w-full overflow-y-scroll min-h-[60%] m-0 p-0 scrollbar-hide overflow-auto"
           >
             <MoveHistory moveHistory={moveHistory} />
             {drawOffered ? (
-              <div className="draw-offered-dialogue">
+              <div className="h-[60px] w-full rounded-t-[5%] z-10 flex justify-center items-center flex-row gap-2 bg-[#606060] bottom-0 mt-auto">
                 <span>Oponent offered a Draw</span>
-                <button className="draw-offered-btn" onClick={drawAcceptedfn}>
+                <Button
+                  startContent={<FaCheck />}
+                  onClick={drawAcceptedfn}
+                  className="w-auto bg-[#3f4040] hover:bg-[#353636] p-0 h-8 rounded-md"
+                >
                   Accept
-                </button>
-                <button className="draw-offered-btn" onClick={drawDeclined}>
+                </Button>
+                <Button
+                  startContent={<FaTimes />}
+                  onClick={drawDeclinefn}
+                  className="w-auto bg-[#3f4040] hover:bg-[#353636] p-0 h-8 rounded-md"
+                >
                   Decline
-                </button>
+                </Button>
               </div>
             ) : null}
           </div>
