@@ -21,9 +21,11 @@ export function Game() {
   const socket = useSocket();
   const user = useUser();
   const {
-    gameId,
+    // gameId,
     gameState,
     gameStatus,
+    gameResult,
+    isGameOver,
     player1timer,
     player2timer,
     optionSquares,
@@ -40,22 +42,14 @@ export function Game() {
     startGame,
     offerDrawfn,
     drawAcceptedfn,
+    drawDeclinedfn,
   } = useChessGame(user);
   // const [user, setUser] = useState<User | null>(null);
   const windowDimensions = useWindowDimensions();
   const [boardWidth, setBoardWidth] = useState<number>(500);
-  const [isGameOverModal, setIsGameOverModal] = useState<boolean>(false);
-
   useEffect(() => {
     console.log("user details", user);
   }, []);
-
-  useEffect(() => {
-    if (gameStatus === "OVER") {
-      console.log("game over");
-      setIsGameOverModal(true);
-    }
-  }, [gameStatus]);
 
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
@@ -78,7 +72,7 @@ export function Game() {
     const updateBoardWidth = () => {
       const boardH = chessboardEle.clientHeight;
       const boardW = chessboardEle.clientWidth;
-      console.log("boardH", boardH, "boardW", boardW);
+      // console.log("boardH", boardH, "boardW", boardW);
       setBoardWidth(boardH < boardW ? boardH : boardW);
     };
     // Create a ResizeObserver to watch the chessboard element
@@ -112,9 +106,9 @@ export function Game() {
       />
       <main
         id="main"
-        className="flex flex-row justify-start items-center bg-[#302e2b] h-screen m-0 p-4 md:p-1 box-border overflow-hidden lg:h-auto lg:flex-col lg:relative lg:w-full"
+        className="flex flex-row justify-start items-center flex-grow overflow-auto bg-[#302e2b] h-screen m-0 p-4 md:p-1 box-border lg:h-auto lg:flex-col lg:relative lg:w-full lg:gap-5"
       >
-        <div className="w-[60%] h-full flex flex-col items-center justify-center m-0 p-0 lg:w-full lg:h-[90vh] md:h-[40rem] sm:h-[30rem]">
+        <div className="w-[60%] h-full flex flex-col items-center justify-center m-0 p-0 lg:w-full lg:h-[80vh] md:h-[40rem] sm:h-[30rem]">
           <div
             className="w-full h-[2.5rem] flex flex-row justify-between items-center md:w-full"
             style={{ width: boardWidth }}
@@ -136,7 +130,7 @@ export function Game() {
             ref={chessboardDivRef}
           >
             <div className="relative">
-              <GameModal isGameOverModal={isGameOverModal} />
+              <GameModal isGameOverModal={isGameOver} message={gameResult} />
               <Chessboard
                 id="PlayVsPlay"
                 boardWidth={boardWidth}
@@ -187,6 +181,7 @@ export function Game() {
           offerDraw={offerDraw}
           gameResignfn={gameResign}
           drawAcceptedfn={drawAcceptedfn}
+          drawDeclinefn={drawDeclinedfn}
         />
       </main>
     </>

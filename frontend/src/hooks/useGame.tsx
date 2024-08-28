@@ -6,12 +6,13 @@ import {
   INIT_GAME,
   MOVE,
   GAME_OVER,
-  TIMEOUT,
+  // TIMEOUT,
   OFFER_DRAW,
   DRAW_OFFERED,
   DRAW_ACCEPTED,
-  GAME_DRAW,
+  // GAME_DRAW,
   RESIGN,
+  DRAW_DECLINED,
 } from "../utils/messages";
 
 // const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
@@ -20,12 +21,13 @@ export function useChessGame(user: any) {
   const socket = useSocket();
   const chessboardRef = useRef<any>();
   const [game, _setGame] = useState(new Chess());
-  const [oponent, setOponent] = useState(null);
+  // const [oponent, setOponent] = useState(null);
   const [gameId, setGameID] = useState<string | null>(null);
   const [gameState, setGameState] = useState(game.fen());
   const [gameStatus, setGameStatus] = useState<
     "STARTED" | "OVER" | "WAITING" | "IDEAL"
   >("IDEAL");
+  const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [waiting, setWaiting] = useState(false);
   const [side, setSide] = useState<BoardOrientation>("white");
   const [player1timer, setPlayer1Timer] = useState<number>(0);
@@ -65,8 +67,10 @@ export function useChessGame(user: any) {
             break;
           }
           setGameState(game.fen());
+          clearAllInterval();
           setPlayer1Timer(message.d.clock.w);
           setPlayer2Timer(message.d.clock.b);
+          setPlayerTimer();
           updateHistory(move);
           break;
         case GAME_OVER:
@@ -129,9 +133,13 @@ export function useChessGame(user: any) {
     if (gameStatus === "STARTED") {
       setGameStatus("OVER");
     }
-    clearAllInterval();
-    setGameResult("game over");
+    setTimeout(() => {
+      clearAllInterval();
+      setGameResult(msgPayload.msg);
+      setIsGameOver(true);
+    }, 500);
   };
+
   const makeMove = (sourceSquare: Square, targetSquare: Square) => {
     if (
       game.get(sourceSquare)?.color !== game.turn() ||
@@ -140,6 +148,8 @@ export function useChessGame(user: any) {
     )
       return false;
     if (!socket) return false;
+    setMoveFrom(null);
+    setOptionSquares({});
     const move = game.move({
       from: sourceSquare,
       to: targetSquare,
@@ -216,6 +226,14 @@ export function useChessGame(user: any) {
     );
     setDrawOffered(false);
     gameEndfn(null);
+  };
+
+  const drawDeclinedfn = () => {
+    if (gameStatus !== "STARTED" || !socket) {
+      return;
+    }
+    socket.send(JSON.stringify({ t: DRAW_DECLINED, d: { color: side[0] } }));
+    setDrawOffered(false);
   };
 
   const startGame = (timeLimit: number): boolean => {
@@ -304,6 +322,8 @@ export function useChessGame(user: any) {
     gameId,
     gameState,
     gameStatus,
+    gameResult,
+    isGameOver,
     player1timer,
     player2timer,
     optionSquares,
@@ -321,5 +341,6 @@ export function useChessGame(user: any) {
     startGame,
     offerDrawfn,
     drawAcceptedfn,
+    drawDeclinedfn,
   };
 }

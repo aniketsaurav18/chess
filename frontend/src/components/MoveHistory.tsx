@@ -48,15 +48,20 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
         return "";
     }
   };
-  const movehiss = [[{piece: "q", color:"b", san:"a4"}, {piece:"k", color:"w", san: "r5"}]];
+  // const movehiss = [
+  //   [
+  //     { piece: "q", color: "b", san: "a4" },
+  //     { piece: "k", color: "w", san: "r5" },
+  //   ],
+  // ];
 
   return (
-    <div className="flex flex-col items-center justify-start flex-grow w-full h-full m-0 p-0">
-      {movehiss.length > 0
-        ? movehiss.map((movePair, index) => (
+    <div className="flex flex-col items-center justify-start w-full h-full m-0 p-0">
+      {moveHistory.length > 0
+        ? moveHistory.map((movePair, index) => (
             <div
               key={index}
-              className="flex flex-row items-center justify-start bg-red-500 w-full h-8 text-md font-bold text-white my-0.5"
+              className="flex flex-row items-center justify-start w-full h-8 text-md text-white my-0.5"
               style={{
                 backgroundColor: index % 2 === 0 ? "#2A2926" : "#262522",
               }}
@@ -65,7 +70,7 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
               {movePair[0] && (
                 <div
                   id="white-move"
-                  className="is2d flex justify-start flex-row items-center mr-8 ml-8 w-24 h-full"
+                  className="is2d flex justify-start flex-row gap-1 items-center mr-8 ml-8 w-24 h-full"
                 >
                   <span
                     className={`${getChessPiece(
@@ -79,7 +84,7 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
               {movePair[1] && (
                 <div
                   id="black-move"
-                  className="is2d flex justify-start flex-row items-center mr-8 ml-8 w-24 h-full"
+                  className="is2d flex justify-start flex-row gap-1 items-center mr-8 ml-8 w-24 h-full"
                 >
                   <span
                     className={`${getChessPiece(
