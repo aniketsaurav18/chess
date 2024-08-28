@@ -48,14 +48,15 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
         return "";
     }
   };
+  const movehiss = [[{piece: "q", color:"b", san:"a4"}, {piece:"k", color:"w", san: "r5"}]];
 
   return (
-    <div className="history-moves-table">
-      {moveHistory.length > 0
-        ? moveHistory.map((movePair, index) => (
+    <div className="flex flex-col items-center justify-start flex-grow w-full h-full m-0 p-0">
+      {movehiss.length > 0
+        ? movehiss.map((movePair, index) => (
             <div
               key={index}
-              className="history-move "
+              className="flex flex-row items-center justify-start bg-red-500 w-full h-8 text-md font-bold text-white my-0.5"
               style={{
                 backgroundColor: index % 2 === 0 ? "#2A2926" : "#262522",
               }}
@@ -64,13 +65,13 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
               {movePair[0] && (
                 <div
                   id="white-move"
-                  className="is2d flex justify-start flex-row items-center mr-8 ml-8 w-24"
+                  className="is2d flex justify-start flex-row items-center mr-8 ml-8 w-24 h-full"
                 >
                   <span
                     className={`${getChessPiece(
                       movePair[0].piece,
                       movePair[0].color
-                    )} h-8 max-w-4`}
+                    )} h-full w-5 bg-size bg-contain bg-center bg-no-repeat`}
                   />
                   <span>{movePair[0].san}</span>
                 </div>
@@ -78,13 +79,13 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
               {movePair[1] && (
                 <div
                   id="black-move"
-                  className="is2d flex justify-start flex-row items-center mr-8 ml-8 w-24"
+                  className="is2d flex justify-start flex-row items-center mr-8 ml-8 w-24 h-full"
                 >
                   <span
                     className={`${getChessPiece(
                       movePair[1].piece,
                       movePair[1].color
-                    )} h-8 max-w-1`}
+                    )} h-full w-5 bg-size bg-contain bg-center bg-no-repeat`}
                   />
                   <span>{movePair[1].san}</span>
                 </div>
