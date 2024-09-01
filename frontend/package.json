@@ -13,6 +13,7 @@
     "@nextui-org/button": "^2.0.37",
     "@nextui-org/card": "^2.0.33",
     "@nextui-org/modal": "^2.0.39",
+    "@nextui-org/popover": "^2.1.27",
     "@nextui-org/select": "^2.2.5",
     "@nextui-org/system": "^2.2.5",
     "@nextui-org/tabs": "^2.0.35",

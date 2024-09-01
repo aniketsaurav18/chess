@@ -29,7 +29,12 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
   return (
     <>
       <Topbar setSidebarOpen={setSidebarOpen} />
-      <div className={`sidebar ${sidebar ? "open" : "closed"}`}>
+      <div
+        id="sidebar"
+        className={`h-screen w-[200px] fixed flex flex-col items-center justify-start z-10 top-0 left-0 bg-[#111] overflow-x-hidden transition-transform duration-300 ease-in-out transform            ${
+          sidebar ? "-translate-x-0" : "-translate-x-full"
+        }`}
+      >
         {windowSize <= viewportWidthBreakpoint && (
           <div className="sidebar-close-btn">
             <button onClick={() => setSidebar(false)}>

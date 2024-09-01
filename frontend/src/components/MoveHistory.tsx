@@ -1,4 +1,5 @@
 import "../../public/cardinal.css";
+
 interface Move {
   from: string;
   to: string;
@@ -48,6 +49,7 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
         return "";
     }
   };
+
   // const movehiss = [
   //   [
   //     { piece: "q", color: "b", san: "a4" },
@@ -56,48 +58,49 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
   // ];
 
   return (
-    <div className="flex flex-col items-center justify-start w-full h-full m-0 p-0">
-      {moveHistory.length > 0
-        ? moveHistory.map((movePair, index) => (
-            <div
-              key={index}
-              className="flex flex-row items-center justify-start w-full h-8 text-md text-white my-0.5"
-              style={{
-                backgroundColor: index % 2 === 0 ? "#2A2926" : "#262522",
-              }}
-            >
-              <span className="move-number">{index + 1}.</span>
-              {movePair[0] && (
-                <div
-                  id="white-move"
-                  className="is2d flex justify-start flex-row gap-1 items-center mr-8 ml-8 w-24 h-full"
-                >
-                  <span
-                    className={`${getChessPiece(
-                      movePair[0].piece,
-                      movePair[0].color
-                    )} h-full w-5 bg-size bg-contain bg-center bg-no-repeat`}
-                  />
-                  <span>{movePair[0].san}</span>
-                </div>
-              )}
-              {movePair[1] && (
-                <div
-                  id="black-move"
-                  className="is2d flex justify-start flex-row gap-1 items-center mr-8 ml-8 w-24 h-full"
-                >
-                  <span
-                    className={`${getChessPiece(
-                      movePair[1].piece,
-                      movePair[1].color
-                    )} h-full w-5 bg-size bg-contain bg-center bg-no-repeat`}
-                  />
-                  <span>{movePair[1].san}</span>
-                </div>
-              )}
-            </div>
-          ))
-        : "No moves yet"}
+    <div className="flex flex-col items-center justify-start w-full h-full overflow-y-auto rounded-lg shadow-lg">
+      {moveHistory.length > 0 ? (
+        moveHistory.map((movePair, index) => (
+          <div
+            key={index}
+            className={`flex flex-row items-center w-full py-2 px-4 text-sm ${
+              index % 2 === 0 ? "bg-[#2a2926]" : "bg-[#262522]"
+            }`}
+          >
+            <span className="text-white font-semibold w-6">{index + 1}.</span>
+            {movePair[0] && (
+              <div
+                id="white-move"
+                className="is2d flex flex-row items-center justify-center gap-2 w-24"
+              >
+                <span
+                  className={`${getChessPiece(
+                    movePair[0].piece,
+                    movePair[0].color
+                  )} w-5 h-5 bg-center bg-no-repeat bg-contain`}
+                />
+                <span className="text-white">{movePair[0].san}</span>
+              </div>
+            )}
+            {movePair[1] && (
+              <div
+                id="black-move"
+                className="is2d flex flex-row items-center justify-center gap-2 w-24"
+              >
+                <span
+                  className={`${getChessPiece(
+                    movePair[1].piece,
+                    movePair[1].color
+                  )} w-5 h-5 bg-center bg-no-repeat bg-contain`}
+                />
+                <span className="text-white">{movePair[1].san}</span>
+              </div>
+            )}
+          </div>
+        ))
+      ) : (
+        <span className="text-gray-400 py-4">No moves yet</span>
+      )}
     </div>
   );
 };

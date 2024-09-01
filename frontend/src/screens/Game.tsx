@@ -54,9 +54,7 @@ export function Game() {
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
       return;
-    const sidebarEle = document.getElementsByClassName(
-      "sidebar"
-    )[0] as HTMLElement;
+    const sidebarEle = document.getElementById("sidebar") as HTMLElement;
     const sidebarWidth = sidebarEle.clientWidth;
     const mainEle = document.getElementById("main") as HTMLElement;
     mainEle.style.marginLeft = `${

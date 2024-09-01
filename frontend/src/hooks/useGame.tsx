@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Chess, Square } from "chess.js";
 import { useSocket } from "../hooks/useSocket";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
@@ -177,7 +177,7 @@ export function useChessGame(user: any) {
     return true;
   };
 
-  const gameResign = () => {
+  const gameResign = useCallback(() => {
     if (gameStatus !== "STARTED") {
       return;
     }
@@ -195,26 +195,31 @@ export function useChessGame(user: any) {
     } catch (e: any) {
       console.log(e.message);
     }
-  };
+  }, [socket, gameStatus, gameId, side]);
 
-  const offerDrawfn = () => {
+  const offerDrawfn = useCallback(() => {
     if (offerDraw) return;
+    console.log("draw offered");
     setOfferDraw(true);
-    socket?.send(
-      JSON.stringify({
-        t: OFFER_DRAW,
-        d: {
-          gameId: gameId,
-          player: side[0],
-        },
-      })
-    );
-    setTimeout(() => {
-      setOfferDraw(false);
-    }, 5000);
-  };
+    try {
+      socket?.send(
+        JSON.stringify({
+          t: OFFER_DRAW,
+          d: {
+            gameId: gameId,
+            player: side[0],
+          },
+        })
+      );
+      setTimeout(() => {
+        setOfferDraw(false);
+      }, 5000);
+    } catch (e) {
+      console.log("error while offering draw", e);
+    }
+  }, [socket, gameId, side]);
 
-  const drawAcceptedfn = () => {
+  const drawAcceptedfn = useCallback(() => {
     if (gameStatus !== "STARTED" || !socket) {
       return;
     }
@@ -226,39 +231,43 @@ export function useChessGame(user: any) {
     );
     setDrawOffered(false);
     gameEndfn(null);
-  };
+  }, [socket, gameStatus, gameId, side, gameEndfn]);
 
-  const drawDeclinedfn = () => {
+  const drawDeclinedfn = useCallback(() => {
     if (gameStatus !== "STARTED" || !socket) {
       return;
     }
     socket.send(JSON.stringify({ t: DRAW_DECLINED, d: { color: side[0] } }));
     setDrawOffered(false);
-  };
+  }, [socket, gameStatus, side]);
 
-  const startGame = (timeLimit: number): boolean => {
-    if (!socket) {
-      console.log("no socket found");
-      return false;
-    }
-    try {
-      setWaiting(true);
-      socket.send(
-        JSON.stringify({
-          t: INIT_GAME,
-          d: {
-            tl: timeLimit,
-          },
-        })
-      );
-      game.reset();
-      chessboardRef.current.clearPremoves();
-      return true;
-    } catch (e) {
-      setWaiting(false);
-      return false;
-    }
-  };
+  const startGame = useCallback(
+    (timeLimit: number): boolean => {
+      if (!socket) {
+        console.log("no socket found");
+        return false;
+      }
+      try {
+        setWaiting(true);
+        socket.send(
+          JSON.stringify({
+            t: INIT_GAME,
+            d: {
+              tl: timeLimit,
+            },
+          })
+        );
+        game.reset();
+        chessboardRef.current.clearPremoves();
+        return true;
+      } catch (e) {
+        console.log("start Game error:", e);
+        setWaiting(false);
+        return false;
+      }
+    },
+    [socket, game, chessboardRef]
+  );
 
   const updateHistory = (move: any) => {
     setGameHistory((history: any) => {
@@ -269,7 +278,6 @@ export function useChessGame(user: any) {
       return [...history, lastMoveWithTime];
     });
   };
-
   function getMoveOptions(square: Square) {
     if (game.turn() !== side[0] && gameStatus !== "STARTED") return;
 
