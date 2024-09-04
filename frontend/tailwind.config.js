@@ -4,7 +4,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "./node_modules/@nextui-org/theme/dist/components/(button|card|modal|popover|select|tabs|ripple|spinner|listbox|divider|scroll-shadow).js"
+    "./node_modules/@nextui-org/theme/dist/components/(button|card|modal|popover|select|tabs|user|ripple|spinner|listbox|divider|scroll-shadow|avatar).js"
   ],
   theme: {
     screens: {
