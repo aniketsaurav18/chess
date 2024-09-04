@@ -58,7 +58,7 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
   // ];
 
   return (
-    <div className="flex flex-col items-center justify-start w-full h-full overflow-y-auto rounded-lg shadow-lg">
+    <div className="flex flex-col items-center justify-start w-full h-full flex-grow overflow-y-auto rounded-lg shadow-lg">
       {moveHistory.length > 0 ? (
         moveHistory.map((movePair, index) => (
           <div

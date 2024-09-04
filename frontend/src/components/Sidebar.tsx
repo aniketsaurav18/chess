@@ -8,8 +8,11 @@ import { FaHome } from "react-icons/fa";
 import { FaChessKnight } from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { FaInfoCircle } from "react-icons/fa";
+import { User } from "@nextui-org/user";
+
 const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
   const [sidebar, setSidebar] = useState(true);
+
   useEffect(() => {
     console.log("Window size:", windowSize);
     // Ensure sidebar is open on large screens by default
@@ -31,12 +34,13 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
       setSidebar(false);
     }
   };
+
   return (
     <>
       <Topbar setSidebarOpen={setSidebarOpen} />
       <div
         id="sidebar"
-        className={`h-screen w-[200px] fixed flex flex-col items-center justify-start z-10 top-0 left-0 bg-[#111] overflow-x-hidden transition-transform duration-300 ease-in-out transform            ${
+        className={`h-screen w-[200px] fixed flex flex-col items-center justify-start z-10 top-0 left-0 bg-[#111] overflow-x-hidden transition-transform duration-300 ease-in-out transform ${
           sidebar ? "-translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -64,7 +68,7 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
         <div className="sidebar-header">
           <img src="/Chess-logo-2.png" alt="chess-logo" />
         </div>
-        <div className="sidebar-content">
+        <div className="flex flex-col items-center justify-start w-full flex-grow">
           <Link
             to="/"
             className="block w-[90%] text-left"
@@ -103,27 +107,33 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
           </Link>
         </div>
 
-        {user.user === "guest" ? (
-          <div className="user-functions">
-            <Link to="/login" className="sidebar-link userfn-btn sidebar-text">
-              Login
-            </Link>
-            <Link to="/signup" className="sidebar-link userfn-btn sidebar-text">
-              Signup
-            </Link>
-          </div>
-        ) : (
-          <div className="user-container">
-            <div className="user-details">
-              <img src="./default_user.jpg" alt="" className="user-image" />
-              <div className="user-details-text">
-                <h4 className="sidebar-text">{user?.username}</h4>
-                <p className="sidebar-text">{user?.email}</p>
-              </div>
+        <div className="w-full h-auto p-2">
+          {user.type === "guest" ? (
+            <div className="flex flex-col items-center justify-center gap-2 w-full my-4">
+              <Link
+                to="/login"
+                className="h-8 w-full flex items-center justify-center rounded-sm bg-[#2ea44f] hover:bg-[#2c974b]"
+              >
+                Login
+              </Link>
+              <Link
+                to="/signup"
+                className="h-8 w-full flex items-center justify-center rounded-sm bg-[#2ea44f] hover:bg-[#2c974b]"
+              >
+                Signup
+              </Link>
             </div>
-            <button className="logout-btn">Logout</button>
-          </div>
-        )}
+          ) : (
+            <User
+              name="Jane Doe"
+              description="Product Designer"
+              avatarProps={{
+                radius: "sm",
+                src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
+              }}
+            />
+          )}
+        </div>
       </div>
     </>
   );

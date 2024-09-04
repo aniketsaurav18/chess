@@ -18,6 +18,7 @@
     "@nextui-org/system": "^2.2.5",
     "@nextui-org/tabs": "^2.0.35",
     "@nextui-org/theme": "^2.2.9",
+    "@nextui-org/user": "^2.0.33",
     "@types/chess.js": "^0.13.7",
     "chess.js": "^0.13.4",
     "class-variance-authority": "^0.7.0",
