@@ -68,7 +68,8 @@ export class Game {
     } else {
       this.player1TimeLeft -= diff;
     }
-
+    //TODO - reset timer.
+    
     //TODO - send move to a kafka server for inserting into DB
 
     console.log(this.board.turn());
