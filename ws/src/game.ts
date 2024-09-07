@@ -68,8 +68,7 @@ export class Game {
     } else {
       this.player1TimeLeft -= diff;
     }
-    //TODO - reset timer.
-    
+    this.setGameTimer();
     //TODO - send move to a kafka server for inserting into DB
 
     console.log(this.board.turn());
@@ -124,6 +123,7 @@ export class Game {
     }
     this.gameStatus = "over";
     this.gameResult = winner as Result;
+    console.log("history:", this.moveHistry);
     try {
       this.gameSocket.sendGameOverMsg(
         type,
@@ -153,6 +153,7 @@ export class Game {
     } else {
       timeRemain = this.player2TimeLeft;
     }
+    console.log(turn, timeRemain);
     this.gameTimer = setTimeout(() => {
       console.log(turn === "w" ? "black" : "white", "timeout");
       this.gameEnd(

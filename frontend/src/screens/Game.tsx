@@ -84,9 +84,10 @@ export function Game() {
   }, []);
 
   const gameTimer = (timeConsumed: number) => {
-    const timeLeftMs = timeConsumed;
+    const timeLeftMs = timeConsumed > 0 ? timeConsumed : 0; // Ensure timeConsumed does not go below zero
     const timeINMinutes = Math.floor(timeLeftMs / 60000);
     const timeInSeconds = Math.floor((timeLeftMs % 60000) / 1000);
+
     return (
       <div className="flex justify-center items-center bg-gray-500 w-[6rem] h-5/6 text-[1.5rem] font-bold text-white">
         {timeINMinutes < 10 ? "0" : ""}

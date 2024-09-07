@@ -1,21 +1,22 @@
 import { Link } from "react-router-dom";
 import Topbar from "./Topbar";
-import "./Sidebar.css";
 import { useEffect, useState } from "react";
 import { viewportWidthBreakpoint } from "../utils/config";
 import { Button } from "@nextui-org/button";
-import { FaHome } from "react-icons/fa";
-import { FaChessKnight } from "react-icons/fa";
+import {
+  FaHome,
+  FaChessKnight,
+  FaInfoCircle,
+  FaSignOutAlt,
+  FaUser,
+} from "react-icons/fa";
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import { FaInfoCircle } from "react-icons/fa";
 import { User } from "@nextui-org/user";
 
 const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
   const [sidebar, setSidebar] = useState(true);
 
   useEffect(() => {
-    console.log("Window size:", windowSize);
-    // Ensure sidebar is open on large screens by default
     if (windowSize > viewportWidthBreakpoint) {
       setSidebar(true);
     } else {
@@ -24,15 +25,22 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
   }, [windowSize]);
 
   const setSidebarOpen = () => {
-    console.log("setSidebarOpen");
     setSidebar((d) => !d);
   };
 
   const handleLinkClick = () => {
-    // Collapse sidebar only on small devices
     if (windowSize <= viewportWidthBreakpoint) {
       setSidebar(false);
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("name");
+    localStorage.removeItem("email");
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    window.location.href = "/";
   };
 
   return (
@@ -40,20 +48,19 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
       <Topbar setSidebarOpen={setSidebarOpen} />
       <div
         id="sidebar"
-        className={`h-screen w-[200px] fixed flex flex-col items-center justify-start z-10 top-0 left-0 bg-[#111] overflow-x-hidden transition-transform duration-300 ease-in-out transform ${
+        className={`h-screen w-[200px] fixed flex flex-col items-center justify-start z-20 top-0 left-0 bg-[#121212] border-r border-[#2e2e2e] overflow-x-hidden transition-transform duration-300 ease-in-out transform ${
           sidebar ? "-translate-x-0" : "-translate-x-full"
         }`}
       >
         {windowSize <= viewportWidthBreakpoint && (
-          <div className="sidebar-close-btn">
+          <div className="absolute top-4 right-4">
             <button onClick={() => setSidebar(false)}>
               <svg
-                className="sidebar-close"
+                className="text-white w-8 h-8"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-                style={{ width: "2rem", height: "2rem" }}
               >
                 <path
                   strokeLinecap="round"
@@ -65,10 +72,14 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
             </button>
           </div>
         )}
-        <div className="sidebar-header">
-          <img src="/Chess-logo-2.png" alt="chess-logo" />
+        <div className="my-8">
+          <img
+            src="/Chess-logo-2.png"
+            alt="chess-logo"
+            className="w-24 h-auto"
+          />
         </div>
-        <div className="flex flex-col items-center justify-start w-full flex-grow">
+        <div className="flex flex-col items-center justify-start w-full flex-grow space-y-2">
           <Link
             to="/"
             className="block w-[90%] text-left"
@@ -76,7 +87,7 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
           >
             <Button
               startContent={<FaHome />}
-              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#444] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
+              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
             >
               Home
             </Button>
@@ -84,7 +95,7 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
           <Link to="/game" className="block w-[90%] text-left">
             <Button
               startContent={<FaChessKnight />}
-              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#444] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
+              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
             >
               Play
             </Button>
@@ -92,7 +103,7 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
           <Link to="/analysis" className="block w-[90%] text-left">
             <Button
               startContent={<FaMagnifyingGlass />}
-              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#444] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
+              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
             >
               Analysis
             </Button>
@@ -100,38 +111,56 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
           <Link to="/about" className="block w-[90%] text-left">
             <Button
               startContent={<FaInfoCircle />}
-              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#444] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
+              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
             >
               About
             </Button>
           </Link>
         </div>
 
-        <div className="w-full h-auto p-2">
+        <div className="w-full h-auto p-4 bg-[#1a1a1a] border-t border-[#2e2e2e]">
           {user.type === "guest" ? (
-            <div className="flex flex-col items-center justify-center gap-2 w-full my-4">
+            <div className="flex flex-col items-center justify-center gap-2 w-full">
               <Link
                 to="/login"
-                className="h-8 w-full flex items-center justify-center rounded-sm bg-[#2ea44f] hover:bg-[#2c974b]"
+                className="h-10 w-full flex items-center justify-center rounded-md bg-green-600 hover:bg-green-700 text-white"
               >
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="h-8 w-full flex items-center justify-center rounded-sm bg-[#2ea44f] hover:bg-[#2c974b]"
+                className="h-10 w-full flex items-center justify-center rounded-md bg-green-600 hover:bg-green-700 text-white"
               >
                 Signup
               </Link>
             </div>
           ) : (
-            <User
-              name="Jane Doe"
-              description="Product Designer"
-              avatarProps={{
-                radius: "sm",
-                src: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-              }}
-            />
+            <div className="flex flex-col items-center justify-center gap-2 w-full">
+              <User
+                name={user.name}
+                description={user.email}
+                avatarProps={{
+                  radius: "sm",
+                  src: "/default-user.jpg",
+                }}
+                className="text-white"
+              />
+              <Link to="/profile" className="w-full">
+                <Button
+                  startContent={<FaUser />}
+                  className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-sm text-gray-300 pl-2 pr-4 py-0 h-9 rounded-md transition duration-300 ease-in-out"
+                >
+                  Profile
+                </Button>
+              </Link>
+              <Button
+                startContent={<FaSignOutAlt />}
+                className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-sm text-gray-300 pl-2 pr-4 h-9 rounded-md transition duration-300 ease-in-out"
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </div>
           )}
         </div>
       </div>

@@ -1,119 +1,147 @@
 import { useState } from "react";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import { Card, CardBody, CardHeader } from "@nextui-org/card";
+import { Link } from "@nextui-org/link";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
-const UserLogin = () => {
-  const [username, setUsername] = useState("");
+export function LoginPage() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = () => setIsVisible(!isVisible);
+
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState({
+    email: "",
+    password: "",
+  });
+  const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess("");
-    if (!username || !password) {
-      setError("Email and password are required");
-      setLoading(false);
+  const handleLogin = async () => {
+    const newError = { ...error };
+    newError.email = email.trim() ? "" : "Please enter valid Email or Username";
+    newError.password = password.trim() ? "" : "Please enter your Password";
+    setError(newError);
+    if (newError.email !== "" || newError.password !== "") {
       return;
     }
-    // console.log(backendUrl);
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   if (username === "testuser" && password === "password") {
-    //     setSuccess("Login successful!");
-    //   } else {
-    //     setError("Invalid username or password");
-    //   }
-    // }, 1000);
     try {
-      const response = await fetch(`${backendUrl}/api/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: username, password }),
-      });
+      setLoading(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            password: password,
+          }),
+        }
+      );
       const data = await response.json();
-      console.log(data);
-      setLoading(false);
-      if (response.status === 200) {
-        setSuccess(data.message);
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userId", data.userId);
-        localStorage.setItem("userEmail", data.email);
-        window.location.href = "/game";
-      } else {
-        setError(data.message || "An error occurred");
+      if (!response.ok) {
+        setLoginError(
+          data.message ? data.message : "An error occured while loggin in."
+        );
+        setLoading(false);
+        return;
       }
-    } catch (e: any) {
+
+      localStorage.setItem("userId", data.userId);
+      localStorage.setItem("email", data.email);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("name", data.name);
+      window.location.href = "/game";
       setLoading(false);
-      setError("An error occurred");
+    } catch (err: any) {
+      console.log(err);
+      setLoginError("Some error occured");
+      setLoading(false);
     }
   };
-
   return (
-    <main className="flex justify-center items-center flex-col w-full h-[100vh]">
-      <form
-        action=""
-        className="flex justify-center items-center flex-col w-full max-w-[400px] p-5 border border-gray-300 rounded-[10px] bg-white shadow-md"
-      >
-        <h1 className="mb-5 text-[2rem] text-gray-800">Login</h1>
-        <div className="flex flex-col w-full mb-[15px]">
-          <label
-            htmlFor="email"
-            className="self-start mb-[5px] text-[1rem] text-gray-800"
-          >
-            Email or Username
-          </label>
-          <input
-            type="text"
-            id="email"
-            name="email"
-            className="w-full p-[10px] border border-gray-300 rounded-[5px] text-[1rem]"
-            required
-            onChange={(e) => setUsername(e.currentTarget.value)}
+    <div className="flex items-center justify-center min-h-screen bg-[#121212]">
+      <Card className="w-full max-w-md bg-[#1a1a1a] border border-[#2e2e2e]">
+        <CardHeader className="flex flex-col items-center pb-0 pt-6">
+          <h2 className="text-3xl font-bold text-white">Login</h2>
+          <p className="mt-2 text-sm text-gray-400">
+            Don't have an account?
+            <Link
+              href="/signup"
+              className="ml-1 text-green-400 hover:text-green-300"
+            >
+              Sign up
+            </Link>
+          </p>
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <Input
+            type="email"
+            label="Email"
+            variant="bordered"
+            // placeholder="Enter your email"
+            classNames={{
+              label: "text-gray-400",
+              input: "text-white",
+              inputWrapper: "bg-[#2e2e2e] border-[#3b3b3b] hover:bg-[#3b3b3b]",
+            }}
+            onValueChange={setEmail}
           />
-        </div>
-        <div className="flex flex-col w-full mb-[15px]">
-          <label
-            htmlFor="password"
-            className="self-start mb-[5px] text-[1rem] text-gray-800"
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            className="w-full p-[10px] border border-gray-300 rounded-[5px] text-[1rem]"
-            required
-            onChange={(e) => setPassword(e.currentTarget.value)}
+          <Input
+            label="Password"
+            variant="bordered"
+            // placeholder="Enter your password"
+            endContent={
+              <button
+                className="focus:outline-none"
+                type="button"
+                onClick={toggleVisibility}
+              >
+                {isVisible ? (
+                  <EyeIcon className="text-2xl text-gray-400" />
+                ) : (
+                  <EyeOffIcon className="text-2xl text-gray-400" />
+                )}
+              </button>
+            }
+            type={isVisible ? "text" : "password"}
+            classNames={{
+              label: "text-gray-400",
+              input: "text-white",
+              inputWrapper: "bg-[#2e2e2e] border-[#3b3b3b] hover:bg-[#3b3b3b]",
+            }}
+            onValueChange={setPassword}
           />
-        </div>
-        <button
-          type="submit"
-          className="w-full p-[10px] mt-[10px] border-none rounded-[5px] bg-[#2a7f22] text-white text-[1rem] cursor-pointer hover:bg-[#144c10]"
-          disabled={loading}
-          onClick={onSubmit}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-        {error && <p className="text-red-500 mt-[10px]">{error}</p>}
-        {success && <p className="text-green-500 mt-[10px]">{success}</p>}
-        <p className="mt-[15px] text-[1rem] text-gray-800">
-          New Player?{" "}
-          <a
-            href="/signup"
-            className="text-[#007bff] no-underline hover:underline"
+          {!!loginError && (
+            <p className="text-red-600 font-normal text-center">{loginError}</p>
+          )}
+          <Button
+            color="success"
+            className="w-full font-medium bg-green-500 hover:bg-green-600 text-white"
+            onClick={handleLogin}
+            isLoading={loading}
           >
-            Sign Up
-          </a>
-        </p>
-      </form>
-    </main>
+            Login
+          </Button>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-600"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 text-gray-500 bg-[#1a1a1a]">
+                Or continue with
+              </span>
+            </div>
+          </div>
+          <Button className="w-full font-medium bg-[#2e2e2e] text-white hover:bg-[#3b3b3b]">
+            GitHub
+          </Button>
+        </CardBody>
+      </Card>
+    </div>
   );
-};
-
-export default UserLogin;
+}
