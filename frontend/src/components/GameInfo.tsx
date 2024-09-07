@@ -1,5 +1,4 @@
 import { useEffect, useState, memo } from "react";
-import "./GameInfo.css";
 import MoveHistory from "./MoveHistory";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { Tabs, Tab } from "@nextui-org/tabs";

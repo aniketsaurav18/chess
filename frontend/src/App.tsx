@@ -1,8 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import { Game } from "./screens/Game";
-import UserLogin from "./screens/UserLogin";
-import UserSignup from "./screens/UserSignup";
+import { LoginPage } from "./screens/UserLogin";
+// import UserSignup from "./screens/UserSignup";
+import { SignupPage } from "./screens/UserSignup";
 import LandingPage from "./screens/Landing";
 
 function App() {
@@ -11,8 +12,8 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/game" element={<Game />} />
-        <Route path="/login" element={<UserLogin />} />
-        <Route path="/signup" element={<UserSignup />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
       </Routes>
     </BrowserRouter>
   );

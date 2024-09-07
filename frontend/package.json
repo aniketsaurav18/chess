@@ -12,9 +12,12 @@
   "dependencies": {
     "@nextui-org/button": "^2.0.37",
     "@nextui-org/card": "^2.0.33",
+    "@nextui-org/input": "^2.2.4",
+    "@nextui-org/link": "^2.0.34",
     "@nextui-org/modal": "^2.0.39",
     "@nextui-org/popover": "^2.1.27",
     "@nextui-org/select": "^2.2.5",
+    "@nextui-org/spacer": "^2.0.32",
     "@nextui-org/system": "^2.2.5",
     "@nextui-org/tabs": "^2.0.35",
     "@nextui-org/theme": "^2.2.9",
