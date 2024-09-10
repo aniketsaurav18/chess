@@ -1,40 +1,30 @@
-import "./Topbar.css";
+import { GiHamburgerMenu } from "react-icons/gi";
 
 const Topbar = ({ setSidebarOpen }: { setSidebarOpen: () => void }) => {
   return (
-    <div className="justify-between items-center h-[35px] w-full text-[#555] sticky top-0 z-5 px-4 hidden lg:flex sm:h-[30px]">
+    <div className="justify-between items-center h-[50px] w-full bg-[#1a1a1a] text-white sticky top-0 z-10 px-4 shadow-md border-b border-[#2e2e2e] hidden lg:flex mb-4">
+      {/* Sidebar Toggle Button */}
       <button
         onClick={setSidebarOpen}
-        className="bg-transparent border-none text-[#555] cursor-pointer text-[1.2rem] h-full"
+        className="flex items-center justify-center bg-transparent border-none text-white cursor-pointer text-[1.5rem] h-full p-2 hover:text-green-400 focus:outline-none"
+        aria-label="Toggle Sidebar"
       >
-        <svg
-          className="flex items-center h-full"
-          viewBox="0 0 24 24"
-          fill="white"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g clip-path="url(#clip0_429_11066)">
-            <path
-              d="M3 6.00092H21M3 12.0009H21M3 18.0009H21"
-              stroke="#ffffff"
-              stroke-width="2.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </g>
-          <defs>
-            <clipPath id="clip0_429_11066">
-              <rect
-                width="24"
-                height="24"
-                fill="white"
-                transform="translate(0 0.000915527)"
-              />
-            </clipPath>
-          </defs>
-        </svg>
+        <GiHamburgerMenu />
       </button>
-      <h1>Chess</h1>
+
+      {/* Title */}
+      <h1
+        className="text-lg font-bold tracking-wide text-white hover:cursor-pointer"
+        onClick={() => {
+          window.location.href = "/";
+        }}
+      >
+        Chess
+      </h1>
+      <div className="flex items-center gap-4">
+        {/* Example of a Profile Icon or Notification Bell */}
+        {/* This space can be used to add icons or elements in the future */}
+      </div>
     </div>
   );
 };
