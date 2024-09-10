@@ -118,7 +118,7 @@ export function Game() {
                 src={defaultUserImage}
                 alt={defaultUserImage}
               />
-              <span className="ml-[0.5rem] text-base">Username</span>
+              <span className="ml-[0.5rem] text-base">Oponent</span>
             </div>
             {side === "white"
               ? gameTimer(player2timer)
@@ -160,7 +160,9 @@ export function Game() {
                 src={defaultUserImage}
                 alt={defaultUserImage}
               />
-              <span className="ml-[0.5rem] text-base">Username</span>
+              <span className="ml-[0.5rem] text-base">
+                {user.username !== "" ? user.username : "Guest"}
+              </span>
             </div>
             {side === "white"
               ? gameTimer(player1timer)
