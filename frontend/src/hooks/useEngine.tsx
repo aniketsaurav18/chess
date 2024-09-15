@@ -49,6 +49,26 @@ const useEngine = () => {
     if (game.turn() === side[0]) {
       return;
     }
+    const initiateEngineMove = async () => {
+      console.log("initiating engine move");
+      const move = await engineWrapper?.search(game.fen());
+      console.log("move", move);
+
+      let from = move?.slice(0, 2) as Square;
+      let to = move?.slice(2, 4) as Square;
+      console.log("from", from, "to", to);
+      if (move) {
+        const move = game.move({
+          from: from,
+          to: to,
+          promotion: "q",
+        });
+        console.log("chess move", move);
+        setBoardState(game.fen());
+        setGameHistory(game.history({ verbose: true }));
+      }
+    };
+    initiateEngineMove();
   }, [boardState]);
   const cacheStockfishJs = async () => {
     const cache = await caches.open(CACHE_NAME);
@@ -123,9 +143,10 @@ const useEngine = () => {
     }
   };
 
-  const sendCommand = (command: string) => {
+  const sendCommand = async (command: string) => {
     if (engineWrapper) {
       engineWrapper.send(command);
+      await engineWrapper.receive();
     } else {
       console.error("Engine is not initialized.");
     }
