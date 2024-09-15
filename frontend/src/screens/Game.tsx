@@ -17,7 +17,7 @@ import GameModal from "../components/GameOverModal";
 //   player2: string;
 // }
 
-export function Game() {
+export default function Game() {
   const socket = useSocket();
   const user = useUser();
   const {
