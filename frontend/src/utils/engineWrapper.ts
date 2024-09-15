@@ -59,17 +59,14 @@ class EngineWrapper {
 
   async search(
     initialFen: string,
-    moves: string,
-    wtime: number,
-    btime: number,
-    winc: number,
-    binc: number
+    // moves?: string,
+    depth: number = 20
   ): Promise<string> {
-    this.send(`position ${initialFen} moves ${moves}`);
+    this.send(`position fen ${initialFen}`);
     this.send("isready");
     await this.receiveUntil((line) => line === "readyok");
 
-    this.send(`go wtime ${wtime} btime ${btime} winc ${winc} binc ${binc}`);
+    this.send(`go depth ${depth}`);
     const lines = await this.receiveUntil((line) =>
       line.startsWith("bestmove")
     );
