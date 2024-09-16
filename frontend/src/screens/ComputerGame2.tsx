@@ -22,7 +22,7 @@ const ComputerPlay2 = () => {
     // gameHistory,
     side,
     boardState,
-    // initializeWorker,
+    initializeWorker,
     // sendCommand,
     makeMove,
   } = useEngine();
@@ -109,7 +109,7 @@ const ComputerPlay2 = () => {
             </div>
           </div>
         </div>
-        <EngineInfo />
+        <EngineInfo initializeWorker={initializeWorker} />
         {/* <GameInfo
           side={side}
           socket={socket}

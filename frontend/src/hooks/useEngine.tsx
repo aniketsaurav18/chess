@@ -7,12 +7,16 @@ import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 const CACHE_NAME = "chess-engine-cache";
 const STOCKFISH_JS_URL =
   "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.js";
+const STOCKFISH_WASM_URL =
+  "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.wasm";
 const CACHED_JS_URL = "/stockfish-16.1-lite.js";
+const CACHED_WASM_URL = "/stockfish-16.1-lite.wasm";
 
 const useEngine = () => {
   //   const [engine, setEngine] = useState<Engine | null>(null);
   const [queue, _setQueue] = useState<Queue<string>>(new Queue());
   const [progress, setProgress] = useState(0);
+  const [wasmProgress, setWasmProgress] = useState(0);
   const [worker, setWorker] = useState<Worker | null>(null);
   const [engineWrapper, setEngineWrapper] = useState<EngineWrapper | null>(
     null
@@ -92,6 +96,7 @@ const useEngine = () => {
       const { done, value } = await reader.read();
       if (done) break;
       receivedLength += value.length;
+      console.log(`Received ${receivedLength} of ${totalSize} bytes`);
       setProgress((receivedLength / totalSize) * 100);
       chunks.push(value);
     }
@@ -103,10 +108,38 @@ const useEngine = () => {
         "Content-Type": "application/javascript",
         "Cross-Origin-Embedder-Policy": "require-corp",
         "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": contentLength,
       },
     });
 
     await cache.put(CACHED_JS_URL, newResponse);
+    const response2 = await fetch(STOCKFISH_WASM_URL);
+    const contentLength2 = response2.headers.get("content-length");
+    if (!response2.body || !contentLength2) {
+      throw new Error("Unable to fetch Stockfish WASM or track its size.");
+    }
+    const reader2 = response2.body.getReader();
+    const totalSize2 = parseInt(contentLength2, 10);
+    let receivedLength2 = 0;
+    const chunks2: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader2.read();
+      if (done) break;
+      receivedLength2 += value.length;
+      console.log(`Received ${receivedLength2} of ${totalSize2} bytes`);
+      setWasmProgress((receivedLength2 / totalSize2) * 100);
+      chunks2.push(value);
+    }
+    const blob2 = new Blob(chunks2);
+    const newResponse2 = new Response(blob2, {
+      headers: {
+        "Content-Type": "application/wasm",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Content-Length": contentLength2,
+      },
+    });
+    await cache.put(CACHED_WASM_URL, newResponse2);
   };
 
   const initializeWorker = async () => {
@@ -156,6 +189,7 @@ const useEngine = () => {
     worker,
     queue,
     progress,
+    wasmProgress,
     boardState,
     gameHistory,
     gameStatus,
