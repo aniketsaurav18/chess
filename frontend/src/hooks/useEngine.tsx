@@ -20,10 +20,10 @@ const useEngine = () => {
   const [game, _setGame] = useState(new Chess());
   const [boardState, setBoardState] = useState(game.fen());
   const [gameHistory, setGameHistory] = useState<any>([]);
-  const [gameStatus, setGameStatus] = useState<
+  const [gameStatus, _setGameStatus] = useState<
     "STARTED" | "OVER" | "WAITING" | "IDEAL"
   >("STARTED");
-  const [side, setSide] = useState<BoardOrientation>("white");
+  const [side, _setSide] = useState<BoardOrientation>("white");
 
   const makeMove = (sourceSquare: Square, targetSquare: Square) => {
     if (
@@ -109,7 +109,7 @@ const useEngine = () => {
     await cache.put(CACHED_JS_URL, newResponse);
   };
 
-  const initializeWorker = async (engine: string) => {
+  const initializeWorker = async () => {
     if (typeof Worker !== "undefined") {
       try {
         await cacheStockfishJs();
@@ -146,7 +146,7 @@ const useEngine = () => {
   const sendCommand = async (command: string) => {
     if (engineWrapper) {
       engineWrapper.send(command);
-      await engineWrapper.receive();
+      await engineWrapper.receiveUntil((line) => line == "");
     } else {
       console.error("Engine is not initialized.");
     }
