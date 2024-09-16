@@ -11,7 +11,7 @@ class EngineWrapper {
     this.engine = engine;
     this.queue = new Queue<string>();
     this.engine.addEventListener("message", (event: any) => {
-      //   console.log(event.data);
+        console.log("Event data", event.data);
       this.queue.put(event.data);
     });
     this.log = log;
