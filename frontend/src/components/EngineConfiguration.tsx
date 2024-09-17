@@ -4,6 +4,40 @@ import { Slider } from "@nextui-org/slider";
 import { useState } from "react";
 import { EngineDetails } from "../utils/config";
 import { Button } from "@nextui-org/button";
+import { Progress } from "@nextui-org/progress";
+const PlayAsButton = () => {
+  const [selected, setSelected] = useState("White");
+
+  const handleSelect = (color: string) => {
+    setSelected(color);
+  };
+
+  return (
+    <div className="flex flex-row gap-4 items-center justify-center">
+      Play as:
+      <button
+        onClick={() => handleSelect("White")}
+        className={`m-2 text-base font-normal px-2 py-1 rounded ${
+          selected === "White"
+            ? "bg-[#2ea44f] border-2 border-[#22863a] text-white"
+            : "bg-[#383636] hover:bg-[#2ea44f] hover:text-white"
+        }`}
+      >
+        White
+      </button>
+      <button
+        onClick={() => handleSelect("Black")}
+        className={`m-2 text-base font-normal px-2 py-1 rounded ${
+          selected === "Black"
+            ? "bg-[#2ea44f] border-2 border-[#22863a] text-white"
+            : "bg-[#383636] hover:bg-[#2ea44f] hover:text-white"
+        }`}
+      >
+        Black
+      </button>
+    </div>
+  );
+};
 
 const EngineConfiguration = ({
   selectedEngine,
@@ -32,6 +66,12 @@ const EngineConfiguration = ({
           <SelectItem key={detail.key}>{detail.label}</SelectItem>
         ))}
       </Select>
+      <Progress
+        size="sm"
+        label="Downloading Engine"
+        value={55}
+        className="w-full max-w-[20rem]"
+      />
       <Slider
         size="md"
         step={1}
@@ -50,6 +90,7 @@ const EngineConfiguration = ({
           thumb: "bg-zinc-400 z-10",
         }}
       />
+      <PlayAsButton />
       <Button
         size="md"
         className="max-w-[20rem] w-full bg-[#2ea44f] hover:bg-[#2c974b] text-lg font-medium"
