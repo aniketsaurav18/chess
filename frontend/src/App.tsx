@@ -3,6 +3,7 @@ import "./App.css";
 import { LoginPage } from "./screens/UserLogin";
 import { SignupPage } from "./screens/UserSignup";
 import LandingPage from "./screens/Landing";
+import EvalBarPage from "./screens/Evalbartest";
 import { Suspense, lazy } from "react";
 
 // Lazy loading the Game and ComputerPlay2 components
@@ -32,6 +33,7 @@ function App() {
         />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/evalbar" element={<EvalBarPage />} />
       </Routes>
     </BrowserRouter>
   );
