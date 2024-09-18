@@ -8,9 +8,12 @@ export const GameTimeLimit = [
 ];
 
 export const EngineDetails = [
-  {key: "stockfish-16.1", label: "Stockfish 16.1 Multi-threaded"},
-  {key: "stockfish-16.1-single", label: "Stockfish 16.1 Single-threaded"},
-  {key: "stockfish-16.1-lite", label: "Stockfish 16.1 Multi-threaded"},
-  {key: "stockfish-16.1-lite-single", label: "Stockfish 16.1 Lite Single-threaded"},
-  {key: "stockfish-16.1-asm", label: "Stockfish JS (Light Weight)"},
-]
+  { key: "stockfish-16.1", label: "Stockfish 16.1 Multi-threaded" },
+  { key: "stockfish-16.1-single", label: "Stockfish 16.1 Single-threaded" },
+  { key: "stockfish-16.1-lite", label: "Stockfish 16.1 Lite Multi-threaded" },
+  {
+    key: "stockfish-16.1-lite-single",
+    label: "Stockfish 16.1 Lite Single-threaded",
+  },
+  { key: "stockfish-16.1-asm", label: "Stockfish JS (Light Weight)" },
+];

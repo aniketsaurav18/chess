@@ -73,7 +73,7 @@ const EngineConfiguration = ({
         className="w-full max-w-[20rem]"
       />
       <Slider
-        size="md"
+        size="sm"
         step={1}
         color="foreground"
         label="Depth"
