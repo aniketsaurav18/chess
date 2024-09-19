@@ -8,12 +8,53 @@ export const GameTimeLimit = [
 ];
 
 export const EngineDetails = [
-  { key: "stockfish-16.1", label: "Stockfish 16.1 Multi-threaded" },
-  { key: "stockfish-16.1-single", label: "Stockfish 16.1 Single-threaded" },
-  { key: "stockfish-16.1-lite", label: "Stockfish 16.1 Lite Multi-threaded" },
+  {
+    key: "stockfish-16.1",
+    label: "Stockfish 16.1 Multi-threaded",
+    public_path: "/engine/stockfish-16.1.js",
+    cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1.js",
+    wasm_cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1.wasm",
+    multiThreaded: true,
+  },
+  {
+    key: "stockfish-16.1-single",
+    label: "Stockfish 16.1 Single-threaded",
+    public_path: "/engine/stockfish-16.1-single.js",
+    cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-single.js",
+    wasm_cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-single.wasm",
+    multiThreaded: false,
+  },
+  {
+    key: "stockfish-16.1-lite",
+    label: "Stockfish 16.1 Lite Multi-threaded",
+    public_path: "/engine/stockfish-16.1-lite.js",
+    cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.js",
+    wasm_cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.wasm",
+    multiThreaded: true,
+  },
   {
     key: "stockfish-16.1-lite-single",
     label: "Stockfish 16.1 Lite Single-threaded",
+    public_path: "/engine/stockfish-16.1-lite-single.js",
+    cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite-single.js",
+    wasm_cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite-single.wasm",
+    multiThreaded: false,
   },
-  { key: "stockfish-16.1-asm", label: "Stockfish JS (Light Weight)" },
+  {
+    key: "stockfish-16.1-asm",
+    label: "Stockfish JS (Light Weight)",
+    public_path: "/engine/stockfish-16.1-asm.js",
+    cdn_path:
+      "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-asm.js",
+    wasm_cdn_path: "", // No WASM for this engine
+    multiThreaded: false,
+  },
 ];
