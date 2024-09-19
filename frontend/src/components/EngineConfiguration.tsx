@@ -1,7 +1,7 @@
 import { Select, SelectItem } from "@nextui-org/select";
 import { Tab, Tabs } from "@nextui-org/tabs";
 import { Slider } from "@nextui-org/slider";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { EngineDetails } from "../utils/config";
 import { Button } from "@nextui-org/button";
 import { Progress } from "@nextui-org/progress";
@@ -44,8 +44,18 @@ const EngineConfiguration = ({
   setSelectedEngine,
   initializeWorker,
 }: any) => {
+  const [isMultithreaded, setIsMultithreaded] = useState(false);
+
+  useEffect(() => {
+    const engine = EngineDetails.find(
+      (engine) => engine.key === selectedEngine
+    );
+    if (engine) {
+      setIsMultithreaded(engine.multiThreaded);
+    }
+  }, [selectedEngine]);
   return (
-    <div className="flex flex-col justify-center items-center gap-4">
+    <div className="flex flex-col justify-center items-center gap-2">
       <Select
         label="Select Engine"
         className="max-w-[20rem] w-full m-4"
@@ -77,7 +87,6 @@ const EngineConfiguration = ({
         step={1}
         color="foreground"
         label="Depth"
-        showSteps={true}
         showTooltip={true}
         maxValue={30}
         minValue={12}
@@ -90,6 +99,25 @@ const EngineConfiguration = ({
           thumb: "bg-zinc-400 z-10",
         }}
       />
+      {isMultithreaded && (
+        <Slider
+          size="sm"
+          step={1}
+          color="foreground"
+          label="Threads"
+          showTooltip={true}
+          maxValue={8}
+          minValue={1}
+          defaultValue={4}
+          className="w-2/3"
+          classNames={{
+            // mark:"bg-red-500",
+            track: "bg-zinc-400",
+            // step: "bg-blue-500"
+            thumb: "bg-zinc-400 z-10",
+          }}
+        />
+      )}
       <PlayAsButton />
       <Button
         size="md"
