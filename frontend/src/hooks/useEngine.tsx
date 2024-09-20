@@ -3,14 +3,8 @@ import { useEffect, useState } from "react";
 import EngineWrapper from "../utils/engineWrapper";
 import { Chess, Square } from "chess.js";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
+import { EngineDetails, CACHE_NAME } from "../utils/config";
 
-const CACHE_NAME = "chess-engine-cache";
-const STOCKFISH_JS_URL =
-  "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.js";
-const STOCKFISH_WASM_URL =
-  "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.wasm";
-const CACHED_JS_URL = "/stockfish-16.1-lite.js";
-const CACHED_WASM_URL = "/stockfish-16.1-lite.wasm";
 
 const useEngine = () => {
   //   const [engine, setEngine] = useState<Engine | null>(null);
@@ -33,7 +27,8 @@ const useEngine = () => {
     if (
       game.get(sourceSquare)?.color !== game.turn() ||
       game.turn() !== side[0] ||
-      gameStatus !== "STARTED"
+      gameStatus !== "STARTED" ||
+      worker == null
     )
       return false;
     const move = game.move({
@@ -74,12 +69,12 @@ const useEngine = () => {
     };
     initiateEngineMove();
   }, [boardState]);
-  const cacheStockfishJs = async () => {
+  const cacheStockfishJs = async (engine: typeof EngineDetails[0]) => {
     const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(CACHED_JS_URL);
+    const cachedResponse = await cache.match(engine.public_path);
     if (cachedResponse) return;
 
-    const response = await fetch(STOCKFISH_JS_URL);
+    const response = await fetch(engine.cdn_path);
 
     const contentLength = response.headers.get("content-length");
 
@@ -111,9 +106,13 @@ const useEngine = () => {
         "Content-Length": contentLength,
       },
     });
+    await cache.put(engine.public_path, newResponse);
 
-    await cache.put(CACHED_JS_URL, newResponse);
-    const response2 = await fetch(STOCKFISH_WASM_URL);
+    // fetching wasm files.
+    if(engine.wasm_cdn_path === ""){
+      return;
+    }
+    const response2 = await fetch(engine.wasm_cdn_path);
     const contentLength2 = response2.headers.get("content-length");
     if (!response2.body || !contentLength2) {
       throw new Error("Unable to fetch Stockfish WASM or track its size.");
@@ -139,20 +138,24 @@ const useEngine = () => {
         "Content-Length": contentLength2,
       },
     });
-    await cache.put(CACHED_WASM_URL, newResponse2);
+    await cache.put(engine.public_path, newResponse2);
   };
 
-  const initializeWorker = async () => {
+  const initializeWorker = async (key: string) => {
+    const SelectedEngineDetail = EngineDetails.find((i) => i.key === key);
+    if(!SelectedEngineDetail){
+      throw new Error("Engine not found.")
+    }
     if (typeof Worker !== "undefined") {
       try {
-        await cacheStockfishJs();
+        await cacheStockfishJs(SelectedEngineDetail);
 
         const cache = await caches.open(CACHE_NAME);
-        const cachedResponse = await cache.match(CACHED_JS_URL);
+        const cachedResponse = await cache.match(SelectedEngineDetail.public_path);
 
         if (cachedResponse) {
           const stockfishWorker = new Worker(
-            new URL(CACHED_JS_URL, import.meta.url)
+            new URL(SelectedEngineDetail.public_path, import.meta.url)
           );
           setWorker(stockfishWorker);
           const engineWrapper = new EngineWrapper(stockfishWorker);
