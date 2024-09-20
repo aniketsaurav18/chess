@@ -7,6 +7,8 @@ export const GameTimeLimit = [
   { key: "15", label: "15 Minutes" },
 ];
 
+export const CACHE_NAME = "chess-engine-cache";
+
 export const EngineDetails = [
   {
     key: "stockfish-16.1",
