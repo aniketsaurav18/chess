@@ -7,7 +7,7 @@ import useUser from "../hooks/useUser";
 // import GameInfo from "../components/GameInfo";
 import Sidebar from "../components/Sidebar";
 import { viewportWidthBreakpoint } from "../utils/config";
-import EngineInfo from "../components/EngineConfiguration";
+import EngineInfo from "../components/EngineInfo";
 // import GameModal from "../components/GameOverModal";
 
 const ComputerPlay2 = () => {
@@ -20,6 +20,7 @@ const ComputerPlay2 = () => {
     // progress,
     // gameStatus,
     // gameHistory,
+    downloadProgress,
     side,
     boardState,
     initializeWorker,

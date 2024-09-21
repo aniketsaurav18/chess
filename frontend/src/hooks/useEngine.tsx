@@ -5,16 +5,27 @@ import { Chess, Square } from "chess.js";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { EngineDetails, CACHE_NAME } from "../utils/config";
 
+const use_cdn_recource = import.meta.env.VITE_USE_CDN_RESOURCE === "true";
 
 const useEngine = () => {
   //   const [engine, setEngine] = useState<Engine | null>(null);
   const [queue, _setQueue] = useState<Queue<string>>(new Queue());
-  const [progress, setProgress] = useState(0);
-  const [wasmProgress, setWasmProgress] = useState(0);
+  const [downloadProgress, setDownloadProgress] = useState({
+    currentlyDownloading: "",
+    progress: 0,
+    size: 0,
+  });
   const [worker, setWorker] = useState<Worker | null>(null);
   const [engineWrapper, setEngineWrapper] = useState<EngineWrapper | null>(
     null
   );
+  const [engineConfiguration, setEngineConfiguration] = useState<any>({
+    depth: 20,
+    time: 5000, // engine will search for 5 seconds by default. time in ms
+    threads: 1, // only applicable in multithreaded engine.
+    multipv: 1, // number of lines to return
+    elo: 0, // engine strength, 0 means no limit
+  });
   const [game, _setGame] = useState(new Chess());
   const [boardState, setBoardState] = useState(game.fen());
   const [gameHistory, setGameHistory] = useState<any>([]);
@@ -69,110 +80,133 @@ const useEngine = () => {
     };
     initiateEngineMove();
   }, [boardState]);
-  const cacheStockfishJs = async (engine: typeof EngineDetails[0]) => {
+
+  const cacheStockfishJs = async (engine: (typeof EngineDetails)[0]) => {
     const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(engine.public_path);
-    if (cachedResponse) return;
+    const cachedJSResponse = await cache.match(engine.public_js_path);
+    const cachedWasmResponse = await cache.match(engine.public_wasm_path);
+    if (cachedJSResponse && cachedWasmResponse) return;
 
-    const response = await fetch(engine.cdn_path);
+    // Cache JS
+    if (!cachedJSResponse) {
+      const response = await fetch(
+        use_cdn_recource ? engine.cdn_js_path : engine.public_js_path
+      );
 
-    const contentLength = response.headers.get("content-length");
+      const contentLength = response.headers.get("content-length");
 
-    if (!response.body || !contentLength) {
-      throw new Error("Unable to fetch Stockfish JS or track its size.");
+      if (!response.body) {
+        throw new Error("Unable to fetch Stockfish JS");
+      }
+      if (!contentLength) {
+        throw new Error("Unable to track Stockfish JS size.");
+      }
+
+      const reader = response.body.getReader();
+      const totalSize = parseInt(contentLength, 10);
+      let receivedLength = 0;
+      const chunks: Uint8Array[] = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        receivedLength += value.length;
+        console.log(`Received ${receivedLength} of ${totalSize} bytes`);
+        setDownloadProgress({
+          currentlyDownloading: engine.key,
+          progress: (receivedLength / totalSize) * 100,
+          size: totalSize,
+        });
+        chunks.push(value);
+      }
+
+      const blob = new Blob(chunks);
+
+      const newResponse = new Response(blob, {
+        headers: {
+          "Content-Type": "application/javascript",
+          "Cross-Origin-Embedder-Policy": "require-corp",
+          "Cross-Origin-Opener-Policy": "same-origin",
+          "Content-Length": contentLength,
+        },
+      });
+      await cache.put(engine.public_js_path, newResponse); //should always be public_js_path
     }
 
-    const reader = response.body.getReader();
-    const totalSize = parseInt(contentLength, 10);
-    let receivedLength = 0;
-    const chunks: Uint8Array[] = [];
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      receivedLength += value.length;
-      console.log(`Received ${receivedLength} of ${totalSize} bytes`);
-      setProgress((receivedLength / totalSize) * 100);
-      chunks.push(value);
+    // Cache WASM
+    if (!cachedWasmResponse) {
+      const response2 = await fetch(
+        use_cdn_recource ? engine.cdn_wasm_path : engine.public_wasm_path
+      );
+      const contentLength2 = response2.headers.get("content-length");
+      if (!response2.body) {
+        throw new Error("Unable to fetch Stockfish WASM or track its size.");
+      }
+      if (!contentLength2) {
+        throw new Error("Unable to track Stockfish WASM size.");
+      }
+      const reader2 = response2.body.getReader();
+      const totalSize2 = parseInt(contentLength2, 10);
+      let receivedLength2 = 0;
+      const chunks2: Uint8Array[] = [];
+      while (true) {
+        const { done, value } = await reader2.read();
+        if (done) break;
+        receivedLength2 += value.length;
+        console.log(`Received ${receivedLength2} of ${totalSize2} bytes`);
+        setDownloadProgress({
+          currentlyDownloading: engine.key,
+          progress: (receivedLength2 / totalSize2) * 100,
+          size: totalSize2,
+        });
+        chunks2.push(value);
+      }
+      const blob2 = new Blob(chunks2);
+      const newResponse2 = new Response(blob2, {
+        headers: {
+          "Content-Type": "application/wasm",
+          "Cross-Origin-Embedder-Policy": "require-corp",
+          "Cross-Origin-Opener-Policy": "same-origin",
+          "Content-Length": contentLength2,
+        },
+      });
+      await cache.put(engine.public_wasm_path, newResponse2);
     }
-
-    const blob = new Blob(chunks);
-
-    const newResponse = new Response(blob, {
-      headers: {
-        "Content-Type": "application/javascript",
-        "Cross-Origin-Embedder-Policy": "require-corp",
-        "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": contentLength,
-      },
-    });
-    await cache.put(engine.public_path, newResponse);
-
-    // fetching wasm files.
-    if(engine.wasm_cdn_path === ""){
-      return;
-    }
-    const response2 = await fetch(engine.wasm_cdn_path);
-    const contentLength2 = response2.headers.get("content-length");
-    if (!response2.body || !contentLength2) {
-      throw new Error("Unable to fetch Stockfish WASM or track its size.");
-    }
-    const reader2 = response2.body.getReader();
-    const totalSize2 = parseInt(contentLength2, 10);
-    let receivedLength2 = 0;
-    const chunks2: Uint8Array[] = [];
-    while (true) {
-      const { done, value } = await reader2.read();
-      if (done) break;
-      receivedLength2 += value.length;
-      console.log(`Received ${receivedLength2} of ${totalSize2} bytes`);
-      setWasmProgress((receivedLength2 / totalSize2) * 100);
-      chunks2.push(value);
-    }
-    const blob2 = new Blob(chunks2);
-    const newResponse2 = new Response(blob2, {
-      headers: {
-        "Content-Type": "application/wasm",
-        "Cross-Origin-Embedder-Policy": "require-corp",
-        "Cross-Origin-Opener-Policy": "same-origin",
-        "Content-Length": contentLength2,
-      },
-    });
-    await cache.put(engine.public_path, newResponse2);
   };
 
   const initializeWorker = async (key: string) => {
     const SelectedEngineDetail = EngineDetails.find((i) => i.key === key);
-    if(!SelectedEngineDetail){
-      throw new Error("Engine not found.")
+    if (!SelectedEngineDetail) {
+      throw new Error("Engine not found.");
     }
     if (typeof Worker !== "undefined") {
       try {
-        await cacheStockfishJs(SelectedEngineDetail);
-
         const cache = await caches.open(CACHE_NAME);
-        const cachedResponse = await cache.match(SelectedEngineDetail.public_path);
-
-        if (cachedResponse) {
-          const stockfishWorker = new Worker(
-            new URL(SelectedEngineDetail.public_path, import.meta.url)
-          );
-          setWorker(stockfishWorker);
-          const engineWrapper = new EngineWrapper(stockfishWorker);
-          setEngineWrapper(engineWrapper);
-          console.log("initilise game", await engineWrapper.initializeGame());
-          stockfishWorker.onerror = (event) => {
-            console.error("Worker Error:", event.error);
-          };
-
-          stockfishWorker.postMessage("uci");
-
-          return () => {
-            if (worker) {
-              worker.terminate();
-            }
-          };
+        const cachedResponse = await cache.match(
+          SelectedEngineDetail.public_js_path
+        );
+        if (!cachedResponse) {
+          await cacheStockfishJs(SelectedEngineDetail);
         }
+
+        const stockfishWorker = new Worker(
+          new URL(SelectedEngineDetail.public_js_path, import.meta.url)
+        );
+        setWorker(stockfishWorker);
+        const engineWrapper = new EngineWrapper(stockfishWorker);
+        setEngineWrapper(engineWrapper);
+        console.log("initilise game", await engineWrapper.initializeGame());
+        stockfishWorker.onerror = (event) => {
+          console.error("Worker Error:", event.error);
+        };
+
+        stockfishWorker.postMessage("uci");
+
+        return () => {
+          if (worker) {
+            worker.terminate();
+          }
+        };
       } catch (error) {
         console.error("Error initializing worker", error);
       }
@@ -191,8 +225,7 @@ const useEngine = () => {
   return {
     worker,
     queue,
-    progress,
-    wasmProgress,
+    downloadProgress,
     boardState,
     gameHistory,
     gameStatus,
