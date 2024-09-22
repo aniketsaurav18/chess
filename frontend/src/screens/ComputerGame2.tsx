@@ -26,6 +26,7 @@ const ComputerPlay2 = () => {
     initializeWorker,
     // sendCommand,
     makeMove,
+    setEngineConfiguration,
   } = useEngine();
 
   // const handleSend = () => {
@@ -110,7 +111,11 @@ const ComputerPlay2 = () => {
             </div>
           </div>
         </div>
-        <EngineInfo initializeWorker={initializeWorker} />
+        <EngineInfo
+          initializeWorker={initializeWorker}
+          setEngineConfiguration={setEngineConfiguration}
+          downloadProgress={downloadProgress}
+        />
         {/* <GameInfo
           side={side}
           socket={socket}

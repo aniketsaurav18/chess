@@ -233,6 +233,7 @@ const useEngine = () => {
     initializeWorker,
     sendCommand,
     makeMove,
+    setEngineConfiguration,
   };
 };
 
