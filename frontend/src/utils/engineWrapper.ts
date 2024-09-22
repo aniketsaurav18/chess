@@ -1,4 +1,5 @@
 import Queue from "./messageQueue";
+
 class EngineWrapper {
   private engine: any;
   private queue: Queue<string>;
@@ -11,7 +12,7 @@ class EngineWrapper {
     this.engine = engine;
     this.queue = new Queue<string>();
     this.engine.addEventListener("message", (event: any) => {
-        console.log("Event data", event.data);
+      console.log("Event data", event.data);
       this.queue.put(event.data);
     });
     this.log = log;
@@ -57,21 +58,35 @@ class EngineWrapper {
     await this.receiveUntil((line) => line === "readyok");
   }
 
+  async getEval(fen?: string): Promise<string> {
+    if (fen) {
+      this.send(`position fen ${fen}`);
+      this.send("isready");
+      this.receiveUntil((line) => line === "readyok");
+    }
+    this.send("eval");
+    return "eval completed";
+  }
+
   async search(
     initialFen: string,
     // moves?: string,
-    depth: number = 20
+    depth: number = 20,
+    searchTime?: number
   ): Promise<string> {
     this.send(`position fen ${initialFen}`);
     this.send("isready");
     await this.receiveUntil((line) => line === "readyok");
 
-    this.send(`go depth ${depth}`);
+    this.send(
+      `go depth ${depth} ${searchTime ? `movetime ${searchTime}` : ""}`
+    );
     const lines = await this.receiveUntil((line) =>
       line.startsWith("bestmove")
     );
     const lastLine = lines[lines.length - 1];
     const bestmove = lastLine.split(" ")[1];
+    this.getEval();
     return bestmove;
   }
 }
