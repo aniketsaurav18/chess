@@ -1,9 +1,21 @@
 import Queue from "./messageQueue";
 
+// reference: https://disservin.github.io/stockfish-docs/stockfish-wiki/UCI-&-Commands.html
+const VALID_UCI_OPTIONS = [
+  "Threads",
+  "Hash",
+  "MultiPV",
+  "UCI_LimitStrength",
+  "UCI_Elo",
+  "Skill Level",
+];
+
 class EngineWrapper {
   private engine: any;
   private queue: Queue<string>;
   private log: (message?: any, ...optionalParams: any[]) => void;
+  public SearchTime: number | null = 5;
+  public Depth: number | null = 20;
 
   constructor(
     engine: any,
@@ -41,14 +53,25 @@ class EngineWrapper {
     return lines;
   }
 
-  async initialize(options: Record<string, string> = {}): Promise<void> {
+  async initialize(options: Record<string, any> = {}): Promise<boolean> {
     this.send("uci");
     await this.receiveUntil((line) => line === "uciok");
     for (const name in options) {
-      this.send(`setoption name ${name} value ${options[name]}`);
+      if (VALID_UCI_OPTIONS.includes(name)) {
+        // console.error(`Invalid UCI option: ${name}`);
+        this.send(`setoption name ${name} value ${options[name].toString()}`);
+        continue;
+      } else if (name === "Time") {
+        this.SearchTime = options[name];
+      } else if (name === "Depth") {
+        this.Depth = options[name];
+      } else {
+        console.error(`Invalid UCI option: ${name}`);
+      }
     }
     this.send("isready");
     await this.receiveUntil((line) => line === "readyok");
+    return true;
   }
 
   async initializeGame(): Promise<void> {
@@ -69,24 +92,25 @@ class EngineWrapper {
   }
 
   async search(
-    initialFen: string,
+    initialFen: string
     // moves?: string,
-    depth: number = 20,
-    searchTime?: number
+    // depth: number | null = this.Depth,
+    // searchTime?: number | null
   ): Promise<string> {
     this.send(`position fen ${initialFen}`);
     this.send("isready");
     await this.receiveUntil((line) => line === "readyok");
-
-    this.send(
-      `go depth ${depth} ${searchTime ? `movetime ${searchTime}` : ""}`
-    );
+    const searchCommand = `go ${this.Depth ? `depth ${this.Depth}` : ""} ${
+      this.SearchTime ? `movetime ${this.SearchTime}` : ""
+    }`;
+    console.log("Search Command", searchCommand);
+    this.send(searchCommand);
     const lines = await this.receiveUntil((line) =>
       line.startsWith("bestmove")
     );
     const lastLine = lines[lines.length - 1];
     const bestmove = lastLine.split(" ")[1];
-    this.getEval();
+    // this.getEval();
     return bestmove;
   }
 }

@@ -1,24 +1,15 @@
+import { useEffect, useRef, useState } from "react";
 import "../../public/cardinal.css";
+import { Move } from "../types";
 
-interface Move {
-  from: string;
-  to: string;
-  color: string;
-  piece: string;
-  san: string;
-  flags: string;
-  lan: string;
-  before: string;
-  after: string;
-  captured?: string;
-  time: number;
+interface MoveHistoryProps {
+  gameHistory: Move[];
 }
 
-interface MoveHistoryProp {
-  moveHistory: Move[][];
-}
+const MoveHistory = ({ gameHistory }: MoveHistoryProps) => {
+  const [moveHistory, setMoveHistory] = useState<Move[][]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
   const getChessPiece = (piece: string, color: string): string => {
     switch (piece + color) {
       case "bb":
@@ -50,15 +41,35 @@ const MoveHistory = ({ moveHistory }: MoveHistoryProp) => {
     }
   };
 
-  // const movehiss = [
-  //   [
-  //     { piece: "q", color: "b", san: "a4" },
-  //     { piece: "k", color: "w", san: "r5" },
-  //   ],
-  // ];
+  useEffect(() => {
+    if (gameHistory.length === 0) return;
+
+    const history: Move[][] = [[]];
+    for (let i = 0; i < gameHistory.length; i++) {
+      if (i % 2 === 0) {
+        if (history[history.length - 1].length === 2) {
+          history.push([gameHistory[i]]);
+        } else {
+          history[history.length - 1].push(gameHistory[i]);
+        }
+      } else {
+        history[history.length - 1].push(gameHistory[i]);
+      }
+    }
+    setMoveHistory(history);
+  }, [gameHistory]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [moveHistory]);
 
   return (
-    <div className="flex flex-col items-center justify-start w-full h-full flex-grow overflow-y-auto rounded-lg shadow-lg">
+    <div
+      ref={containerRef}
+      className="flex flex-col items-center justify-start w-full h-[90%] flex-grow overflow-y-scroll rounded-lg shadow-lg"
+    >
       {moveHistory.length > 0 ? (
         moveHistory.map((movePair, index) => (
           <div
