@@ -4,6 +4,7 @@ import EngineWrapper from "../utils/engineWrapper";
 import { Chess, Square } from "chess.js";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import { EngineDetails, CACHE_NAME } from "../utils/config";
+import { Move } from "../types";
 
 const use_cdn_recource = import.meta.env.VITE_USE_CDN_RESOURCE === "true";
 
@@ -19,6 +20,7 @@ const useEngine = () => {
   const [engineWrapper, setEngineWrapper] = useState<EngineWrapper | null>(
     null
   );
+  const [engineReady, setEngineReady] = useState(false);
   const [engineConfiguration, setEngineConfiguration] = useState<any>({
     depth: 20,
     time: 5000, // engine will search for 5 seconds by default. time in ms
@@ -28,11 +30,11 @@ const useEngine = () => {
   });
   const [game, _setGame] = useState(new Chess());
   const [boardState, setBoardState] = useState(game.fen());
-  const [gameHistory, setGameHistory] = useState<any>([]);
+  const [gameHistory, setGameHistory] = useState<Move[]>([]);
   const [gameStatus, _setGameStatus] = useState<
     "STARTED" | "OVER" | "WAITING" | "IDEAL"
   >("STARTED");
-  const [side, _setSide] = useState<BoardOrientation>("white");
+  const [side, setSide] = useState<BoardOrientation>("white");
 
   const makeMove = (sourceSquare: Square, targetSquare: Square) => {
     if (
@@ -51,9 +53,14 @@ const useEngine = () => {
       return false;
     }
     setBoardState(game.fen());
-    setGameHistory(game.history({ verbose: true }));
+    updateHistory(move);
     console.log("game history", game.history({ verbose: true }));
     return true;
+  };
+  const updateHistory = (move: any) => {
+    setGameHistory((history: any) => {
+      return [...history, move];
+    });
   };
   useEffect(() => {
     if (game.turn() === side[0]) {
@@ -75,7 +82,7 @@ const useEngine = () => {
         });
         console.log("chess move", move);
         setBoardState(game.fen());
-        setGameHistory(game.history({ verbose: true }));
+        updateHistory(move);
       }
     };
     initiateEngineMove();
@@ -174,7 +181,10 @@ const useEngine = () => {
     }
   };
 
-  const initializeWorker = async (key: string) => {
+  const initializeWorker = async (
+    key: string,
+    config: Record<string, string> = {}
+  ) => {
     const SelectedEngineDetail = EngineDetails.find((i) => i.key === key);
     if (!SelectedEngineDetail) {
       throw new Error("Engine not found.");
@@ -195,12 +205,23 @@ const useEngine = () => {
         setWorker(stockfishWorker);
         const engineWrapper = new EngineWrapper(stockfishWorker);
         setEngineWrapper(engineWrapper);
-        console.log("initilise game", await engineWrapper.initializeGame());
+        console.log("config", config);
+        const initialized = await engineWrapper.initialize({
+          Threads: `${SelectedEngineDetail.multiThreaded ? config.threads : 1}`,
+          MultiPV: config.multipv,
+          Time: config.time,
+          Depth: config.depth,
+        });
+        if (initialized) {
+          console.log("Engine Initialized");
+          setEngineReady(true);
+        }
+
         stockfishWorker.onerror = (event) => {
           console.error("Worker Error:", event.error);
         };
 
-        stockfishWorker.postMessage("uci");
+        // stockfishWorker.postMessage("uci");
 
         return () => {
           if (worker) {
@@ -230,6 +251,9 @@ const useEngine = () => {
     gameHistory,
     gameStatus,
     side,
+    setSide,
+    engineReady,
+    engineConfiguration,
     initializeWorker,
     sendCommand,
     makeMove,

@@ -19,10 +19,12 @@ const ComputerPlay2 = () => {
     // worker,
     // progress,
     // gameStatus,
-    // gameHistory,
+    gameHistory,
     downloadProgress,
     side,
     boardState,
+    engineReady,
+    setSide,
     initializeWorker,
     // sendCommand,
     makeMove,
@@ -115,6 +117,9 @@ const ComputerPlay2 = () => {
           initializeWorker={initializeWorker}
           setEngineConfiguration={setEngineConfiguration}
           downloadProgress={downloadProgress}
+          setSide={setSide}
+          gameHistory={gameHistory}
+          engineStatus={engineReady}
         />
         {/* <GameInfo
           side={side}

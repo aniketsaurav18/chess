@@ -5,12 +5,15 @@ import { useEffect, useState } from "react";
 import { EngineDetails } from "../utils/config";
 import { Button } from "@nextui-org/button";
 import { Progress } from "@nextui-org/progress";
+import MoveHistory from "./MoveHistory";
+// import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 
-const PlayAsButton = () => {
+const PlayAsButton = ({ setSide }: any) => {
   const [selected, setSelected] = useState("white");
 
   const handleSelect = (color: string) => {
     setSelected(color);
+    setSide(color);
   };
 
   return (
@@ -99,15 +102,18 @@ const EngineInfo = ({
   initializeWorker,
   downloadProgress,
   setEngineConfiguration,
+  setSide,
+  gameHistory,
+  engineStatus,
 }: any) => {
   const [selectedTab, setSelectedTab] = useState("engine");
   const [selectedEngine, setSelectedEngine] = useState("stockfish-16.1");
   const [isMultithreaded, setIsMultithreaded] = useState(false);
   const [threads, setThreads] = useState(1);
   const [depth, setDepth] = useState(20);
-  const [searchTime, setSearchTime] = useState(5); // value in seconds but should stored in ms
-  // const [multipv, setMultipv] = useState(1);
-  // const [elo, setElo] = useState(0);
+  const [searchTime, setSearchTime] = useState(5);
+  const [useDepth, setUseDepth] = useState(true);
+  const [useTime, setUseTime] = useState(false);
 
   useEffect(() => {
     const engine = EngineDetails.find(
@@ -118,18 +124,23 @@ const EngineInfo = ({
     }
   }, [selectedEngine]);
 
-  const handleApply = (prev: any) => {
+  const handleApply = () => {
     let t = searchTime * 1000;
     setEngineConfiguration({
-      ...prev,
+      elo: 0,
+      multipv: 1,
       threads: threads,
-      depth: depth,
-      time: t,
-      // multipv,
-      // elo,
+      depth: useDepth ? depth : null,
+      time: useTime ? t : null,
     });
-    initializeWorker(selectedEngine);
+    initializeWorker(selectedEngine, {
+      threads: threads,
+      depth: useDepth ? depth : null,
+      time: useTime ? t : null,
+      multipv: 1,
+    });
   };
+
   return (
     <div className="w-[35%] md:w-11/12 lg:w-11/12 md:min-h-[30rem] lg:min-h-[30rem] h-full flex flex-col bg-[#262522] m-0 p-0 rounded-[1.6%] pb-2">
       <Tabs
@@ -139,15 +150,12 @@ const EngineInfo = ({
         selectedKey={selectedTab}
         key="engine"
         title="Engine"
-        onSelectionChange={(key) => {
-          setSelectedTab(key.toString());
-        }}
+        onSelectionChange={(key) => setSelectedTab(key.toString())}
         classNames={{
           tabList: "bg-[#21201D]",
           tab: "h-10",
           panel: "h-full rounded-[1.6%] flex-grow",
           cursor: "w-full bg-[#262522]",
-          // base: "bg-red-400",
           tabContent: "text-8 text-white",
         }}
       >
@@ -167,30 +175,62 @@ const EngineInfo = ({
                 className="w-full max-w-[20rem]"
               />
             )}
-            <SliderComponent
-              label="Depth"
-              minVal={12}
-              maxVal={30}
-              defaultVal={20}
-              setvalue={setDepth}
-            />
-            <SliderComponent
-              label="Search Time(sec)"
-              minVal={1}
-              maxVal={30}
-              defaultVal={5}
-              setvalue={setSearchTime}
-            />
+            <div className="flex flex-row gap-2 items-center justify-between">
+              <p>Use: </p>
+              <input
+                id="useDepth"
+                type="checkbox"
+                className="accent-green-600"
+                checked={useDepth}
+                disabled={!useTime}
+                onChange={() => {
+                  if (!useTime) return; // Prevent unchecking if the other checkbox is unchecked
+                  setUseDepth(!useDepth);
+                }}
+              />
+              <label htmlFor="useDepth">Depth</label>
+
+              <input
+                id="useTime"
+                type="checkbox"
+                className="accent-green-600"
+                checked={useTime}
+                disabled={!useDepth}
+                onChange={() => {
+                  if (!useDepth) return; // Prevent unchecking if the other checkbox is unchecked
+                  setUseTime(!useTime);
+                }}
+              />
+              <label htmlFor="useTime">Search Time</label>
+            </div>
+            {useDepth && (
+              <SliderComponent
+                label="Depth"
+                minVal={12}
+                maxVal={30}
+                defaultVal={20}
+                setvalue={setDepth}
+              />
+            )}
+            {useTime && (
+              <SliderComponent
+                label="Search Time(sec)"
+                minVal={1}
+                maxVal={30}
+                defaultVal={5}
+                setvalue={setSearchTime}
+              />
+            )}
             {isMultithreaded && (
               <SliderComponent
                 label="Threads"
                 minVal={1}
-                maxVal={8} // TODO: max threads should be calculated based on the system
+                maxVal={8}
                 defaultVal={1}
                 setvalue={setThreads}
               />
             )}
-            <PlayAsButton />
+            <PlayAsButton setSide={setSide} />
             <Button
               size="md"
               className="max-w-[20rem] w-full bg-[#2ea44f] hover:bg-[#2c974b] text-lg font-medium"
@@ -198,9 +238,12 @@ const EngineInfo = ({
             >
               Apply
             </Button>
+            <div>{engineStatus ? "Engine Ready" : "Engine Not Ready"}</div>
           </div>
         </Tab>
-        <Tab key={"history"} title={"History"}></Tab>
+        <Tab key={"history"} title={"History"}>
+          <MoveHistory gameHistory={gameHistory} />
+        </Tab>
       </Tabs>
     </div>
   );

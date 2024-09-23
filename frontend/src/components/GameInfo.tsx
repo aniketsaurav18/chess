@@ -64,7 +64,6 @@ const GameInfo = memo(
     drawAcceptedfn,
     drawDeclinefn,
   }: GameInfoProps) => {
-    const [moveHistory, setMoveHistory] = useState<Move[][]>([]);
     const [selectedTimeLimit, setSelectedTimeLimit] = useState("10");
     const [selectedKey, setSelectedKey] = useState("play");
     console.log("waiting", waiting);
@@ -75,27 +74,6 @@ const GameInfo = memo(
         setSelectedKey("history");
       }
     }, [status]);
-
-    useEffect(() => {
-      if (gameHistory.length === 0) return;
-      console.log(gameHistory);
-      // console.log(gameHistory[0].after);
-      // console.log(gameHistory[0].before);
-
-      const history: Move[][] = [[]];
-      for (let i = 0; i < gameHistory.length; i++) {
-        if (i % 2 === 0) {
-          if (history[history.length - 1].length === 2) {
-            history.push([gameHistory[i]]);
-          } else {
-            history[history.length - 1].push(gameHistory[i]);
-          }
-        } else {
-          history[history.length - 1].push(gameHistory[i]);
-        }
-      }
-      setMoveHistory(history);
-    }, [gameHistory]);
 
     return (
       <div className="w-[35%] md:w-11/12 lg:w-11/12 md:min-h-[30rem] lg:min-h-[30rem] h-full flex flex-col bg-[#262522] m-0 p-0 rounded-[1.6%] pb-2">
@@ -178,7 +156,7 @@ const GameInfo = memo(
               id="game-history"
               className="flex flex-col justify-start flex-grow items-center w-full overflow-y-scroll min-h-[60%] m-0 p-0 scrollbar-hide overflow-auto"
             >
-              <MoveHistory moveHistory={moveHistory} />
+              <MoveHistory gameHistory={gameHistory} />
               {drawOffered ? (
                 <div className="h-[60px] w-full rounded-t-[5%] z-10 flex justify-center items-center flex-row gap-2 bg-[#606060] bottom-0 mt-auto">
                   <span>Oponent offered a Draw</span>
