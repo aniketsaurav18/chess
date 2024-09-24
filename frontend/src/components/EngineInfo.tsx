@@ -137,7 +137,7 @@ const EngineInfo = ({
       threads: threads,
       depth: useDepth ? depth : null,
       time: useTime ? t : null,
-      multipv: 1,
+      multipv: 3,
     });
   };
 

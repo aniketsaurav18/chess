@@ -1,32 +1,31 @@
 const CACHE_NAME = "chess-engine-cache";
+
 const ASSETS_TO_CACHE = [
-  "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.js",
-  "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.wasm",
+  "/engine/stockfish-16.1.js",
+  "/engine/stockfish-16.1.wasm",
+  "/engine/stockfish-16.1-lite.js",
+  "/engine/stockfish-16.1-lite.wasm",
+  "/engine/stockfish-16.1-lite-single.js",
+  "/engine/stockfish-16.1-lite-single.wasm",
+  "/engine/stockfish-16.1-asm.js",
+  "/engine/stockfish-16.1-single.js",
+  "/engine/stockfish-16.1-single.wasm",
 ];
 
 self.addEventListener("fetch", (event) => {
   const requestURL = new URL(event.request.url);
   
-  if (ASSETS_TO_CACHE.includes(requestURL.href)) {
-    event.respondWith(fetch(event.request));
-  } else {
-    event.respondWith((async () => {
-      const cachedResponse = await caches.match(event.request);
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      
-      const fetchPromise = fetch(event.request);
-      
-      fetchPromise.then((response) => {
-        if (response && response.status === 200 && response.type === "basic") {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => cache.put(event.request, responseToCache));
+  if (ASSETS_TO_CACHE.includes(requestURL.pathname)) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        } else {
+          return fetch(event.request); 
         }
-      });
-      
-      return fetchPromise;
-    })());
+      })
+    );
+  } else {
+    event.respondWith(fetch(event.request)); 
   }
 });
