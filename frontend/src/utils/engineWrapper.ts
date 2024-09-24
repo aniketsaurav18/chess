@@ -10,12 +10,26 @@ const VALID_UCI_OPTIONS = [
   "Skill Level",
 ];
 
+interface CurrentEval {
+  depth: number;
+  nodes: number;
+  multiPv: number;
+  millis: number;
+  evalType: string;
+  isMate: boolean;
+  povEv: number;
+  moves: string[];
+}
+
 class EngineWrapper {
   private engine: any;
   private queue: Queue<string>;
   private log: (message?: any, ...optionalParams: any[]) => void;
   public SearchTime: number | null = 5;
   public Depth: number | null = 20;
+  public expectedPV: number = 1;
+  public CurrentEval: CurrentEval | null = null;
+  public side: string = "black";
 
   constructor(
     engine: any,
@@ -113,6 +127,52 @@ class EngineWrapper {
     // this.getEval();
     return bestmove;
   }
+
+  // parseMessage(events: string): void {
+  //   const parts = events.trim().split(/\s+/g);
+  //   if (parts[0] === "info") {
+  //     let depth = 0,
+  //       nodes,
+  //       multiPv = 1,
+  //       millis,
+  //       evalType,
+  //       isMate = false,
+  //       povEv,
+  //       moves: string[] = [];
+  //     for (let i = 1; i < parts.length; i++) {
+  //       switch (parts[i]) {
+  //         case "depth":
+  //           depth = parseInt(parts[++i]);
+  //           break;
+  //         case "nodes":
+  //           nodes = parseInt(parts[++i]);
+  //           break;
+  //         case "multipv":
+  //           multiPv = parseInt(parts[++i]);
+  //           break;
+  //         case "time":
+  //           millis = parseInt(parts[++i]);
+  //           break;
+  //         case "score":
+  //           isMate = parts[++i] === "mate";
+  //           povEv = parseInt(parts[++i]);
+  //           if (parts[i + 1] === "lowerbound" || parts[i + 1] === "upperbound")
+  //             evalType = parts[++i];
+  //           break;
+  //         case "pv":
+  //           moves = parts.slice(++i);
+  //           i = parts.length;
+  //           break;
+  //       }
+  //     }
+  //     if (isMate && !povEv) return;
+  //     if (this.expectedPV < multiPv) this.expectedPV = multiPv;
+
+  //     if (!nodes || !millis || !isMate || !povEv) return;
+  //     const ev = (this.side === "black" ? -1 : 1) * povEv;
+
+  //   }
+  // }
 }
 
 export default EngineWrapper;
