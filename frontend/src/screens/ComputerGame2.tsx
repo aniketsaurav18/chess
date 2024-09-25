@@ -8,17 +8,19 @@ import useUser from "../hooks/useUser";
 import Sidebar from "../components/Sidebar";
 import { viewportWidthBreakpoint } from "../utils/config";
 import EngineInfo from "../components/EngineInfo";
+import GameModal from "../components/GameOverModal";
 // import GameModal from "../components/GameOverModal";
 
 const ComputerPlay2 = () => {
   const windowDimensions = useWindowDimensions();
   const user = useUser();
   const [boardWidth, setBoardWidth] = useState<number>(500);
+  const [modal, setModal] = useState(false);
   // const [command, setCommand] = useState("");
   const {
     // worker,
     // progress,
-    // gameStatus,
+    gameStatus,
     gameHistory,
     downloadProgress,
     side,
@@ -31,17 +33,11 @@ const ComputerPlay2 = () => {
     setEngineConfiguration,
   } = useEngine();
 
-  // const handleSend = () => {
-  //   if (worker) {
-  //     sendCommand(command);
-  //   } else {
-  //     console.error("Worker is not initialized.");
-  //   }
-  // };
-
-  // const handleLoadWorker = async () => {
-  //   await initializeWorker("stockfish");
-  // };
+  useEffect(() => {
+    if (gameStatus === "OVER") {
+      setModal(true);
+    }
+  }, [gameStatus]);
 
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
@@ -91,7 +87,13 @@ const ComputerPlay2 = () => {
             ref={chessboardDivRef}
           >
             <div className="relative">
-              {/* <GameModal isGameOverModal={isGameOver} message={gameResult} /> */}
+              <GameModal
+                isGameOverModal={modal}
+                message={"Game Over"}
+                handleClose={() => {
+                  setModal(false);
+                }}
+              />
               <Chessboard
                 id="PlayVsPlay"
                 boardWidth={boardWidth}

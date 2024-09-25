@@ -1,9 +1,13 @@
-import Queue from "../utils/messageQueue";
+import Queue from "../lib/messageQueue";
 import { useEffect, useState } from "react";
-import EngineWrapper from "../utils/engineWrapper";
+import EngineWrapper from "../lib/engineWrapper";
 import { Chess, Square } from "chess.js";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
-import { EngineDetails, CACHE_NAME } from "../utils/config";
+import {
+  EngineDetails,
+  CACHE_NAME,
+  DEFAULT_ENGINE_CONFIG,
+} from "../utils/config";
 import { Move } from "../types";
 
 const use_cdn_recource = import.meta.env.VITE_USE_CDN_RESOURCE === "true";
@@ -22,19 +26,70 @@ const useEngine = () => {
   );
   const [engineReady, setEngineReady] = useState(false);
   const [engineConfiguration, setEngineConfiguration] = useState<any>({
-    depth: 20,
-    time: 5000, // engine will search for 5 seconds by default. time in ms
-    threads: 1, // only applicable in multithreaded engine.
-    multipv: 1, // number of lines to return
-    elo: 0, // engine strength, 0 means no limit
+    ...DEFAULT_ENGINE_CONFIG,
   });
   const [game, _setGame] = useState(new Chess());
   const [boardState, setBoardState] = useState(game.fen());
   const [gameHistory, setGameHistory] = useState<Move[]>([]);
-  const [gameStatus, _setGameStatus] = useState<
+  const [gameStatus, setGameStatus] = useState<
     "STARTED" | "OVER" | "WAITING" | "IDEAL"
-  >("STARTED");
+  >("IDEAL");
   const [side, setSide] = useState<BoardOrientation>("white");
+
+  useEffect(() => {
+    if (!engineWrapper) return;
+    if (side === "white") {
+      engineWrapper.side = "white";
+    } else {
+      engineWrapper.side = "black";
+    }
+  }, [side]);
+
+  useEffect(() => {
+    if (
+      game.in_checkmate() ||
+      game.in_draw() ||
+      game.in_stalemate() ||
+      game.in_threefold_repetition() ||
+      game.insufficient_material()
+    ) {
+      setGameStatus("OVER");
+      return;
+    }
+    if (!engineReady) {
+      return;
+    }
+    if (
+      (side === "black" && game.turn() === "w") ||
+      (side === "white" && game.turn() === "b")
+    ) {
+      initiateEngineMove(game.fen());
+    }
+  }, [engineReady, side, boardState]);
+
+  const initiateEngineMove = async (fen: string) => {
+    console.log("initiating engine move");
+    if (engineWrapper === null) {
+      console.error("Engine not initialized");
+      return;
+    }
+    const move = await engineWrapper.search(fen);
+    console.log("move", move);
+
+    let from = move?.slice(0, 2) as Square;
+    let to = move?.slice(2, 4) as Square;
+    console.log("from", from, "to", to);
+    if (move) {
+      const move = game.move({
+        from: from,
+        to: to,
+        promotion: "q",
+      });
+      console.log("chess move", move);
+      setBoardState(game.fen());
+      updateHistory(move);
+    }
+  };
 
   const makeMove = (sourceSquare: Square, targetSquare: Square) => {
     if (
@@ -62,31 +117,6 @@ const useEngine = () => {
       return [...history, move];
     });
   };
-  useEffect(() => {
-    if (game.turn() === side[0]) {
-      return;
-    }
-    const initiateEngineMove = async () => {
-      console.log("initiating engine move");
-      const move = await engineWrapper?.search(game.fen());
-      console.log("move", move);
-
-      let from = move?.slice(0, 2) as Square;
-      let to = move?.slice(2, 4) as Square;
-      console.log("from", from, "to", to);
-      if (move) {
-        const move = game.move({
-          from: from,
-          to: to,
-          promotion: "q",
-        });
-        console.log("chess move", move);
-        setBoardState(game.fen());
-        updateHistory(move);
-      }
-    };
-    initiateEngineMove();
-  }, [boardState]);
 
   const cacheStockfishJs = async (engine: (typeof EngineDetails)[0]) => {
     const cache = await caches.open(CACHE_NAME);
@@ -179,6 +209,11 @@ const useEngine = () => {
       });
       await cache.put(engine.public_wasm_path, newResponse2);
     }
+    setDownloadProgress({
+      currentlyDownloading: "",
+      progress: 0,
+      size: 0,
+    });
   };
 
   const initializeWorker = async (
@@ -212,16 +247,15 @@ const useEngine = () => {
           Time: config.time,
           Depth: config.depth,
         });
-        if (initialized) {
-          console.log("Engine Initialized");
-          setEngineReady(true);
-        }
 
         stockfishWorker.onerror = (event) => {
           console.error("Worker Error:", event.error);
         };
-
-        // stockfishWorker.postMessage("uci");
+        if (initialized) {
+          console.log("Engine Initialized");
+          setEngineReady(true);
+          setGameStatus("STARTED");
+        }
 
         return () => {
           if (worker) {
@@ -230,6 +264,7 @@ const useEngine = () => {
         };
       } catch (error) {
         console.error("Error initializing worker", error);
+        throw new Error("Error initializing worker");
       }
     }
   };
