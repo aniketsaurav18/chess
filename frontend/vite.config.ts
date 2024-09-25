@@ -8,13 +8,13 @@ export default defineConfig({
     "process.env": {},
   },
   server: {
-    // https: {
-    //   key: fs.readFileSync("localhost-key.pem"),
-    //   cert: fs.readFileSync("localhost.pem"),
-    // },
-    headers: {
-      "Cross-Origin-Opener-Policy": "same-origin",
-      "Cross-Origin-Embedder-Policy": "require-corp",
+    https: {
+      key: fs.readFileSync("localhost-key.pem"),
+      cert: fs.readFileSync("localhost.pem"),
     },
+    // headers: {
+    //   "Cross-Origin-Opener-Policy": "same-origin",
+    //   "Cross-Origin-Embedder-Policy": "require-corp",
+    // },
   },
 });
