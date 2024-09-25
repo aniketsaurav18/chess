@@ -8,7 +8,7 @@ import { Suspense, lazy } from "react";
 
 // Lazy loading the Game and ComputerPlay2 components
 const Game = lazy(() => import("./screens/Game"));
-const ComputerPlay2 = lazy(() => import("./screens/ComputerGame2"));
+const ComputerPlay = lazy(() => import("./screens/ComputerGame2"));
 
 function App() {
   return (
@@ -24,10 +24,10 @@ function App() {
           }
         />
         <Route
-          path="/engine-test"
+          path="/engine"
           element={
             <Suspense fallback={<div>Loading...</div>}>
-              <ComputerPlay2 />
+              <ComputerPlay />
             </Suspense>
           }
         />
