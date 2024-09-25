@@ -11,7 +11,7 @@ import EngineInfo from "../components/EngineInfo";
 import GameModal from "../components/GameOverModal";
 // import GameModal from "../components/GameOverModal";
 
-const ComputerPlay2 = () => {
+const ComputerPlay = () => {
   const windowDimensions = useWindowDimensions();
   const user = useUser();
   const [boardWidth, setBoardWidth] = useState<number>(500);
@@ -143,4 +143,4 @@ const ComputerPlay2 = () => {
   );
 };
 
-export default ComputerPlay2;
+export default ComputerPlay;
