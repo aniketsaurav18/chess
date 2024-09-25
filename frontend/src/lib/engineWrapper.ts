@@ -15,9 +15,9 @@ interface CurrentEval {
   nodes: number;
   multiPv: number;
   millis: number;
-  evalType: string;
   isMate: boolean;
-  povEv: number;
+  cp: number | null;
+  mate: number | null;
   moves: string[];
 }
 
@@ -25,10 +25,10 @@ class EngineWrapper {
   private engine: any;
   private queue: Queue<string>;
   private log: (message?: any, ...optionalParams: any[]) => void;
-  public SearchTime: number | null = 5;
+  public SearchTime: number | null = 8;
   public Depth: number | null = 20;
   public expectedPV: number = 1;
-  public CurrentEval: CurrentEval | null = null;
+  public CurrentEval: CurrentEval[] | null = null;
   public side: string = "black";
 
   constructor(
@@ -68,6 +68,7 @@ class EngineWrapper {
   }
 
   async initialize(options: Record<string, any> = {}): Promise<boolean> {
+    this.send("stop"); //stop the engine if it is running
     this.send("uci");
     await this.receiveUntil((line) => line === "uciok");
     for (const name in options) {
@@ -128,51 +129,75 @@ class EngineWrapper {
     return bestmove;
   }
 
-  // parseMessage(events: string): void {
-  //   const parts = events.trim().split(/\s+/g);
-  //   if (parts[0] === "info") {
-  //     let depth = 0,
-  //       nodes,
-  //       multiPv = 1,
-  //       millis,
-  //       evalType,
-  //       isMate = false,
-  //       povEv,
-  //       moves: string[] = [];
-  //     for (let i = 1; i < parts.length; i++) {
-  //       switch (parts[i]) {
-  //         case "depth":
-  //           depth = parseInt(parts[++i]);
-  //           break;
-  //         case "nodes":
-  //           nodes = parseInt(parts[++i]);
-  //           break;
-  //         case "multipv":
-  //           multiPv = parseInt(parts[++i]);
-  //           break;
-  //         case "time":
-  //           millis = parseInt(parts[++i]);
-  //           break;
-  //         case "score":
-  //           isMate = parts[++i] === "mate";
-  //           povEv = parseInt(parts[++i]);
-  //           if (parts[i + 1] === "lowerbound" || parts[i + 1] === "upperbound")
-  //             evalType = parts[++i];
-  //           break;
-  //         case "pv":
-  //           moves = parts.slice(++i);
-  //           i = parts.length;
-  //           break;
-  //       }
-  //     }
-  //     if (isMate && !povEv) return;
-  //     if (this.expectedPV < multiPv) this.expectedPV = multiPv;
+  /* --------- This is a sample message from the engine ----------------
+   "info depth 20 seldepth 30 multipv 1 score cp -23 nodes 4176440 nps 1099352 hashfull 894 time 3799 pv e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 e4e5 d8e7 d1e2 f6d5 g2g3 a7a5 f1g2 d5b6 b2b3 a5a4 c1b2 e7e6 e1g1 d7d5 c2c4 f8e7 f2f4 a4b3" 
+   
+   Note: for every multiPV, there will be a separate info message.
+  */
 
-  //     if (!nodes || !millis || !isMate || !povEv) return;
-  //     const ev = (this.side === "black" ? -1 : 1) * povEv;
+  parseMessage(events: string): void {
+    const parts = events.trim().split(/\s+/g);
+    if (parts[0] === "info") {
+      let depth = 0,
+        nodes,
+        multiPv = 1,
+        millis,
+        evalType,
+        isMate = false,
+        povEv,
+        moves: string[] = [];
+      for (let i = 1; i < parts.length; i++) {
+        switch (parts[i]) {
+          case "depth":
+            depth = parseInt(parts[++i]);
+            break;
+          case "nodes":
+            nodes = parseInt(parts[++i]);
+            break;
+          case "multipv":
+            multiPv = parseInt(parts[++i]);
+            break;
+          case "time":
+            millis = parseInt(parts[++i]);
+            break;
+          case "score":
+            isMate = parts[++i] === "mate";
+            povEv = parseInt(parts[++i]);
+            if (parts[i + 1] === "lowerbound" || parts[i + 1] === "upperbound")
+              evalType = parts[++i];
+            break;
+          case "pv":
+            moves = parts.slice(++i);
+            i = parts.length;
+            break;
+        }
+      }
+      if (isMate && !povEv) return;
+      if (this.expectedPV < multiPv) this.expectedPV = multiPv;
 
-  //   }
-  // }
+      if (!nodes || !millis || !isMate || !povEv) return;
+      const ev = (this.side === "black" ? -1 : 1) * povEv;
+
+      // For now, ignore most upperbound/lowerbound messages.
+      // However non-primary pvs may only have an upperbound.
+      if (evalType && multiPv === 1) return;
+      const cp = isMate ? null : ev;
+      const mate = isMate ? ev : null;
+
+      const currentEval: CurrentEval = {
+        depth,
+        nodes,
+        multiPv,
+        millis,
+        isMate,
+        cp,
+        mate,
+        moves,
+      };
+      if (!this.CurrentEval) this.CurrentEval = [];
+      this.CurrentEval[multiPv - 1] = currentEval;
+    }
+  }
 }
 
 export default EngineWrapper;

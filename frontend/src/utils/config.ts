@@ -9,6 +9,15 @@ export const GameTimeLimit = [
 
 export const CACHE_NAME = "chess-engine-cache";
 
+export const DEFAULT_ENGINE_CONFIG = {
+  key: "stockfish-16.1", // key of default engine. Refer EngineDetails
+  depth: 20, // engine will search for 20 moves by default
+  time: 8000, // engine will search for 8 seconds by default. time in ms
+  threads: 1, // only applicable in multithreaded engine.
+  multipv: 1, // number of lines to return
+  elo: 0, // engine strength, 0 means no limit
+};
+
 export const EngineDetails = [
   {
     key: "stockfish-16.1",
