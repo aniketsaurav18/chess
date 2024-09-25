@@ -6,6 +6,7 @@ import { EngineDetails } from "../utils/config";
 import { Button } from "@nextui-org/button";
 import { Progress } from "@nextui-org/progress";
 import MoveHistory from "./MoveHistory";
+import { DEFAULT_ENGINE_CONFIG } from "../utils/config";
 // import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 
 const PlayAsButton = ({ setSide }: any) => {
@@ -107,7 +108,9 @@ const EngineInfo = ({
   engineStatus,
 }: any) => {
   const [selectedTab, setSelectedTab] = useState("engine");
-  const [selectedEngine, setSelectedEngine] = useState("stockfish-16.1");
+  const [selectedEngine, setSelectedEngine] = useState(
+    DEFAULT_ENGINE_CONFIG.key
+  );
   const [isMultithreaded, setIsMultithreaded] = useState(false);
   const [threads, setThreads] = useState(1);
   const [depth, setDepth] = useState(20);
