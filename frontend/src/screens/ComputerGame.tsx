@@ -71,6 +71,10 @@ const ComputerPlay = () => {
     return () => resizeObserver.disconnect();
   }, []);
 
+  const handleClose = () => {
+    setModal(false);
+  };
+
   return (
     <>
       <Sidebar
@@ -90,9 +94,7 @@ const ComputerPlay = () => {
               <GameModal
                 isGameOverModal={modal}
                 message={"Game Over"}
-                handleClose={() => {
-                  setModal(false);
-                }}
+                handleClose={handleClose}
               />
               <Chessboard
                 id="PlayVsPlay"

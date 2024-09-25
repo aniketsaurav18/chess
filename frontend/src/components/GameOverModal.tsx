@@ -3,7 +3,7 @@ import { Button } from "@nextui-org/button";
 interface ModalProp {
   isGameOverModal: boolean;
   message: string | null;
-  handleClose: () => void;
+  handleClose?: () => void;
 }
 
 export default function GameModal({
