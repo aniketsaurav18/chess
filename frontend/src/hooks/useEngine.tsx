@@ -130,44 +130,42 @@ const useEngine = () => {
         use_cdn_recource ? engine.cdn_js_path : engine.public_js_path
       );
 
-      const contentLength = response.headers.get("content-length");
-
       if (!response.body) {
         throw new Error("Unable to fetch Stockfish JS");
       }
-      if (!contentLength) {
-        throw new Error("Unable to track Stockfish JS size.");
-      }
 
       const reader = response.body.getReader();
-      const totalSize = parseInt(contentLength, 10);
-      let receivedLength = 0;
       const chunks: Uint8Array[] = [];
+      let receivedLength = 0;
+      const contentLength = response.headers.get("content-length");
+      const totalSize = contentLength ? parseInt(contentLength, 10) : undefined;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+
         receivedLength += value.length;
-        console.log(`Received ${receivedLength} of ${totalSize} bytes`);
+        console.log(
+          `Received ${receivedLength} bytes` +
+            (totalSize ? ` of ${totalSize} bytes` : "")
+        );
         setDownloadProgress({
           currentlyDownloading: engine.key,
-          progress: (receivedLength / totalSize) * 100,
-          size: totalSize,
+          progress: totalSize ? (receivedLength / totalSize) * 100 : -1, // Use -1 for unknown progress
+          size: totalSize !== undefined ? totalSize : -1, // Use -1 for unknown size
         });
         chunks.push(value);
       }
 
       const blob = new Blob(chunks);
-
       const newResponse = new Response(blob, {
         headers: {
           "Content-Type": "application/javascript",
           "Cross-Origin-Embedder-Policy": "require-corp",
           "Cross-Origin-Opener-Policy": "same-origin",
-          "Content-Length": contentLength,
         },
       });
-      await cache.put(engine.public_js_path, newResponse); //should always be public_js_path
+      await cache.put(engine.public_js_path, newResponse);
     }
 
     // Cache WASM
@@ -175,40 +173,47 @@ const useEngine = () => {
       const response2 = await fetch(
         use_cdn_recource ? engine.cdn_wasm_path : engine.public_wasm_path
       );
-      const contentLength2 = response2.headers.get("content-length");
+
       if (!response2.body) {
-        throw new Error("Unable to fetch Stockfish WASM or track its size.");
+        throw new Error("Unable to fetch Stockfish WASM");
       }
-      if (!contentLength2) {
-        throw new Error("Unable to track Stockfish WASM size.");
-      }
+
       const reader2 = response2.body.getReader();
-      const totalSize2 = parseInt(contentLength2, 10);
-      let receivedLength2 = 0;
       const chunks2: Uint8Array[] = [];
+      let receivedLength2 = 0;
+      const contentLength2 = response2.headers.get("content-length");
+      const totalSize2 = contentLength2
+        ? parseInt(contentLength2, 10)
+        : undefined;
+
       while (true) {
         const { done, value } = await reader2.read();
         if (done) break;
+
         receivedLength2 += value.length;
-        console.log(`Received ${receivedLength2} of ${totalSize2} bytes`);
+        console.log(
+          `Received ${receivedLength2} bytes` +
+            (totalSize2 ? ` of ${totalSize2} bytes` : "")
+        );
         setDownloadProgress({
           currentlyDownloading: engine.key,
-          progress: (receivedLength2 / totalSize2) * 100,
-          size: totalSize2,
+          progress: totalSize2 ? (receivedLength2 / totalSize2) * 100 : -1, // Use -1 for unknown progress
+          size: totalSize2 !== undefined ? totalSize2 : -1, // Use -1 for unknown size
         });
         chunks2.push(value);
       }
+
       const blob2 = new Blob(chunks2);
       const newResponse2 = new Response(blob2, {
         headers: {
           "Content-Type": "application/wasm",
           "Cross-Origin-Embedder-Policy": "require-corp",
           "Cross-Origin-Opener-Policy": "same-origin",
-          "Content-Length": contentLength2,
         },
       });
       await cache.put(engine.public_wasm_path, newResponse2);
     }
+
     setDownloadProgress({
       currentlyDownloading: "",
       progress: 0,
