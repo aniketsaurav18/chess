@@ -19,7 +19,15 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {
-          return cachedResponse;
+          // Clone the cached response to modify headers
+          const modifiedResponse = new Response(cachedResponse.body, {
+            headers: {
+              "Content-Type": cachedResponse.headers.get("Content-Type") || "application/octet-stream",
+              "Cross-Origin-Embedder-Policy": "require-corp",
+              "Cross-Origin-Opener-Policy": "same-origin",
+            },
+          });
+          return modifiedResponse; 
         } else {
           return fetch(event.request); 
         }
