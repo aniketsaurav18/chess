@@ -8,7 +8,7 @@ import { Suspense, lazy } from "react";
 
 // Lazy loading the Game and ComputerPlay2 components
 const Game = lazy(() => import("./screens/Game"));
-const ComputerPlay = lazy(() => import("./screens/ComputerGame2"));
+const ComputerPlay = lazy(() => import("./screens/ComputerGame"));
 
 function App() {
   return (
