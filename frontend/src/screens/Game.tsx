@@ -9,6 +9,7 @@ import Sidebar from "../components/Sidebar";
 import { viewportWidthBreakpoint } from "../utils/config";
 import { useChessGame } from "../hooks/useGame";
 import GameModal from "../components/GameOverModal";
+import ChessBoard from "../components/ChessBoard";
 
 // const WS_URL = "ws://localhost:8080";
 
@@ -73,11 +74,10 @@ export default function Game() {
       // console.log("boardH", boardH, "boardW", boardW);
       setBoardWidth(boardH < boardW ? boardH : boardW);
     };
-    // Create a ResizeObserver to watch the chessboard element
+
     const resizeObserver = new ResizeObserver(updateBoardWidth);
     resizeObserver.observe(chessboardEle);
 
-    // Initial update to set the board width
     updateBoardWidth();
 
     return () => resizeObserver.disconnect();
@@ -130,7 +130,7 @@ export default function Game() {
           >
             <div className="relative">
               <GameModal isGameOverModal={isGameOver} message={gameResult} />
-              <Chessboard
+              {/* <Chessboard
                 id="PlayVsPlay"
                 boardWidth={boardWidth}
                 position={gameState}
@@ -147,6 +147,15 @@ export default function Game() {
                 customSquareStyles={{
                   ...optionSquares,
                 }}
+              /> */}
+              <ChessBoard
+                makeMove={makeMove}
+                boardState={gameState}
+                boardWidth={boardWidth}
+                chessBoardref={chessboardRef}
+                gameStatus={gameStatus}
+                side={side}
+                key="game"
               />
             </div>
           </div>
