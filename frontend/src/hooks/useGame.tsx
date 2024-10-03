@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Chess, Square } from "chess.js";
+import { Chess, PieceColor, Square } from "chess.js";
 import { useSocket } from "../hooks/useSocket";
 import { BoardOrientation } from "react-chessboard/dist/chessboard/types";
 import {
@@ -30,15 +30,16 @@ export function useChessGame(user: any) {
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [waiting, setWaiting] = useState(false);
   const [side, setSide] = useState<BoardOrientation>("white");
-  const [player1timer, setPlayer1Timer] = useState<number>(0);
-  const [player2timer, setPlayer2Timer] = useState<number>(0);
-  const [moveFrom, setMoveFrom] = useState<Square | null>(null);
-  const [optionSquares, setOptionSquares] = useState<any>({}); // for highlighting possible moves
+  const [turn, setTurn] = useState<PieceColor>("w");
+  const [player1clock, setplayer1clock] = useState<number>(60000);
+  const [player2clock, setplayer2clock] = useState<number>(60000);
+  // const [moveFrom, setMoveFrom] = useState<Square | null>(null);
+  // const [optionSquares, setOptionSquares] = useState<any>({});
   const [gameHistory, setGameHistory] = useState<any>([]);
   const [offerDraw, setOfferDraw] = useState<boolean>(false); // player offered a draw
   const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
-  const player1TimerRef = useRef<NodeJS.Timeout | null>(null);
-  const player2TimerRef = useRef<NodeJS.Timeout | null>(null);
+  // const player1clockRef = useRef<NodeJS.Timeout | null>(null);
+  // const player2clockRef = useRef<NodeJS.Timeout | null>(null);
   const [gameResult, setGameResult] = useState<string | null>(null);
 
   useEffect(() => {
@@ -56,8 +57,8 @@ export function useChessGame(user: any) {
         case INIT_GAME:
           setSide(message.d.color);
           setGameID(message.d.id);
-          setPlayer1Timer(message.d.clock.w);
-          setPlayer2Timer(message.d.clock.b);
+          setplayer1clock(message.d.clock.w);
+          setplayer2clock(message.d.clock.b);
           setGameStatus("STARTED");
           setWaiting(false);
           break;
@@ -67,10 +68,10 @@ export function useChessGame(user: any) {
             break;
           }
           setGameState(game.fen());
-          clearAllInterval();
-          setPlayer1Timer(message.d.clock.w);
-          setPlayer2Timer(message.d.clock.b);
-          setPlayerTimer();
+          // clearAllInterval();
+          setplayer1clock(message.d.clock.w);
+          setplayer2clock(message.d.clock.b);
+          // setPlayerTimer();
           updateHistory(move);
           break;
         case GAME_OVER:
@@ -92,49 +93,50 @@ export function useChessGame(user: any) {
       return;
     }
     console.log("status", gameStatus, "game turn", game.turn());
-    clearAllInterval();
-    setPlayerTimer();
-    return () => clearAllInterval();
+    setTurn(game.turn());
+    // clearAllInterval();
+    // setPlayerTimer();
+    // return () => clearAllInterval();
   }, [gameStatus, game.turn()]);
 
-  const setPlayerTimer = () => {
-    if (gameStatus === "OVER") {
-      return;
-    }
-    if (game.turn() === "w") {
-      console.log("setting white timer");
-      player1TimerRef.current = setInterval(() => {
-        setPlayer1Timer((t) => t - 100);
-      }, 100);
-    } else if (game.turn() === "b") {
-      console.log("setting black timer");
-      player2TimerRef.current = setInterval(() => {
-        setPlayer2Timer((t) => t - 100);
-      }, 100);
-    }
-  };
-  const clearAllInterval = () => {
-    if (player1TimerRef.current) {
-      console.log("clearing player1 timer");
-      clearInterval(player1TimerRef.current);
-      player1TimerRef.current = null;
-    }
-    if (player2TimerRef.current) {
-      console.log("clearing player2 timer");
-      clearInterval(player2TimerRef.current);
-      player2TimerRef.current = null;
-    }
-  };
+  // const setPlayerTimer = () => {
+  //   if (gameStatus === "OVER") {
+  //     return;
+  //   }
+  //   if (game.turn() === "w") {
+  //     console.log("setting white timer");
+  //     player1clockRef.current = setInterval(() => {
+  //       setplayer1clock((t) => t - 100);
+  //     }, 100);
+  //   } else if (game.turn() === "b") {
+  //     console.log("setting black timer");
+  //     player2clockRef.current = setInterval(() => {
+  //       setplayer2clock((t) => t - 100);
+  //     }, 100);
+  //   }
+  // };
+  // const clearAllInterval = () => {
+  //   if (player1clockRef.current) {
+  //     console.log("clearing player1 timer");
+  //     clearInterval(player1clockRef.current);
+  //     player1clockRef.current = null;
+  //   }
+  //   if (player2clockRef.current) {
+  //     console.log("clearing player2 timer");
+  //     clearInterval(player2clockRef.current);
+  //     player2clockRef.current = null;
+  //   }
+  // };
   const gameEndfn = (msgPayload: any) => {
     if (msgPayload == null) {
-      clearAllInterval();
+      // clearAllInterval();
       return;
     }
     if (gameStatus === "STARTED") {
       setGameStatus("OVER");
     }
     setTimeout(() => {
-      clearAllInterval();
+      // clearAllInterval();
       setGameResult(msgPayload.msg);
       setIsGameOver(true);
     }, 500);
@@ -148,8 +150,6 @@ export function useChessGame(user: any) {
     )
       return false;
     if (!socket) return false;
-    setMoveFrom(null);
-    setOptionSquares({});
     const move = game.move({
       from: sourceSquare,
       to: targetSquare,
@@ -191,7 +191,7 @@ export function useChessGame(user: any) {
           },
         })
       );
-      clearAllInterval();
+      // clearAllInterval();
     } catch (e: any) {
       console.log(e.message);
     }
@@ -273,69 +273,21 @@ export function useChessGame(user: any) {
     setGameHistory((history: any) => {
       const lastMoveWithTime = {
         ...game.history({ verbose: true })[game.history().length - 1],
-        time: move.color === "w" ? player1timer : player2timer,
+        time: move.color === "w" ? player1clock : player2clock,
       };
       return [...history, lastMoveWithTime];
     });
-  };
-  function getMoveOptions(square: Square) {
-    if (game.turn() !== side[0] && gameStatus !== "STARTED") return;
-
-    const moves = game.moves({
-      square,
-      verbose: true,
-    });
-    if (moves.length === 0) {
-      return;
-    }
-
-    const newSquares: any = {};
-    moves.map((move) => {
-      newSquares[move.to] = {
-        background:
-          game.get(move.to) &&
-          game.get(move.to)?.color !== game.get(square)?.color
-            ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
-            : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
-        borderRadius: "50%",
-      };
-      return move;
-    });
-    newSquares[square] = {
-      background: "rgba(255, 255, 0, 0.4)",
-    };
-    setOptionSquares(newSquares);
-  }
-
-  const onSquareClick = (square: Square) => {
-    if (game.turn() !== side[0]) return;
-    if (!moveFrom) {
-      if (game.get(square)?.color !== game.turn()) return;
-      getMoveOptions(square);
-      setMoveFrom(square);
-    } else {
-      if (!Object.keys(optionSquares).includes(square)) {
-        getMoveOptions(square);
-        setMoveFrom(square);
-        return;
-      }
-      if (makeMove(moveFrom, square)) {
-        setMoveFrom(null);
-        setOptionSquares({});
-      }
-    }
   };
 
   return {
     gameId,
     gameState,
     gameStatus,
+    turn,
     gameResult,
     isGameOver,
-    player1timer,
-    player2timer,
-    optionSquares,
-    moveFrom,
+    player1clock,
+    player2clock,
     offerDraw,
     gameResign,
     drawOffered,
@@ -345,7 +297,6 @@ export function useChessGame(user: any) {
     side,
     waiting,
     makeMove,
-    onSquareClick,
     startGame,
     offerDrawfn,
     drawAcceptedfn,

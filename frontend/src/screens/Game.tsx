@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useSocket } from "../hooks/useSocket";
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import useUser from "../hooks/useUser";
-import { Chessboard } from "react-chessboard";
 import defaultUserImage from "../assets/default-user.jpg";
 import GameInfo from "../components/GameInfo";
 import Sidebar from "../components/Sidebar";
@@ -10,6 +9,7 @@ import { viewportWidthBreakpoint } from "../utils/config";
 import { useChessGame } from "../hooks/useGame";
 import GameModal from "../components/GameOverModal";
 import ChessBoard from "../components/ChessBoard";
+import GameTimer from "../components/Timer";
 
 // const WS_URL = "ws://localhost:8080";
 
@@ -25,11 +25,11 @@ export default function Game() {
     // gameId,
     gameState,
     gameStatus,
+    turn,
     gameResult,
     isGameOver,
-    player1timer,
-    player2timer,
-    optionSquares,
+    player1clock,
+    player2clock,
     makeMove,
     setDrawOffered,
     offerDraw,
@@ -39,7 +39,6 @@ export default function Game() {
     chessboardRef,
     side,
     waiting,
-    onSquareClick,
     startGame,
     offerDrawfn,
     drawAcceptedfn,
@@ -83,19 +82,19 @@ export default function Game() {
     return () => resizeObserver.disconnect();
   }, []);
 
-  const gameTimer = (timeConsumed: number) => {
-    const timeLeftMs = timeConsumed > 0 ? timeConsumed : 0; // Ensure timeConsumed does not go below zero
-    const timeINMinutes = Math.floor(timeLeftMs / 60000);
-    const timeInSeconds = Math.floor((timeLeftMs % 60000) / 1000);
+  // const gameTimer = (timeConsumed: number) => {
+  //   const timeLeftMs = timeConsumed > 0 ? timeConsumed : 0; // Ensure timeConsumed does not go below zero
+  //   const timeINMinutes = Math.floor(timeLeftMs / 60000);
+  //   const timeInSeconds = Math.floor((timeLeftMs % 60000) / 1000);
 
-    return (
-      <div className="flex justify-center items-center bg-gray-500 w-[6rem] h-5/6 text-[1.5rem] font-bold text-white">
-        {timeINMinutes < 10 ? "0" : ""}
-        {timeINMinutes}:{timeInSeconds < 10 ? "0" : ""}
-        {timeInSeconds}
-      </div>
-    );
-  };
+  //   return (
+  //     <div className="flex justify-center items-center bg-gray-500 w-[6rem] h-5/6 text-[1.5rem] font-bold text-white">
+  //       {timeINMinutes < 10 ? "0" : ""}
+  //       {timeINMinutes}:{timeInSeconds < 10 ? "0" : ""}
+  //       {timeInSeconds}
+  //     </div>
+  //   );
+  // };
 
   return (
     <>
@@ -120,9 +119,11 @@ export default function Game() {
               />
               <span className="ml-[0.5rem] text-base">Oponent</span>
             </div>
-            {side === "white"
-              ? gameTimer(player2timer)
-              : gameTimer(player1timer)}
+            {side === "white" ? (
+              <GameTimer time={player2clock} side={side} turn={turn} />
+            ) : (
+              <GameTimer time={player1clock} side={side} turn={turn} />
+            )}
           </div>
           <div
             className="w-full flex-grow my-2 p-0 grid place-items-center lg:w-full lg:h-full"
@@ -173,9 +174,11 @@ export default function Game() {
                 {user.username !== "" ? user.username : "Guest"}
               </span>
             </div>
-            {side === "white"
-              ? gameTimer(player1timer)
-              : gameTimer(player2timer)}
+            {side === "white" ? (
+              <GameTimer time={player1clock} side={side} turn={turn} />
+            ) : (
+              <GameTimer time={player2clock} side={side} turn={turn} />
+            )}
           </div>
         </div>
         <GameInfo

@@ -28,9 +28,23 @@ const ChessBoard = ({
     setGame(new Chess(boardState));
   }, [boardState]);
 
+  const makeMoveWrapper = (from: Square, to: Square): boolean => {
+    setMoveFrom(null);
+    setOptionSquares({});
+    if (makeMove(from, to)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   function getMoveOptions(square: Square) {
     if (game.turn() !== side[0] && gameStatus !== "STARTED") return;
-
+    if (game.get(square) === null) {
+      setMoveFrom(null);
+      setOptionSquares({});
+      return;
+    }
     const moves = game.moves({
       square,
       verbose: true,
@@ -58,11 +72,6 @@ const ChessBoard = ({
   }
 
   const onSquareClick = (square: Square) => {
-    if (game.get(square) === null) {
-      setMoveFrom(null);
-      setOptionSquares({});
-      return;
-    }
     if (game.turn() !== side[0]) return;
     if (!moveFrom) {
       if (game.get(square)?.color !== game.turn()) return;
@@ -85,7 +94,7 @@ const ChessBoard = ({
       id="PlayVsPlay"
       boardWidth={boardWidth}
       position={boardState}
-      onPieceDrop={makeMove}
+      onPieceDrop={makeMoveWrapper}
       customBoardStyle={{
         borderRadius: "4px",
         boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
