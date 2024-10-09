@@ -24,22 +24,16 @@ export function useChessGame(user: any) {
   // const [oponent, setOponent] = useState(null);
   const [gameId, setGameID] = useState<string | null>(null);
   const [gameState, setGameState] = useState(game.fen());
-  const [gameStatus, setGameStatus] = useState<
-    "STARTED" | "OVER" | "WAITING" | "IDEAL"
-  >("IDEAL");
+  const [gameStatus, setGameStatus] = useState<GameStatus>("IDEAL");
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [waiting, setWaiting] = useState(false);
   const [side, setSide] = useState<BoardOrientation>("white");
   const [turn, setTurn] = useState<PieceColor>("w");
-  const [player1clock, setplayer1clock] = useState<number>(60000);
-  const [player2clock, setplayer2clock] = useState<number>(60000);
-  // const [moveFrom, setMoveFrom] = useState<Square | null>(null);
-  // const [optionSquares, setOptionSquares] = useState<any>({});
+  const [player1clock, setplayer1clock] = useState<number>(600000);
+  const [player2clock, setplayer2clock] = useState<number>(600000);
   const [gameHistory, setGameHistory] = useState<any>([]);
   const [offerDraw, setOfferDraw] = useState<boolean>(false); // player offered a draw
   const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
-  // const player1clockRef = useRef<NodeJS.Timeout | null>(null);
-  // const player2clockRef = useRef<NodeJS.Timeout | null>(null);
   const [gameResult, setGameResult] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,10 +62,8 @@ export function useChessGame(user: any) {
             break;
           }
           setGameState(game.fen());
-          // clearAllInterval();
           setplayer1clock(message.d.clock.w);
           setplayer2clock(message.d.clock.b);
-          // setPlayerTimer();
           updateHistory(move);
           break;
         case GAME_OVER:
@@ -94,49 +86,16 @@ export function useChessGame(user: any) {
     }
     console.log("status", gameStatus, "game turn", game.turn());
     setTurn(game.turn());
-    // clearAllInterval();
-    // setPlayerTimer();
-    // return () => clearAllInterval();
   }, [gameStatus, game.turn()]);
 
-  // const setPlayerTimer = () => {
-  //   if (gameStatus === "OVER") {
-  //     return;
-  //   }
-  //   if (game.turn() === "w") {
-  //     console.log("setting white timer");
-  //     player1clockRef.current = setInterval(() => {
-  //       setplayer1clock((t) => t - 100);
-  //     }, 100);
-  //   } else if (game.turn() === "b") {
-  //     console.log("setting black timer");
-  //     player2clockRef.current = setInterval(() => {
-  //       setplayer2clock((t) => t - 100);
-  //     }, 100);
-  //   }
-  // };
-  // const clearAllInterval = () => {
-  //   if (player1clockRef.current) {
-  //     console.log("clearing player1 timer");
-  //     clearInterval(player1clockRef.current);
-  //     player1clockRef.current = null;
-  //   }
-  //   if (player2clockRef.current) {
-  //     console.log("clearing player2 timer");
-  //     clearInterval(player2clockRef.current);
-  //     player2clockRef.current = null;
-  //   }
-  // };
   const gameEndfn = (msgPayload: any) => {
     if (msgPayload == null) {
-      // clearAllInterval();
       return;
     }
     if (gameStatus === "STARTED") {
       setGameStatus("OVER");
     }
     setTimeout(() => {
-      // clearAllInterval();
       setGameResult(msgPayload.msg);
       setIsGameOver(true);
     }, 500);

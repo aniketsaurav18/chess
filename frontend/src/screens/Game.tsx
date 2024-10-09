@@ -11,13 +11,6 @@ import GameModal from "../components/GameOverModal";
 import ChessBoard from "../components/ChessBoard";
 import GameTimer from "../components/Timer";
 
-// const WS_URL = "ws://localhost:8080";
-
-// interface GameMetadata {
-//   player1: string;
-//   player2: string;
-// }
-
 export default function Game() {
   const socket = useSocket();
   const user = useUser();
@@ -82,20 +75,6 @@ export default function Game() {
     return () => resizeObserver.disconnect();
   }, []);
 
-  // const gameTimer = (timeConsumed: number) => {
-  //   const timeLeftMs = timeConsumed > 0 ? timeConsumed : 0; // Ensure timeConsumed does not go below zero
-  //   const timeINMinutes = Math.floor(timeLeftMs / 60000);
-  //   const timeInSeconds = Math.floor((timeLeftMs % 60000) / 1000);
-
-  //   return (
-  //     <div className="flex justify-center items-center bg-gray-500 w-[6rem] h-5/6 text-[1.5rem] font-bold text-white">
-  //       {timeINMinutes < 10 ? "0" : ""}
-  //       {timeINMinutes}:{timeInSeconds < 10 ? "0" : ""}
-  //       {timeInSeconds}
-  //     </div>
-  //   );
-  // };
-
   return (
     <>
       <Sidebar
@@ -120,9 +99,19 @@ export default function Game() {
               <span className="ml-[0.5rem] text-base">Oponent</span>
             </div>
             {side === "white" ? (
-              <GameTimer time={player2clock} side={side} turn={turn} />
+              <GameTimer
+                time={player2clock}
+                side="b"
+                turn={turn}
+                gameStatus={gameStatus}
+              />
             ) : (
-              <GameTimer time={player1clock} side={side} turn={turn} />
+              <GameTimer
+                time={player1clock}
+                side="w"
+                turn={turn}
+                gameStatus={gameStatus}
+              />
             )}
           </div>
           <div
@@ -131,24 +120,6 @@ export default function Game() {
           >
             <div className="relative">
               <GameModal isGameOverModal={isGameOver} message={gameResult} />
-              {/* <Chessboard
-                id="PlayVsPlay"
-                boardWidth={boardWidth}
-                position={gameState}
-                onPieceDrop={makeMove}
-                customBoardStyle={{
-                  borderRadius: "4px",
-                  boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
-                }}
-                ref={chessboardRef}
-                boardOrientation={side}
-                areArrowsAllowed={true}
-                arePremovesAllowed={true}
-                onSquareClick={onSquareClick}
-                customSquareStyles={{
-                  ...optionSquares,
-                }}
-              /> */}
               <ChessBoard
                 makeMove={makeMove}
                 boardState={gameState}
@@ -175,9 +146,19 @@ export default function Game() {
               </span>
             </div>
             {side === "white" ? (
-              <GameTimer time={player1clock} side={side} turn={turn} />
+              <GameTimer
+                time={player1clock}
+                side="w"
+                turn={turn}
+                gameStatus={gameStatus}
+              />
             ) : (
-              <GameTimer time={player2clock} side={side} turn={turn} />
+              <GameTimer
+                time={player2clock}
+                side="b"
+                turn={turn}
+                gameStatus={gameStatus}
+              />
             )}
           </div>
         </div>

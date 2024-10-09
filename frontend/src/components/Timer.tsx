@@ -1,18 +1,20 @@
+import { PieceColor } from "chess.js";
 import { useEffect, useRef, useState } from "react";
 
 interface GameTimerProps {
   time: number;
-  side: string;
-  turn: string;
+  side: PieceColor;
+  turn: PieceColor;
+  gameStatus: GameStatus;
 }
 
-const GameTimer = ({ time, side, turn }: GameTimerProps) => {
-  const [clock, setClock] = useState(time);
-  const timerRef = useRef<NodeJS.Timeout | null>(null); // Use useRef to avoid re-renders
+const GameTimer = ({ time, side, turn, gameStatus }: GameTimerProps) => {
+  const [clock, setClock] = useState<number>(time);
+  const timerRef = useRef<NodeJS.Timeout | null>(null); // useRef to avoid re-renders
 
-  // Start/Stop timer based on whose turn it is
   useEffect(() => {
-    if (side[0] === turn) {
+    setClock(time);
+    if (side === turn && gameStatus === "STARTED") {
       if (!timerRef.current) {
         startTimer();
       }
@@ -21,22 +23,19 @@ const GameTimer = ({ time, side, turn }: GameTimerProps) => {
     }
 
     return () => {
-      stopTimer(); // Clean up the timer on turn change or unmount
+      stopTimer();
     };
-  }, [turn]);
+  }, [turn, gameStatus]);
 
-  // Sync clock with the initial time only when side starts its turn
   useEffect(() => {
-    if (side[0] === turn) {
-      setClock(time);
-    }
+    setClock(time);
   }, [time, side, turn]);
 
   const startTimer = () => {
-    stopTimer(); // Stop any existing timer first
+    stopTimer();
     timerRef.current = setInterval(() => {
-      setClock((prevClock) => Math.max(prevClock - 1000, 0)); // Decrease every second
-    }, 1000); // Lower the frequency to update every second
+      setClock((prevClock) => Math.max(prevClock - 1000, 0));
+    }, 1000);
   };
 
   const stopTimer = () => {
@@ -46,7 +45,6 @@ const GameTimer = ({ time, side, turn }: GameTimerProps) => {
     }
   };
 
-  // Convert time from milliseconds to minutes and seconds
   const timeLeftMs = clock;
   const timeInMinutes = Math.floor(timeLeftMs / 60000);
   const timeInSeconds = Math.floor((timeLeftMs % 60000) / 1000);
