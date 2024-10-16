@@ -3,16 +3,11 @@ import {
   GameMessagePayload,
   InitGamePayload,
   MovePayload,
-  GameDrawPayload,
   GameOverPayload,
-  TimeoutPayload,
-  ResignPayload,
   GameMove,
   GameOverType,
-  DrawOfferPayload,
   Result,
   gameOverMessages,
-  GameOverMessage,
 } from "./types/types";
 import {
   DRAW_OFFERED,
@@ -82,9 +77,13 @@ export class Socket {
     }
   }
 
-  sendMove(m: GameMove, whiteClock: number, blackClock: number) {
+  sendMove(
+    m: GameMove,
+    whiteClock: number,
+    blackClock: number
+  ): MovePayload | null {
     try {
-      this.sendMessage({
+      const payload: MovePayload = {
         t: MOVE,
         d: {
           san: m.san,
@@ -95,9 +94,12 @@ export class Socket {
             b: blackClock,
           },
         },
-      });
+      };
+      this.sendMessage(payload);
+      return payload;
     } catch (error) {
       this.handleError(error, "Failed to send move message.");
+      return null;
     }
   }
 
@@ -128,7 +130,7 @@ export class Socket {
     winner: Result,
     player1Time: number,
     player2Time: number
-  ) {
+  ): GameOverPayload | null {
     try {
       const payload: GameOverPayload = {
         t: GAME_OVER,
@@ -144,96 +146,12 @@ export class Socket {
       };
       this.sendMessage(payload);
       this.closeConnection();
+      return payload;
     } catch (error) {
       this.handleError(error, "Failed to send Game Over message");
+      return null;
     }
   }
-
-  // sendGameDraw(whiteClock: number, blackClock: number) {
-  //   try {
-  //     const payload: GameDrawPayload = {
-  //       t: GAME_DRAW,
-  //       d: {
-  //         winner: "draw",
-  //         clock: {
-  //           w: whiteClock,
-  //           b: blackClock,
-  //         },
-  //       },
-  //     };
-  //     this.sendMessage(payload);
-  //   } catch (error) {
-  //     this.handleError(error, "Failed to send game draw message.");
-  //   }
-  // }
-
-  // sendGameOver(
-  //   type: GameOverType,
-  //   winner: "white" | "black",
-  //   whiteClock: number,
-  //   blackClock: number
-  // ) {
-  //   try {
-  //     const payload: GameOverPayload = {
-  //       t: GAME_OVER,
-  //       d: {
-  //         type: type,
-  //         winner: winner,
-  //         clock: {
-  //           w: whiteClock,
-  //           b: blackClock,
-  //         },
-  //       },
-  //     };
-  //     this.sendMessage(payload);
-  //   } catch (error) {
-  //     this.handleError(error, "Failed to send game over message.");
-  //   }
-  // }
-
-  // sendTimeout(
-  //   winner: "white" | "black",
-  //   whiteClock: number,
-  //   blackClock: number
-  // ) {
-  //   try {
-  //     const payload: TimeoutPayload = {
-  //       t: TIMEOUT,
-  //       d: {
-  //         winner: winner,
-  //         clock: {
-  //           w: whiteClock,
-  //           b: blackClock,
-  //         },
-  //       },
-  //     };
-  //     this.sendMessage(payload);
-  //   } catch (error) {
-  //     this.handleError(error, "Failed to send timeout message.");
-  //   }
-  // }
-
-  // sendResign(
-  //   winner: "white" | "black",
-  //   whiteClock: number,
-  //   blackClock: number
-  // ) {
-  //   try {
-  //     const payload: ResignPayload = {
-  //       t: RESIGN,
-  //       d: {
-  //         winner: winner,
-  //         clock: {
-  //           w: whiteClock,
-  //           b: blackClock,
-  //         },
-  //       },
-  //     };
-  //     this.sendMessage(payload);
-  //   } catch (error) {
-  //     this.handleError(error, "Failed to send resignation message.");
-  //   }
-  // }
 
   private sendMessage(payload: GameMessagePayload): boolean {
     const p = JSON.stringify(payload);

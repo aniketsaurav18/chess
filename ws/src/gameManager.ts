@@ -1,7 +1,6 @@
 import { WebSocket } from "ws";
 import { Game } from "./game";
 import {
-  DRAW_OFFERED,
   INIT_GAME,
   MOVE,
   OFFER_DRAW,
@@ -9,16 +8,19 @@ import {
   ERR,
   DRAW_ACCEPTED,
 } from "./messages";
+import Producer from "./kafka/producer";
 
 export class GameManager {
   private games: Game[];
   private pendingUser: WebSocket | null;
   private users: WebSocket[];
+  private producer: Producer;
 
-  constructor() {
+  constructor(producer: Producer) {
     this.games = [];
     this.pendingUser = null;
     this.users = [];
+    this.producer = producer;
   }
 
   addUser(socket: WebSocket) {
@@ -32,10 +34,10 @@ export class GameManager {
 
   private handleInit(socket: WebSocket) {
     try {
-      socket.on("message", (data) => {
+      socket.on("message", async (data) => {
         const msg = JSON.parse(data.toString());
         console.log("GameManager incoming message:", msg);
-        this.handleMessage(socket, msg);
+        await this.handleMessage(socket, msg);
       });
     } catch (e: any) {
       this.handleError(
@@ -46,14 +48,14 @@ export class GameManager {
     }
   }
 
-  private handleMessage(socket: WebSocket, msg: any) {
+  private async handleMessage(socket: WebSocket, msg: any) {
     try {
       switch (msg.t) {
         case INIT_GAME:
           this.handleInitGame(socket, msg);
           break;
         case MOVE:
-          this.handleMove(socket, msg);
+          await this.handleMove(socket, msg);
           break;
         case OFFER_DRAW:
           this.handleOfferDraw(socket, msg);
@@ -82,7 +84,12 @@ export class GameManager {
   }
   private handleInitGame(socket: WebSocket, msg: any) {
     if (this.pendingUser !== null) {
-      const game = new Game(this.pendingUser, socket, Number(msg.d.tl));
+      const game = new Game(
+        this.pendingUser,
+        socket,
+        this.producer,
+        Number(msg.d.tl) // TODO: make check for this number.
+      );
       this.games.push(game);
       this.pendingUser = null;
     } else {
@@ -90,10 +97,10 @@ export class GameManager {
     }
   }
 
-  private handleMove(socket: WebSocket, msg: any) {
-    const game = this.games.find((game) => game.gameId === msg.d.gameId);
+  private async handleMove(socket: WebSocket, msg: any) {
+    const game = this.games.find((game) => game.gameId === msg.d.gameId); // TODO: convert this into map
     if (game) {
-      game.makeMove(socket, msg.d.m);
+      await game.makeMove(socket, msg.d.m);
     } else {
       this.handleError(socket, "Game not found.", new Error("Game not found"));
     }
