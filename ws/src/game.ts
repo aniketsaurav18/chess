@@ -2,7 +2,14 @@ import WebSocket from "ws";
 import { Chess, Move } from "chess.js";
 import { Socket } from "./socketManager";
 import { randomUUID } from "crypto";
-import { GameMove, GameOverType, GameStatus, Result } from "./types/types";
+import {
+  GameMove,
+  GameOverType,
+  GameStatus,
+  MovePayload,
+  Result,
+} from "./types/types";
+import Producer from "./kafka/producer";
 
 // Time in milliseconds
 export const TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
@@ -14,16 +21,18 @@ export class Game {
   public gameOverType: GameOverType | null = null;
   private board: Chess;
   private moveHistry: GameMove[] = [];
-  private startTime = new Date(Date.now());
-  private lastMoveTime = new Date(Date.now());
-  private gameTimeLimit = TIME_LIMIT;
-  private player1TimeLeft = 0;
-  private player2TimeLeft = 0;
+  private startTime: Date; // will be a metadata about the game.
+  private lastMoveTime: Date;
+  private gameTimeLimit: number;
+  private player1TimeLeft: number = 0;
+  private player2TimeLeft: number = 0;
   private gameTimer: NodeJS.Timeout | null = null;
+  private producer: Producer;
 
   constructor(
     p1: WebSocket,
     p2: WebSocket,
+    producer: Producer,
     timeLimit?: number,
     gameId?: string
   ) {
@@ -35,11 +44,14 @@ export class Game {
     this.player2TimeLeft = this.gameTimeLimit;
     console.log("game created, message sending");
     this.gameSocket.sendInitMsg(this.player1TimeLeft, this.player2TimeLeft);
+    this.startTime = new Date(); // Initialize start time
+    this.lastMoveTime = new Date();
     this.setGameTimer();
     console.log("send messages init_game");
+    this.producer = producer;
   }
 
-  makeMove(socket: WebSocket, move: string) {
+  async makeMove(socket: WebSocket, move: string) {
     if (this.board.turn() === "w" && !this.gameSocket.comparePlayer1(socket)) {
       console.log("not your turn w", this.board.turn());
       return;
@@ -49,6 +61,7 @@ export class Game {
       return;
     }
     const currTime = new Date(Date.now());
+    this.clearGameTimer();
     const m = this.board.move(move);
     if (!m) {
       console.log("invalid move");
@@ -69,15 +82,17 @@ export class Game {
       this.player1TimeLeft -= diff;
     }
     this.setGameTimer();
-    //TODO - send move to a kafka server for inserting into DB
 
     console.log(this.board.turn());
 
-    this.gameSocket.sendMove(
+    const movePayload: MovePayload | null = this.gameSocket.sendMove(
       newMove,
       this.player1TimeLeft,
       this.player2TimeLeft
     ); //send move to both players
+    if (movePayload === null) {
+      return;
+    }
 
     if (this.board.isGameOver()) {
       let type: GameOverType | "unknown";
@@ -111,13 +126,14 @@ export class Game {
       }
       this.gameEnd(type, winner);
     }
+    await this.producer.send(JSON.stringify(movePayload));
   }
 
   handleDrawOffer(socket: WebSocket) {
     this.gameSocket.sendDrawOffer(socket);
   }
 
-  private gameEnd(type: GameOverType, winner: Result) {
+  private async gameEnd(type: GameOverType, winner: Result) {
     if (this.gameTimer) {
       clearInterval(this.gameTimer);
     }
@@ -125,12 +141,13 @@ export class Game {
     this.gameResult = winner as Result;
     console.log("history:", this.moveHistry);
     try {
-      this.gameSocket.sendGameOverMsg(
+      const gameOverPayload = this.gameSocket.sendGameOverMsg(
         type,
         winner,
         this.player1TimeLeft,
         this.player2TimeLeft
       );
+      await this.producer.send(JSON.stringify(gameOverPayload)); // produce message to a queue.
     } catch (error: any) {
       this.handleError(error, "Error while sending Game Over Message");
     }
@@ -138,7 +155,7 @@ export class Game {
 
   clearGameTimer() {
     if (this.gameTimer) {
-      clearInterval(this.gameTimer);
+      clearTimeout(this.gameTimer);
     }
   }
 
@@ -146,14 +163,16 @@ export class Game {
     if (this.gameTimer) {
       clearTimeout(this.gameTimer);
     }
+
     const turn = this.board.turn();
-    let timeRemain;
+    let timeRemain: number;
+
     if (turn === "w") {
       timeRemain = this.player1TimeLeft;
     } else {
       timeRemain = this.player2TimeLeft;
     }
-    console.log(turn, timeRemain);
+
     this.gameTimer = setTimeout(() => {
       console.log(turn === "w" ? "black" : "white", "timeout");
       this.gameEnd(
@@ -161,6 +180,17 @@ export class Game {
         turn === "w" ? "black" : "white"
       );
     }, timeRemain);
+    // Print the time left in a human-readable format
+    // TODO: Remove this in production.
+    const formattedTime = this.formatTime(timeRemain);
+    console.log(turn, formattedTime);
+  }
+  private formatTime(milliseconds: number): string {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${minutes}m ${seconds}s`;
   }
 
   resign(socket: WebSocket) {
