@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
+  id           String    @id @default(cuid())
   username     String    @unique
   name         String?
   email        String    @unique
@@ -26,7 +23,7 @@ model User {
 }
 
 model Game {
-  id            String      @id @default(uuid())
+  id            String      @id @default(cuid())
   whitePlayerId String
   blackPlayerId String
   whitePlayer   User        @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
@@ -34,7 +31,7 @@ model Game {
   status        GameStatus
   result        GameResult?
   timeControl   TimeControl
-  moves         Json        @default("[]")
+  moves         Move[]      @relation("GameMoves")
   pgn           String?
   currentFen    String?
   startAt       DateTime    @default(now())
@@ -42,7 +39,19 @@ model Game {
   opening       String?
   event         String?
 
-  @@index([status, result])
+  @@index([id, result])
+}
+
+model Move {
+  id        String   @id @default(cuid())
+  gameId    String
+  game      Game     @relation("GameMoves", fields: [gameId], references: [id])
+  move      String
+  moveNum   Int
+  fenAfter  String?
+  createdAt DateTime @default(now())
+
+  @@index([gameId, moveNum])
 }
 
 enum GameStatus {
