@@ -41,7 +41,6 @@ async function startServer() {
       });
     });
 
-    // Graceful shutdown handling
     const gracefulShutdown = async () => {
       try {
         wss.close();
