@@ -49,6 +49,22 @@ export class Game {
     this.setGameTimer();
     console.log("send messages init_game");
     this.producer = producer;
+    this.productInitMessage();
+  }
+
+  async productInitMessage() {
+    await this.producer.send(
+      JSON.stringify({
+        t: "init_game",
+        d: {
+          gameId: this.gameId,
+          startTime: this.startTime,
+          timeControl: this.gameTimeLimit,
+          currentFen:
+            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        },
+      })
+    );
   }
 
   async makeMove(socket: WebSocket, move: string) {
