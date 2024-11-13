@@ -14,7 +14,7 @@ async function initKafka(): Promise<Producer> {
     });
     const producer = new Producer(kafka);
     await producer.connect();
-    await producer.send(JSON.stringify("hello"));
+    // await producer.send(JSON.stringify("hello"));
     return producer;
   } catch (e: any) {
     console.log("Error connecting to producer \n");
