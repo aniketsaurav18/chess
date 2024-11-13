@@ -54,7 +54,7 @@ export class Game {
 
   async productInitMessage() {
     await this.producer.send(
-      JSON.stringify({
+      {
         t: "init_game",
         d: {
           gameId: this.gameId,
@@ -63,7 +63,8 @@ export class Game {
           currentFen:
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
         },
-      })
+      },
+      this.gameId
     );
   }
 
@@ -142,7 +143,7 @@ export class Game {
       }
       this.gameEnd(type, winner);
     }
-    await this.producer.send(JSON.stringify(movePayload));
+    await this.producer.send(movePayload, this.gameId);
   }
 
   handleDrawOffer(socket: WebSocket) {
@@ -163,7 +164,11 @@ export class Game {
         this.player1TimeLeft,
         this.player2TimeLeft
       );
-      await this.producer.send(JSON.stringify(gameOverPayload)); // produce message to a queue.
+      if (gameOverPayload) {
+        await this.producer.send(gameOverPayload, this.gameId);
+      } else {
+        this.handleError("", "Not able to send GameOverPayload to client");
+      }
     } catch (error: any) {
       this.handleError(error, "Error while sending Game Over Message");
     }

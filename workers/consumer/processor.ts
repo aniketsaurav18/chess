@@ -1,4 +1,4 @@
-import { GameOverPayload, MovePayload } from "./types/types";
+import { GameOverPayload, InitGamePayload, MovePayload } from "./types/types";
 
 // {
 //     t: "init_game",
@@ -10,16 +10,6 @@ import { GameOverPayload, MovePayload } from "./types/types";
 //         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 //     },
 //   }
-
-type InitGamePayload = {
-  t: string;
-  d: {
-    gameId: string;
-    startTime: Date;
-    timeControl: number;
-    currentFen: string;
-  };
-};
 
 const insertMove = async (data) => {
   console.log(data);

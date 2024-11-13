@@ -1,4 +1,9 @@
 import { Kafka } from "kafkajs";
+import {
+  GameOverPayload,
+  InitGamePayloadProducer,
+  MovePayload,
+} from "../types/types";
 
 class Producer {
   private producer;
@@ -8,7 +13,11 @@ class Producer {
   async connect() {
     await this.producer.connect();
   }
-  async send(msg: string) {
+  async send(
+    msg: GameOverPayload | InitGamePayloadProducer | MovePayload,
+    gameId: string
+  ) {
+    const producerMessage = JSON.stringify({ gameId: gameId, payload: msg });
     try {
       console.log("sending message to kafka: ", msg);
       await this.producer.send({
@@ -16,7 +25,7 @@ class Producer {
         messages: [
           {
             key: "moves-update",
-            value: msg,
+            value: producerMessage,
           },
         ],
       });

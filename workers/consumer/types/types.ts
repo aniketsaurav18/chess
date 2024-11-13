@@ -1,5 +1,15 @@
 import { GAME_OVER, MOVE } from "./messages.ts";
 
+export interface InitGamePayload {
+  t: string;
+  d: {
+    gameId: string;
+    startTime: Date;
+    timeControl: number;
+    currentFen: string;
+  };
+}
+
 export interface MovePayload {
   t: typeof MOVE;
   d: {

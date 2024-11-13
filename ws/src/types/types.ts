@@ -11,6 +11,17 @@ import {
 } from "../messages";
 
 export type Result = "white" | "black" | "draw";
+
+export interface InitGamePayloadProducer {
+  t: string;
+  d: {
+    gameId: string;
+    startTime: Date;
+    timeControl: number;
+    currentFen: string;
+  };
+}
+
 export type GameOverType =
   | "draw"
   | "white_timeout"
