@@ -9,6 +9,9 @@ import {
   DRAW_ACCEPTED,
 } from "./messages";
 import Producer from "./kafka/producer";
+import pool from "./db/db";
+
+const TimeLimitAllowed: number[] = [2, 5, 10, 15] //minutes
 
 export class GameManager {
   private games: Game[];
@@ -52,7 +55,7 @@ export class GameManager {
     try {
       switch (msg.t) {
         case INIT_GAME:
-          this.handleInitGame(socket, msg);
+          await this.handleInitGame(socket, msg);
           break;
         case MOVE:
           await this.handleMove(socket, msg);
@@ -82,19 +85,38 @@ export class GameManager {
       );
     }
   }
-  private handleInitGame(socket: WebSocket, msg: any) {
+  private async handleInitGame(socket: WebSocket, msg: any) {
+    // NOTE: time match match making is not being handled here. 
+    // TODO: add a time based match making.
     if (this.pendingUser !== null) {
+      let timeLimit = 10; //timelimit should be in minutes
+      try {
+        timeLimit = Number(msg.d.tl);
+        const match =  TimeLimitAllowed.filter((t) => {t === timeLimit})
+        if(!match){
+          throw new Error("Time Limit now allowed")
+        }
+      } catch (e: any) {
+        this.handleError(socket, "Invalid time limit", e)
+      }
       const game = new Game(
         this.pendingUser,
         socket,
         this.producer,
-        Number(msg.d.tl) // TODO: make check for this number.
+        timeLimit
       );
       this.games.push(game);
       this.pendingUser = null;
     } else {
       this.pendingUser = socket;
     }
+  }
+
+  private async createGameDB(timecontrol: number) {
+    try{
+      const dbRes = await pool.query("INSERT INTO Game (status, timecontrol) VALUE ($1, $2)", ["IN_PROGRESS", timecontrol])
+    }
+    
   }
 
   private async handleMove(socket: WebSocket, msg: any) {
@@ -134,7 +156,7 @@ export class GameManager {
   }
 
   private handleError(socket: WebSocket, errorMsg: string, error: Error) {
-    console.error(error.message); // Log the error on the server
+    console.error(error.message); // TODO: Send Log the error on the server
     socket.send(
       JSON.stringify({
         t: ERR,
