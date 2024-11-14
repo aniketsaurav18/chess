@@ -24,13 +24,13 @@ model User {
 
 model Game {
   id            String      @id @default(cuid())
-  whitePlayerId String
-  blackPlayerId String
-  whitePlayer   User        @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
-  blackPlayer   User        @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
+  whitePlayerId String?
+  blackPlayerId String?
+  whitePlayer   User?       @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
+  blackPlayer   User?       @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
   status        GameStatus
   result        GameResult?
-  timeControl   TimeControl
+  timeControl   Int         @default(10)
   moves         Move[]      @relation("GameMoves")
   pgn           String?
   currentFen    String?
@@ -68,11 +68,4 @@ enum GameResult {
   BLACK_TIMEOUT
   WHITE_ABANDONED
   BLACK_ABANDONED
-}
-
-enum TimeControl {
-  BULLET
-  BLITZ
-  RAPID
-  CLASSICAL
 }
