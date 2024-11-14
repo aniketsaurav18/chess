@@ -4,9 +4,6 @@ CREATE TYPE "GameStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'FINISHED');
 -- CreateEnum
 CREATE TYPE "GameResult" AS ENUM ('WHITE', 'BLACK', 'DRAW', 'WHITE_TIMEOUT', 'BLACK_TIMEOUT', 'WHITE_ABANDONED', 'BLACK_ABANDONED');
 
--- CreateEnum
-CREATE TYPE "TimeControl" AS ENUM ('BULLET', 'BLITZ', 'RAPID', 'CLASSICAL');
-
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -24,11 +21,11 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Game" (
     "id" TEXT NOT NULL,
-    "whitePlayerId" TEXT NOT NULL,
-    "blackPlayerId" TEXT NOT NULL,
+    "whitePlayerId" TEXT,
+    "blackPlayerId" TEXT,
     "status" "GameStatus" NOT NULL,
     "result" "GameResult",
-    "timeControl" "TimeControl" NOT NULL,
+    "timeControl" INTEGER NOT NULL DEFAULT 10,
     "pgn" TEXT,
     "currentFen" TEXT,
     "startAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -67,10 +64,10 @@ CREATE INDEX "Game_id_result_idx" ON "Game"("id", "result");
 CREATE INDEX "Move_gameId_moveNum_idx" ON "Move"("gameId", "moveNum");
 
 -- AddForeignKey
-ALTER TABLE "Game" ADD CONSTRAINT "Game_whitePlayerId_fkey" FOREIGN KEY ("whitePlayerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Game" ADD CONSTRAINT "Game_whitePlayerId_fkey" FOREIGN KEY ("whitePlayerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Game" ADD CONSTRAINT "Game_blackPlayerId_fkey" FOREIGN KEY ("blackPlayerId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Game" ADD CONSTRAINT "Game_blackPlayerId_fkey" FOREIGN KEY ("blackPlayerId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Move" ADD CONSTRAINT "Move_gameId_fkey" FOREIGN KEY ("gameId") REFERENCES "Game"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
