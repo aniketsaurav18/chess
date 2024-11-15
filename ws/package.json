@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "chess-ws-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,14 +11,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/ws": "^8.5.10",
     "chess.js": "^1.0.0-beta.8",
+    "cuid": "^3.0.0",
     "dotenv": "^16.4.5",
     "kafkajs": "^2.2.4",
     "pg": "^8.13.1",
     "ws": "^8.16.0"
   },
   "devDependencies": {
-    "@types/pg": "^8.11.10"
+    "@types/pg": "^8.11.10",
+    "@types/ws": "^8.5.10"
   }
 }

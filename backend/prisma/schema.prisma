@@ -7,51 +7,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model user {
   id           String    @id @default(cuid())
   username     String    @unique
   name         String?
   email        String    @unique
   password     String
   rating       Int       @default(1200)
-  gamesAsWhite Game[]    @relation("GamesAsWhite")
-  gamesAsBlack Game[]    @relation("GamesAsBlack")
-  createdAt    DateTime  @default(now())
-  lastLogin    DateTime?
+  gamesAsWhite game[]    @relation("GamesAsWhite")
+  gamesAsBlack game[]    @relation("GamesAsBlack")
+  created_at   DateTime  @default(now())
+  last_login   DateTime?
 
   @@index([rating])
 }
 
-model Game {
-  id            String      @id @default(cuid())
-  whitePlayerId String?
-  blackPlayerId String?
-  whitePlayer   User?       @relation("GamesAsWhite", fields: [whitePlayerId], references: [id])
-  blackPlayer   User?       @relation("GamesAsBlack", fields: [blackPlayerId], references: [id])
-  status        GameStatus
-  result        GameResult?
-  timeControl   Int         @default(10)
-  moves         Move[]      @relation("GameMoves")
-  pgn           String?
-  currentFen    String?
-  startAt       DateTime    @default(now())
-  endAt         DateTime?
-  opening       String?
-  event         String?
+model game {
+  id              String      @id @default(cuid())
+  white_player_id String?
+  black_player_id String?
+  whitePlayer     user?       @relation("GamesAsWhite", fields: [white_player_id], references: [id])
+  blackPlayer     user?       @relation("GamesAsBlack", fields: [black_player_id], references: [id])
+  status          GameStatus
+  result          GameResult?
+  time_control    Int         @default(10)
+  moves           move[]      @relation("GameMoves")
+  pgn             String?
+  current_fen     String?
+  start_at        DateTime    @default(now())
+  end_at          DateTime?
+  opening         String?
+  event           String?
 
   @@index([id, result])
 }
 
-model Move {
+model move {
   id        String   @id @default(cuid())
-  gameId    String
-  game      Game     @relation("GameMoves", fields: [gameId], references: [id])
+  game_id   String
+  game      game     @relation("GameMoves", fields: [game_id], references: [id])
   move      String
   moveNum   Int
   fenAfter  String?
   createdAt DateTime @default(now())
 
-  @@index([gameId, moveNum])
+  @@index([game_id, moveNum])
 }
 
 enum GameStatus {

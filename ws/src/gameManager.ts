@@ -1,5 +1,6 @@
 import { WebSocket } from "ws";
 import { Game } from "./game";
+import cuid from "cuid";
 import {
   INIT_GAME,
   MOVE,
@@ -11,7 +12,7 @@ import {
 import Producer from "./kafka/producer";
 import pool from "./db/db";
 
-const TimeLimitAllowed: number[] = [2, 5, 10, 15] //minutes
+const TimeLimitAllowed: number[] = [2, 5, 10, 15]; //minutes
 
 export class GameManager {
   private games: Game[];
@@ -44,9 +45,9 @@ export class GameManager {
       });
     } catch (e: any) {
       this.handleError(
-        socket,
         "An error occurred while initializing the game.",
-        e
+        e,
+        socket
       );
     }
   }
@@ -71,40 +72,38 @@ export class GameManager {
           break;
         default:
           this.handleError(
-            socket,
             "Unknown message type.",
-            new Error(`Unknown message type: ${msg.t}`)
+            new Error(`Unknown message type: ${msg.t}`),
+            socket
           );
           break;
       }
     } catch (e: any) {
       this.handleError(
-        socket,
         "An error occurred while processing the message.",
-        e
+        e,
+        socket
       );
     }
   }
   private async handleInitGame(socket: WebSocket, msg: any) {
-    // NOTE: time match match making is not being handled here. 
+    // NOTE: time match match making is not being handled here.
     // TODO: add a time based match making.
     if (this.pendingUser !== null) {
       let timeLimit = 10; //timelimit should be in minutes
       try {
         timeLimit = Number(msg.d.tl);
-        const match =  TimeLimitAllowed.filter((t) => {t === timeLimit})
-        if(!match){
-          throw new Error("Time Limit now allowed")
+        const match = TimeLimitAllowed.filter((t) => {
+          t === timeLimit;
+        });
+        if (!match) {
+          throw new Error("Time Limit now allowed");
         }
       } catch (e: any) {
-        this.handleError(socket, "Invalid time limit", e)
+        this.handleError("Invalid time limit", e, socket);
       }
-      const game = new Game(
-        this.pendingUser,
-        socket,
-        this.producer,
-        timeLimit
-      );
+      await this.createGameDB(timeLimit, "IN_PROGRESS");
+      const game = new Game(this.pendingUser, socket, this.producer, timeLimit);
       this.games.push(game);
       this.pendingUser = null;
     } else {
@@ -112,11 +111,42 @@ export class GameManager {
     }
   }
 
-  private async createGameDB(timecontrol: number) {
-    try{
-      const dbRes = await pool.query("INSERT INTO Game (status, timecontrol) VALUE ($1, $2)", ["IN_PROGRESS", timecontrol])
+  private async createGameDB(
+    timecontrol: number,
+    status: "IN_PROGRESS" | "OPEN" | "FINISHED",
+    whitePlayerId?: string,
+    blackPlayerId?: string
+  ) {
+    const id = cuid();
+    const column = ["id", "status", "timeControl"];
+    const values = [id, "IN_PROGRESS", timecontrol];
+    const placeholder = ["$1", "$2", "$3"];
+    if (whitePlayerId && blackPlayerId) {
+      column.push("whitePlayerId");
+      values.push(whitePlayerId);
+      placeholder.push(`$${values.length}`);
+      column.push("blackPlayerId");
+      values.push(blackPlayerId);
+      placeholder.push(`$${values.length}`);
     }
-    
+    try {
+      const dbQuery = `INSERT INTO game (${column.join(
+        ", "
+      )}) VALUES (${placeholder.join(", ")}) RETURNING *`;
+      const dbRes = await pool.query(dbQuery, values);
+      if (!dbRes) {
+        this.handleError(
+          "Initialization of game into DB failed",
+          new Error("Game initialisation failed.")
+        );
+      }
+    } catch (e: any) {
+      if (e.code === "23505") {
+        this.handleError("Duplicate entry in game creation", e);
+      } else {
+        this.handleError("Unexpected error during game creation", e);
+      }
+    }
   }
 
   private async handleMove(socket: WebSocket, msg: any) {
@@ -124,7 +154,7 @@ export class GameManager {
     if (game) {
       await game.makeMove(socket, msg.d.m);
     } else {
-      this.handleError(socket, "Game not found.", new Error("Game not found"));
+      this.handleError("Game not found.", new Error("Game not found"), socket);
     }
   }
 
@@ -133,7 +163,7 @@ export class GameManager {
     if (game) {
       game.handleDrawOffer(socket);
     } else {
-      this.handleError(socket, "No Game Found", new Error("No Game Found"));
+      this.handleError("No Game Found", new Error("No Game Found"), socket);
     }
   }
 
@@ -142,7 +172,7 @@ export class GameManager {
     if (game) {
       game.resign(socket);
     } else {
-      this.handleError(socket, "Game not found.", new Error("Game not found"));
+      this.handleError("Game not found.", new Error("Game not found"), socket);
     }
   }
 
@@ -151,13 +181,13 @@ export class GameManager {
     if (game) {
       game.gameDraw();
     } else {
-      this.handleError(socket, "Game not found.", new Error("Game not found"));
+      this.handleError("Game not found.", new Error("Game not found"), socket);
     }
   }
 
-  private handleError(socket: WebSocket, errorMsg: string, error: Error) {
+  private handleError(errorMsg: string, error: Error, socket?: WebSocket) {
     console.error(error.message); // TODO: Send Log the error on the server
-    socket.send(
+    socket?.send(
       JSON.stringify({
         t: ERR,
         d: {
