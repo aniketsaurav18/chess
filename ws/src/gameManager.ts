@@ -102,8 +102,14 @@ export class GameManager {
       } catch (e: any) {
         this.handleError("Invalid time limit", e, socket);
       }
-      await this.createGameDB(timeLimit, "IN_PROGRESS");
-      const game = new Game(this.pendingUser, socket, this.producer, timeLimit);
+      const gameId = await this.createGameDB(timeLimit, "IN_PROGRESS");
+      const game = new Game(
+        this.pendingUser,
+        socket,
+        this.producer,
+        timeLimit,
+        gameId
+      );
       this.games.push(game);
       this.pendingUser = null;
     } else {
@@ -116,11 +122,12 @@ export class GameManager {
     status: "IN_PROGRESS" | "OPEN" | "FINISHED",
     whitePlayerId?: string,
     blackPlayerId?: string
-  ) {
+  ): Promise<string> {
     const id = cuid();
     const column = ["id", "status", "timeControl"];
-    const values = [id, "IN_PROGRESS", timecontrol];
+    const values = [id, status, timecontrol];
     const placeholder = ["$1", "$2", "$3"];
+
     if (whitePlayerId && blackPlayerId) {
       column.push("whitePlayerId");
       values.push(whitePlayerId);
@@ -129,23 +136,27 @@ export class GameManager {
       values.push(blackPlayerId);
       placeholder.push(`$${values.length}`);
     }
+
     try {
       const dbQuery = `INSERT INTO game (${column.join(
         ", "
-      )}) VALUES (${placeholder.join(", ")}) RETURNING *`;
+      )}) VALUES (${placeholder.join(", ")}) RETURNING id`;
       const dbRes = await pool.query(dbQuery, values);
-      if (!dbRes) {
+
+      if (dbRes.rows.length === 0) {
         this.handleError(
           "Initialization of game into DB failed",
           new Error("Game initialisation failed.")
         );
       }
+      return dbRes.rows[0].id;
     } catch (e: any) {
       if (e.code === "23505") {
         this.handleError("Duplicate entry in game creation", e);
       } else {
         this.handleError("Unexpected error during game creation", e);
       }
+      throw e;
     }
   }
 
