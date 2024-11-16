@@ -1,4 +1,4 @@
-import { GAME_OVER, MOVE } from "./messages.ts";
+import { GAME_OVER, MOVE } from "./messages";
 
 export interface InitGamePayload {
   t: string;

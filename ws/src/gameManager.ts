@@ -124,15 +124,15 @@ export class GameManager {
     blackPlayerId?: string
   ): Promise<string> {
     const id = cuid();
-    const column = ["id", "status", "timeControl"];
+    const column = ["id", "status", "time_control"];
     const values = [id, status, timecontrol];
     const placeholder = ["$1", "$2", "$3"];
 
     if (whitePlayerId && blackPlayerId) {
-      column.push("whitePlayerId");
+      column.push("white_player_id");
       values.push(whitePlayerId);
       placeholder.push(`$${values.length}`);
-      column.push("blackPlayerId");
+      column.push("black_player_id");
       values.push(blackPlayerId);
       placeholder.push(`$${values.length}`);
     }
