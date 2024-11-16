@@ -1,10 +1,10 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { WebSocketServer } from "ws";
 import { GameManager } from "./gameManager";
 import Producer from "./kafka/producer";
-import dotenv from "dotenv";
 import { Kafka } from "kafkajs";
-
-dotenv.config();
+import pool from "./db/db";
 
 async function initKafka(): Promise<Producer> {
   try {
@@ -17,7 +17,6 @@ async function initKafka(): Promise<Producer> {
     // await producer.send(JSON.stringify("hello"));
     return producer;
   } catch (e: any) {
-    console.log("Error connecting to producer \n");
     throw new Error(`Error connecting to producer: ${e.message}`);
   }
 }
@@ -25,6 +24,7 @@ async function initKafka(): Promise<Producer> {
 async function startServer() {
   try {
     const producer = await initKafka();
+    const p = pool;
     console.log("Producer connected.");
 
     const wss = new WebSocketServer({ port: 8080 });

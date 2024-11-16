@@ -8,4 +8,6 @@ const pool = new Pool({
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
 });
 
+pool.query("select * from game");
+
 export default pool;

@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import { Chess, Move } from "chess.js";
 import { Socket } from "./socketManager";
-import { randomUUID } from "crypto";
+import cuid from "cuid";
 import {
   GameMove,
   GameOverType,
@@ -36,7 +36,7 @@ export class Game {
     timeLimit?: number,
     gameId?: string
   ) {
-    this.gameId = randomUUID() as string;
+    this.gameId = gameId ? gameId : (cuid() as string);
     this.gameSocket = new Socket(this.gameId, p1, p2);
     this.board = new Chess();
     this.gameTimeLimit = timeLimit ? timeLimit * 60 * 1000 : TIME_LIMIT; //time limit should be in miliseconds
