@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { Kafka } from "kafkajs";
 
 const Broker = process.env.KAFKA_BROKER || "localhost:9092";
