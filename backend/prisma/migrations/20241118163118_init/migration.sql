@@ -41,9 +41,9 @@ CREATE TABLE "move" (
     "id" TEXT NOT NULL,
     "game_id" TEXT NOT NULL,
     "move" TEXT NOT NULL,
-    "moveNum" INTEGER NOT NULL,
-    "fenAfter" TEXT,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "move_num" INTEGER NOT NULL,
+    "fen_after" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "move_pkey" PRIMARY KEY ("id")
 );
@@ -61,7 +61,7 @@ CREATE INDEX "user_rating_idx" ON "user"("rating");
 CREATE INDEX "game_id_result_idx" ON "game"("id", "result");
 
 -- CreateIndex
-CREATE INDEX "move_game_id_moveNum_idx" ON "move"("game_id", "moveNum");
+CREATE INDEX "move_game_id_move_num_idx" ON "move"("game_id", "move_num");
 
 -- AddForeignKey
 ALTER TABLE "game" ADD CONSTRAINT "game_white_player_id_fkey" FOREIGN KEY ("white_player_id") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;
