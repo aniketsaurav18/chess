@@ -8,8 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
 const kafkajs_1 = require("kafkajs");
+const processor_1 = require("./processor");
 const Broker = process.env.KAFKA_BROKER || "localhost:9092";
 const GroupId = process.env.KAFKA_GROUP_ID || "my-group";
 const kafka = new kafkajs_1.Kafka({
@@ -25,12 +31,16 @@ const startConsumer = () => __awaiter(void 0, void 0, void 0, function* () {
         console.log("Subscribed to topic");
         yield consumer.run({
             eachMessage: (_a) => __awaiter(void 0, [_a], void 0, function* ({ topic, partition, message }) {
+                var _b;
+                console.log("Message recieved");
                 console.log({
                     topic,
                     partition,
                     key: message.key ? message.key.toString() : "no key",
                     value: message.value ? message.value.toString() : "no value",
                 });
+                const val = (_b = message.value) === null || _b === void 0 ? void 0 : _b.toString();
+                yield (0, processor_1.Processor)(val);
             }),
         });
     }

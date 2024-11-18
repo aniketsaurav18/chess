@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import { Kafka } from "kafkajs";
+import { Processor } from "./processor";
 
 const Broker = process.env.KAFKA_BROKER || "localhost:9092";
 const GroupId = process.env.KAFKA_GROUP_ID || "my-group";
@@ -23,12 +24,15 @@ const startConsumer = async () => {
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
+        console.log("Message recieved");
         console.log({
           topic,
           partition,
           key: message.key ? message.key.toString() : "no key",
           value: message.value ? message.value.toString() : "no value",
         });
+        const val = message.value?.toString() as string;
+        await Processor(val);
       },
     });
   } catch (error) {

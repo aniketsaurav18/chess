@@ -93,9 +93,11 @@ const PGErrorTable = {
   ],
 };
 
-const queryDB = async (query: string): Promise<QueryResultDB> => {
+const queryDB = async (query: string, value: any[]): Promise<QueryResultDB> => {
   try {
-    const res = await pool.query(query);
+    const res = await pool.query(query, value);
+    console.log("database response");
+    console.log(res);
     return { result: "success", queryResult: res };
   } catch (e: any) {
     if (e.code === "23505") {
@@ -118,16 +120,16 @@ const queryDB = async (query: string): Promise<QueryResultDB> => {
 
 const insertMove = async (id: string, data: MovePayload) => {
   const moveId = cuid();
-  const column = ["id", "game_id", "move", "movenum", '"fenAfter"']; //TODO: convert fenAfter to fen_after for consistency.
+  const column = ["id", "game_id", "move", "move_num", "fen_after"]; //TODO: convert fenAfter to fen_after for consistency.
   const values = [moveId, id, data.d.san, 1, data.d.f];
   const query = `INSERT INTO move (${column.join(", ")}) VALUES (${values
-    .map((_, index) => {
-      `$${index + 1}`;
-    })
+    .map((_, index) => `$${index + 1}`)
     .join(", ")})`;
-  const res = await queryDB(query);
+  const res = await queryDB(query, values);
   if (res.result === "error") {
     console.error(res.errorMessage, query);
+  } else if (res.result === "success") {
+    console.log("query executed successfully");
   }
 };
 
@@ -146,9 +148,9 @@ export const Processor = async (message: string) => {
     | GameOverPayload
     | InitGamePayload;
   const id = data.gameId;
-  switch (data.t) {
+  switch (payload.t) {
     case "move": {
-      await insertMove(id, data.d);
+      await insertMove(id, payload as MovePayload);
     }
 
     // case "game_over": {

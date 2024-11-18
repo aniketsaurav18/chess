@@ -43,15 +43,15 @@ model game {
 }
 
 model move {
-  id        String   @id @default(cuid())
-  game_id   String
-  game      game     @relation("GameMoves", fields: [game_id], references: [id])
-  move      String
-  moveNum   Int
-  fenAfter  String?
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  game_id    String
+  game       game     @relation("GameMoves", fields: [game_id], references: [id])
+  move       String
+  move_num   Int
+  fen_after  String?
+  created_at DateTime @default(now())
 
-  @@index([game_id, moveNum])
+  @@index([game_id, move_num])
 }
 
 enum GameStatus {
