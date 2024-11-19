@@ -61,9 +61,9 @@ enum GameStatus {
 }
 
 enum GameResult {
-  WHITE
-  BLACK
-  DRAW
+  white
+  black
+  draw
   WHITE_TIMEOUT
   BLACK_TIMEOUT
   WHITE_ABANDONED
