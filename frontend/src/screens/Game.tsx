@@ -119,7 +119,11 @@ export default function Game() {
             ref={chessboardDivRef}
           >
             <div className="relative">
-              <GameModal isGameOverModal={isGameOver} message={gameResult} />
+              <GameModal
+                isGameOverModal={isGameOver}
+                message={gameResult}
+                startGameFn={startGame}
+              />
               <ChessBoard
                 makeMove={makeMove}
                 boardState={gameState}

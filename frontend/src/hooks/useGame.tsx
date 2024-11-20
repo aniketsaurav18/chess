@@ -25,6 +25,7 @@ export function useChessGame(user: any) {
   const [gameId, setGameID] = useState<string | null>(null);
   const [gameState, setGameState] = useState(game.fen());
   const [gameStatus, setGameStatus] = useState<GameStatus>("IDEAL");
+  const gameStatusRef = useRef<GameStatus>("IDEAL");
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [waiting, setWaiting] = useState(false);
   const [side, setSide] = useState<BoardOrientation>("white");
@@ -41,6 +42,10 @@ export function useChessGame(user: any) {
   }, [user]);
 
   useEffect(() => {
+    gameStatusRef.current = gameStatus;
+  }, [gameStatus]);
+
+  useEffect(() => {
     if (!socket) {
       return;
     }
@@ -54,9 +59,18 @@ export function useChessGame(user: any) {
           setplayer1clock(message.d.clock.w);
           setplayer2clock(message.d.clock.b);
           setGameStatus("STARTED");
+          console.log("game status", gameStatus);
           setWaiting(false);
           break;
         case MOVE:
+          if (gameStatusRef.current !== "STARTED") {
+            console.log("incoming move: game not started yet");
+            break;
+          }
+          if (game.turn() !== side[0]) {
+            console.log("incoming move: not your turn");
+            break;
+          }
           const move = game.move(message.d.san);
           if (!move) {
             break;

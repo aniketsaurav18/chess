@@ -7,6 +7,9 @@ export default defineConfig({
   define: {
     "process.env": {},
   },
+  server: {
+    host: "127.0.0.1",
+  },
   // server: {
   //   https: {
   //     key: fs.readFileSync("localhost-key.pem"),
