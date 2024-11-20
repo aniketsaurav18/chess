@@ -63,14 +63,14 @@ export function useChessGame(user: any) {
           setWaiting(false);
           break;
         case MOVE:
-          if (gameStatusRef.current !== "STARTED") {
-            console.log("incoming move: game not started yet");
-            break;
-          }
-          if (game.turn() !== side[0]) {
-            console.log("incoming move: not your turn");
-            break;
-          }
+          // if (gameStatusRef.current !== "STARTED") {
+          //   console.log("incoming move: game not started yet");
+          //   break;
+          // }
+          // if (game.turn() !== side[0]) {
+          //   console.log("incoming move: not your turn");
+          //   break;
+          // }
           const move = game.move(message.d.san);
           if (!move) {
             break;

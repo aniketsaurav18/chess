@@ -42,32 +42,58 @@ export default function GameModal({
   }, [handleClose]);
   if (isOpen) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+      <div className="flex flex-col p-4 w-[55%] absolute left-1/2 top-1/2 bg-[#262421] z-10 transform -translate-x-1/2 -translate-y-1/2 rounded-2xl shadow-xl sm:w-[70%]">
+        <div className="rounded-lg shadow-xl max-w-md w-full">
           <div className="p-6">
             <h2 className="text-2xl font-bold mb-2">Game Over</h2>
             <p className="text-lg mb-4">{message}</p>
             <div className="flex justify-center items-center space-x-4 mb-6">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center shadow">
                 <span className="text-4xl" role="img" aria-label="White King">
-                  ♔
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="black"
+                    stroke="black"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
+                    <path d="M5 21h14" />
+                  </svg>
                 </span>
               </div>
-              <div className="text-3xl font-bold">{1 - 0}</div>
-              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center shadow">
+              <div className="text-3xl font-bold">1 - 0</div>
+              <div className="w-16 h-16 bg-gray-950 rounded-full flex items-center justify-center shadow">
                 <span
                   className="text-4xl text-white"
                   role="img"
                   aria-label="Black King"
                 >
-                  ♚
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z" />
+                    <path d="M5 21h14" />
+                  </svg>
                 </span>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <button
                 onClick={handleNewGame}
-                className="w-full sm:w-auto px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                className="w-full sm:w-auto px-4 py-2 bg-green-600 text-white rounded hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
                 New Game
               </button>
