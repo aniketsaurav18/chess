@@ -60,6 +60,7 @@ export const gameOverMessages: GameOverMessage = {
 export type GameStatus = "active" | "over";
 export interface GameMove extends Move {
   time: number;
+  moveNumber: number;
 }
 
 export interface InitGamePayload {
@@ -80,6 +81,8 @@ export interface MovePayload {
     san: string;
     f: string;
     t: number;
+    c: string;
+    ply: number;
     clock: {
       w: number;
       b: number;

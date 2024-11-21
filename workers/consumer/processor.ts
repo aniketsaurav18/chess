@@ -64,7 +64,7 @@ const queryDB = async (query: string, value: any[]): Promise<QueryResultDB> => {
 const insertMove = async (id: string, data: MovePayload) => {
   const moveId = cuid();
   const column = ["id", "game_id", "move", "move_num", "fen_after"];
-  const values = [moveId, id, data.d.san, 1, data.d.f];
+  const values = [moveId, id, data.d.san, data.d.ply, data.d.f];
   const query = `INSERT INTO move (${column.join(", ")}) VALUES (${values
     .map((_, index) => `$${index + 1}`)
     .join(", ")})`;
