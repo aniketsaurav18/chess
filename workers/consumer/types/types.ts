@@ -16,6 +16,8 @@ export interface MovePayload {
     san: string;
     f: string;
     t: number;
+    c: string;
+    ply: number;
     clock: {
       w: number;
       b: number;

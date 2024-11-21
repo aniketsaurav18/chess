@@ -89,6 +89,8 @@ export class Socket {
           san: m.san,
           f: m.after,
           t: m.time,
+          c: m.color,
+          ply: m.moveNumber,
           clock: {
             w: whiteClock,
             b: blackClock,

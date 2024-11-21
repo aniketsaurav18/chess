@@ -89,6 +89,7 @@ export class Game {
     const newMove: GameMove = {
       ...m,
       time: diff,
+      moveNumber: this.moveHistry.length + 1,
     };
     this.moveHistry.push(newMove);
 
