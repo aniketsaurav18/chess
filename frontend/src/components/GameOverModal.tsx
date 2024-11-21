@@ -18,7 +18,7 @@ export default function GameModal({
 
   useEffect(() => {
     setIsOpen(isGameOverModal);
-  });
+  }, [isGameOverModal]);
 
   const handleClose = useCallback(() => {
     setIsOpen(false);
