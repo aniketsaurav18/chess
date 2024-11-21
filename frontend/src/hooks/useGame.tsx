@@ -36,6 +36,7 @@ export function useChessGame(user: any) {
   const [offerDraw, setOfferDraw] = useState<boolean>(false); // player offered a draw
   const [drawOffered, setDrawOffered] = useState<boolean>(false); // a draw was offered to player
   const [gameResult, setGameResult] = useState<string | null>(null);
+  const [winner, setWinner] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("user details", user);
@@ -108,6 +109,7 @@ export function useChessGame(user: any) {
     setTimeout(() => {
       setGameResult(msgPayload.msg);
       setIsGameOver(true);
+      setWinner(msgPayload.winner);
     }, 500);
   };
 
@@ -258,6 +260,7 @@ export function useChessGame(user: any) {
     player1clock,
     player2clock,
     offerDraw,
+    winner,
     gameResign,
     drawOffered,
     setDrawOffered,
