@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 interface ModalProp {
   isGameOverModal: boolean;
   message: string | null;
-  // handleClose?: () => void;
+  winner: string | null;
   startGameFn?: (t: number) => void;
 }
 
@@ -11,6 +11,7 @@ export default function GameModal({
   isGameOverModal,
   message,
   // handleClose,
+  winner,
   startGameFn,
 }: ModalProp) {
   const [isOpen, setIsOpen] = useState(true);
@@ -66,7 +67,9 @@ export default function GameModal({
                   </svg>
                 </span>
               </div>
-              <div className="text-3xl font-bold">1 - 0</div>
+              <div className="text-3xl font-bold">
+                {winner === "white" ? "1-0" : "0-1"}
+              </div>
               <div className="w-16 h-16 bg-gray-950 rounded-full flex items-center justify-center shadow">
                 <span
                   className="text-4xl text-white"

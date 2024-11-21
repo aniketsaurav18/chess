@@ -23,6 +23,7 @@ export default function Game() {
     isGameOver,
     player1clock,
     player2clock,
+    winner,
     makeMove,
     setDrawOffered,
     offerDraw,
@@ -122,6 +123,7 @@ export default function Game() {
               <GameModal
                 isGameOverModal={isGameOver}
                 message={gameResult}
+                winner={winner}
                 startGameFn={startGame}
               />
               <ChessBoard
