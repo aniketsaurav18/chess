@@ -7,6 +7,8 @@ import { Button } from "@nextui-org/button";
 import { Progress } from "@nextui-org/progress";
 import MoveHistory from "./MoveHistory";
 import { DEFAULT_ENGINE_CONFIG } from "../utils/config";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { changeConfiguration } from "../store/slices/engine";
 // import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 
 const PlayAsButton = ({ setSide }: any) => {
@@ -107,6 +109,7 @@ const EngineInfo = ({
   gameHistory,
   engineStatus,
 }: any) => {
+  const dispatch = useAppDispatch();
   const [selectedTab, setSelectedTab] = useState("engine");
   const [selectedEngine, setSelectedEngine] = useState(
     DEFAULT_ENGINE_CONFIG.key
@@ -136,6 +139,19 @@ const EngineInfo = ({
       depth: useDepth ? depth : null,
       time: useTime ? t : null,
     });
+    dispatch(
+      changeConfiguration({
+        key: selectedEngine,
+        label:
+          EngineDetails.find((engine) => engine.key === selectedEngine)
+            ?.label || "Engine",
+        threads: threads,
+        depth: useDepth ? depth : 20,
+        time: useTime ? t : 8000,
+        multipv: 1,
+        elo: 0,
+      })
+    );
     initializeWorker(selectedEngine, {
       threads: threads,
       depth: useDepth ? depth : null,
