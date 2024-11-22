@@ -11,6 +11,7 @@ export const CACHE_NAME = "chess-engine-cache";
 
 export const DEFAULT_ENGINE_CONFIG = {
   key: "stockfish-16.1-lite", // key of default engine. (Refer EngineDetails)
+  label: "Stockfish 16.1 Lite Multi-threaded",
   depth: 20, // engine will search for 20 moves by default
   time: 8000, // engine will search for 8 seconds by default. time in ms
   threads: 1, // only applicable in multithreaded engine.

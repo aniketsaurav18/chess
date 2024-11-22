@@ -9,9 +9,13 @@ import Sidebar from "../components/Sidebar";
 import { viewportWidthBreakpoint } from "../utils/config";
 import EngineInfo from "../components/EngineInfo";
 import GameModal from "../components/GameOverModal";
+import { useAppSelector } from "../store/hooks";
 // import GameModal from "../components/GameOverModal";
 
 const ComputerPlay = () => {
+  const engineConfiguration = useAppSelector(
+    (state) => state.engineConfiguration
+  );
   const windowDimensions = useWindowDimensions();
   const user = useUser();
   const [boardWidth, setBoardWidth] = useState<number>(500);
@@ -26,6 +30,7 @@ const ComputerPlay = () => {
     side,
     boardState,
     engineReady,
+    // engineConfiguration,
     setSide,
     initializeWorker,
     // sendCommand,
@@ -83,6 +88,21 @@ const ComputerPlay = () => {
       >
         <div className="w-[60%] h-full flex flex-col items-center justify-center m-0 p-0 lg:w-full lg:h-[80vh] md:h-[40rem] sm:h-[30rem]">
           <div
+            className="w-full h-[3rem] flex flex-row justify-between items-center md:w-full bg-[#3C3B39]"
+            style={{ width: boardWidth }}
+          >
+            <div className="flex flex-row justify-start items-center w-[55%] h-full text-[1.2rem] font-bold text-white mr-[5rem] sm:text-[2rem] sm:h-[2rem]">
+              {/* <img
+                className="h-full"
+                src={defaultUserImage}
+                alt={defaultUserImage}
+              /> */}
+              <span className="ml-[0.5rem] text-base sm:text-sm">
+                {engineConfiguration.label}
+              </span>
+            </div>
+          </div>
+          <div
             className="w-full flex-grow my-2 p-0 grid place-items-center lg:w-full lg:h-full"
             ref={chessboardDivRef}
           >
@@ -112,6 +132,21 @@ const ComputerPlay = () => {
               />
             </div>
           </div>
+          <div
+            className="w-full h-[3rem] flex flex-row justify-between items-center md:w-full bg-[#3C3B39]"
+            style={{ width: boardWidth }}
+          >
+            <div className="flex flex-row justify-start items-center w-[55%] h-full text-[1.2rem] font-bold text-white mr-[5rem] sm:text-[2rem] sm:h-[2rem]">
+              {/* <img
+                className="h-full"
+                src={defaultUserImage}
+                alt={defaultUserImage}
+              /> */}
+              <span className="ml-[0.5rem] text-base sm:text-sm">
+                {engineConfiguration.label}
+              </span>
+            </div>
+          </div>
         </div>
         <EngineInfo
           initializeWorker={initializeWorker}
@@ -121,21 +156,6 @@ const ComputerPlay = () => {
           gameHistory={gameHistory}
           engineStatus={engineReady}
         />
-        {/* <GameInfo
-          side={side}
-          socket={socket}
-          startGame={startGame}
-          status={gameStatus}
-          waiting={waiting}
-          gameHistory={gameHistory}
-          drawOffered={drawOffered}
-          setDrawOffered={setDrawOffered}
-          offerDrawfn={offerDrawfn}
-          offerDraw={offerDraw}
-          gameResignfn={gameResign}
-          drawAcceptedfn={drawAcceptedfn}
-          drawDeclinefn={drawDeclinedfn}
-        /> */}
       </main>
     </>
   );
