@@ -8,7 +8,7 @@ import { Progress } from "@nextui-org/progress";
 import MoveHistory from "./MoveHistory";
 import { DEFAULT_ENGINE_CONFIG } from "../utils/config";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { changeConfiguration } from "../store/slices/engine";
+import { changeConfiguration } from "../store/slices/engine/engineConfiguration";
 // import { CheckboxGroup, Checkbox } from "@nextui-org/checkbox";
 
 const PlayAsButton = ({ setSide }: any) => {
@@ -107,9 +107,9 @@ const EngineInfo = ({
   setEngineConfiguration,
   setSide,
   gameHistory,
-  engineStatus,
 }: any) => {
   const dispatch = useAppDispatch();
+  const engineStatus = useAppSelector((state) => state.engine.status);
   const [selectedTab, setSelectedTab] = useState("engine");
   const [selectedEngine, setSelectedEngine] = useState(
     DEFAULT_ENGINE_CONFIG.key
@@ -257,7 +257,11 @@ const EngineInfo = ({
             >
               Apply
             </Button>
-            <div>{engineStatus ? "Engine Ready" : "Engine Not Ready"}</div>
+            <div>
+              {engineStatus.status === "ready"
+                ? "Engine Ready"
+                : "Engine Not Ready"}
+            </div>
           </div>
         </Tab>
         <Tab key={"history"} title={"History"}>

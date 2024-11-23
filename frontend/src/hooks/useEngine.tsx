@@ -9,11 +9,12 @@ import {
   DEFAULT_ENGINE_CONFIG,
 } from "../utils/config";
 import { Move } from "../types";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { updateStatus } from "../store/slices/engine/engineStatus";
 
 const use_cdn_recource = import.meta.env.VITE_USE_CDN_RESOURCE === "true";
 
 const useEngine = () => {
-  //   const [engine, setEngine] = useState<Engine | null>(null);
   const [queue, _setQueue] = useState<Queue<string>>(new Queue());
   const [downloadProgress, setDownloadProgress] = useState({
     currentlyDownloading: "",
@@ -24,7 +25,8 @@ const useEngine = () => {
   const [engineWrapper, setEngineWrapper] = useState<EngineWrapper | null>(
     null
   );
-  const [engineReady, setEngineReady] = useState(false);
+  const engineStatus = useAppSelector((state) => state.engine.status);
+  const dispatch = useAppDispatch();
   const [engineConfiguration, setEngineConfiguration] = useState<any>({
     ...DEFAULT_ENGINE_CONFIG,
   });
@@ -56,7 +58,7 @@ const useEngine = () => {
       setGameStatus("OVER");
       return;
     }
-    if (!engineReady) {
+    if (!engineStatus) {
       return;
     }
     if (
@@ -65,7 +67,7 @@ const useEngine = () => {
     ) {
       initiateEngineMove(game.fen());
     }
-  }, [engineReady, side, boardState]);
+  }, [engineStatus, side, boardState]);
 
   const initiateEngineMove = async (fen: string) => {
     console.log("initiating engine move");
@@ -258,7 +260,7 @@ const useEngine = () => {
         };
         if (initialized) {
           console.log("Engine Initialized");
-          setEngineReady(true);
+          dispatch(updateStatus("ready"));
           setGameStatus("STARTED");
         }
 
@@ -292,7 +294,6 @@ const useEngine = () => {
     gameStatus,
     side,
     setSide,
-    engineReady,
     engineConfiguration,
     initializeWorker,
     sendCommand,

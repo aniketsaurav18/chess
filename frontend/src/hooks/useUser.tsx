@@ -13,9 +13,9 @@ const useUser = (): User => {
   const [user, setUser] = useState<User>({
     userId: "",
     email: "",
-    name: "",
+    name: "Guest",
     token: "",
-    username: "",
+    username: "guest",
     type: "guest",
   });
 
