@@ -3,24 +3,22 @@ import { Chessboard } from "react-chessboard";
 import useEngine from "../hooks/useEngine";
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import useUser from "../hooks/useUser";
-// import defaultUserImage from "../assets/default-user.jpg";
-// import GameInfo from "../components/GameInfo";
 import Sidebar from "../components/Sidebar";
 import { viewportWidthBreakpoint } from "../utils/config";
 import EngineInfo from "../components/EngineInfo";
 import GameModal from "../components/GameOverModal";
 import { useAppSelector } from "../store/hooks";
-// import GameModal from "../components/GameOverModal";
+import { GoDotFill } from "react-icons/go";
 
 const ComputerPlay = () => {
+  const engineState = useAppSelector((state) => state.engine.status);
   const engineConfiguration = useAppSelector(
-    (state) => state.engineConfiguration
+    (state) => state.engine.configuration
   );
   const windowDimensions = useWindowDimensions();
   const user = useUser();
   const [boardWidth, setBoardWidth] = useState<number>(500);
   const [modal, setModal] = useState(false);
-  // const [command, setCommand] = useState("");
   const {
     // worker,
     // progress,
@@ -29,7 +27,6 @@ const ComputerPlay = () => {
     downloadProgress,
     side,
     boardState,
-    engineReady,
     // engineConfiguration,
     setSide,
     initializeWorker,
@@ -88,17 +85,35 @@ const ComputerPlay = () => {
       >
         <div className="w-[60%] h-full flex flex-col items-center justify-center m-0 p-0 lg:w-full lg:h-[80vh] md:h-[40rem] sm:h-[30rem]">
           <div
-            className="w-full h-[3rem] flex flex-row justify-between items-center md:w-full bg-[#3C3B39]"
+            className="w-full h-[3.5rem] flex flex-row md:w-full bg-[#3C3B39]"
             style={{ width: boardWidth }}
           >
-            <div className="flex flex-row justify-start items-center w-[55%] h-full text-[1.2rem] font-bold text-white mr-[5rem] sm:text-[2rem] sm:h-[2rem]">
-              {/* <img
+            {/* <div className="flex flex-row justify-start items-center w-20 h-full text-[1.2rem] font-bold text-white sm:text-[2rem] sm:h-[2rem]">
+              <img
                 className="h-full"
-                src={defaultUserImage}
-                alt={defaultUserImage}
-              /> */}
-              <span className="ml-[0.5rem] text-base sm:text-sm">
-                {engineConfiguration.label}
+                src="/stockfish-logo.png"
+                alt="stockfish logo"
+              />
+            </div> */}
+            <img
+              className="h-full"
+              src="/stockfish-logo.png"
+              alt="stockfish logo"
+            />
+            <div className="w-full text-left mx-2 flex flex-col items-start justify-center">
+              <span className="text-base sm:text-sm block my-0">
+                {engineConfiguration.configuration.label}
+              </span>
+              <span className="">
+                {engineState.status === "ready" ? (
+                  <span className="text-sm flex flex-row items-center">
+                    Status: Ready <GoDotFill size={20} fill="#008000" />
+                  </span>
+                ) : (
+                  <span className="text-sm flex flex-row items-center">
+                    Status: Not Ready <GoDotFill size={20} fill="#AA0000" />
+                  </span>
+                )}
               </span>
             </div>
           </div>
@@ -133,17 +148,17 @@ const ComputerPlay = () => {
             </div>
           </div>
           <div
-            className="w-full h-[3rem] flex flex-row justify-between items-center md:w-full bg-[#3C3B39]"
+            className="w-full h-[3.5rem] flex flex-row justify-between items-center md:w-full bg-[#3C3B39]"
             style={{ width: boardWidth }}
           >
             <div className="flex flex-row justify-start items-center w-[55%] h-full text-[1.2rem] font-bold text-white mr-[5rem] sm:text-[2rem] sm:h-[2rem]">
-              {/* <img
-                className="h-full"
-                src={defaultUserImage}
-                alt={defaultUserImage}
-              /> */}
+              <img
+                className="h-[80%] rounded-lg"
+                src="/default-user.jpg"
+                alt="default user image"
+              />
               <span className="ml-[0.5rem] text-base sm:text-sm">
-                {engineConfiguration.label}
+                {user.name}
               </span>
             </div>
           </div>
@@ -154,7 +169,6 @@ const ComputerPlay = () => {
           downloadProgress={downloadProgress}
           setSide={setSide}
           gameHistory={gameHistory}
-          engineStatus={engineReady}
         />
       </main>
     </>

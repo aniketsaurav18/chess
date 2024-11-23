@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import changeConfigurationReducer from "./slices/engine/index";
+import engineReducer from "./slices/engine/";
 
 export const store = configureStore({
   reducer: {
-    engineConfiguration: changeConfigurationReducer,
+    engine: engineReducer,
   },
 });
 
