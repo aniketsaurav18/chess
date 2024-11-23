@@ -101,12 +101,12 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
               Play
             </Button>
           </Link>
-          <Link to="/engine" className="block w-[90%] text-left">
+          <Link to="/computer" className="block w-[90%] text-left">
             <Button
               startContent={<RiRobot2Fill />}
               className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
             >
-              Engine
+              Play with AI
             </Button>
           </Link>
           <Link to="/analysis" className="block w-[90%] text-left">

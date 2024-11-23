@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Chessboard } from "react-chessboard";
 import useEngine from "../hooks/useEngine";
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import useUser from "../hooks/useUser";
@@ -9,6 +8,7 @@ import EngineInfo from "../components/EngineInfo";
 import GameModal from "../components/GameOverModal";
 import { useAppSelector } from "../store/hooks";
 import { GoDotFill } from "react-icons/go";
+import ChessBoard from "../components/ChessBoard";
 
 const ComputerPlay = () => {
   const engineState = useAppSelector((state) => state.engine.status);
@@ -20,17 +20,13 @@ const ComputerPlay = () => {
   const [boardWidth, setBoardWidth] = useState<number>(500);
   const [modal, setModal] = useState(false);
   const {
-    // worker,
-    // progress,
     gameStatus,
     gameHistory,
     downloadProgress,
     side,
     boardState,
-    // engineConfiguration,
     setSide,
     initializeWorker,
-    // sendCommand,
     makeMove,
     setEngineConfiguration,
   } = useEngine();
@@ -60,10 +56,9 @@ const ComputerPlay = () => {
     const updateBoardWidth = () => {
       const boardH = chessboardEle.clientHeight;
       const boardW = chessboardEle.clientWidth;
-      // console.log("boardH", boardH, "boardW", boardW);
       setBoardWidth(boardH < boardW ? boardH : boardW);
     };
-    // Create a ResizeObserver to watch the chessboard element
+    // a ResizeObserver to watch the chessboard element
     const resizeObserver = new ResizeObserver(updateBoardWidth);
     resizeObserver.observe(chessboardEle);
 
@@ -88,13 +83,6 @@ const ComputerPlay = () => {
             className="w-full h-[3.5rem] flex flex-row md:w-full bg-[#3C3B39]"
             style={{ width: boardWidth }}
           >
-            {/* <div className="flex flex-row justify-start items-center w-20 h-full text-[1.2rem] font-bold text-white sm:text-[2rem] sm:h-[2rem]">
-              <img
-                className="h-full"
-                src="/stockfish-logo.png"
-                alt="stockfish logo"
-              />
-            </div> */}
             <img
               className="h-full"
               src="/stockfish-logo.png"
@@ -125,25 +113,15 @@ const ComputerPlay = () => {
               <GameModal
                 isGameOverModal={modal}
                 message={"Game Over"}
-                winner={"white"}
+                winner={side === "white" ? "black" : "white"} // you can't beat the computer :P
               />
-              <Chessboard
-                id="PlayVsPlay"
+              <ChessBoard
+                makeMove={makeMove}
+                boardState={boardState}
                 boardWidth={boardWidth}
-                position={boardState}
-                onPieceDrop={makeMove}
-                customBoardStyle={{
-                  borderRadius: "4px",
-                  boxShadow: "0 5px 15px rgba(0, 0, 0, 0.5)",
-                }}
-                // ref={chessboardRef}
-                boardOrientation={side}
-                areArrowsAllowed={true}
-                arePremovesAllowed={true}
-                // onSquareClick={onSquareClick}
-                // customSquareStyles={{
-                //   ...optionSquares,
-                // }}
+                chessBoardref={chessboardDivRef}
+                gameStatus={gameStatus}
+                side={side}
               />
             </div>
           </div>
