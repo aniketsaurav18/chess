@@ -1,57 +1,66 @@
+import { useNavigate } from "react-router-dom";
+import FeatureList from "../components/FeatureList";
+import { Navbar } from "../components/Navbar";
+
 const LandingPage = () => {
+  const navigate = useNavigate();
   const handlePlayNow = () => {
-    window.location.href = "/game";
+    navigate("/game");
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center">
+      <Navbar />
       {/* Hero Section */}
-      <section className="flex flex-col items-center justify-center text-center py-20 px-4">
-        <h1 className="text-6xl font-extrabold text-white mb-4">
-          Chess Master
-        </h1>
-        <p className="text-xl text-gray-300 mb-8">
-          Dive into the ultimate multiplayer chess experience.
-        </p>
-        <button
-          className="bg-green-500 text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-green-400 transition"
-          onClick={handlePlayNow}
-        >
-          Play Now
-        </button>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-gray-800 p-6 rounded-lg shadow-md text-center">
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Real-time Play
-              </h3>
-              <p className="text-gray-400">
-                Challenge opponents in real-time and test your skills.
-              </p>
-            </div>
-            <div className="bg-gray-800 p-6 rounded-lg shadow-md text-center">
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Dark Themed Boards
-              </h3>
-              <p className="text-gray-400">
-                Enjoy a sleek, dark-themed board with customizable elements.
-              </p>
-            </div>
-            <div className="bg-gray-800 p-6 rounded-lg shadow-md text-center">
-              <h3 className="text-xl font-semibold text-white mb-2">
-                Analyze Your Game
-              </h3>
-              <p className="text-gray-400">
-                Improve with powerful analysis tools and move-by-move reviews.
-              </p>
-            </div>
+      <div className="flex min-h-[650px] items-center px-6 lg:px-8">
+        <div className="w-full flex flex-col items-center">
+          <h1 className="text-6xl font-bold tracking-tight">
+            Play Chess With your Friends
+          </h1>
+          <p className="mt-6 text-xl text-gray-600">
+            Master the board your way - Play online or challenge our powerful
+            chess engine!
+          </p>
+
+          {/* Buttons */}
+          <div className="mt-8 flex items-center gap-4">
+            <button className="rounded-lg bg-gray-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700">
+              Sign Up
+            </button>
+            <button
+              className="group flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-colors bg-green-600 hover:bg-green-700"
+              onClick={handlePlayNow}
+            >
+              Get Started
+              <svg
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
           </div>
         </div>
-      </section>
+
+        {/* Logo */}
+        {/* <div className="hidden lg:block">
+          <div className="relative h-64 w-64">
+            <div className="absolute inset-0 bg-black [mask-image:repeating-linear-gradient(45deg,#000_0px,#000_1px,transparent_1px,transparent_8px)]" />
+            <div className="absolute inset-0 transform rotate-45 bg-black [mask-image:repeating-linear-gradient(45deg,#000_0px,#000_1px,transparent_1px,transparent_8px)]" />
+          </div>
+        </div> */}
+      </div>
+
+      {/* Features Section */}
+      <FeatureList />
 
       {/* Call to Action */}
       <section className="flex flex-col items-center justify-center text-center py-20 bg-gray-800">

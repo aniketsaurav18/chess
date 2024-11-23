@@ -140,7 +140,9 @@ const useEngine = () => {
       const chunks: Uint8Array[] = [];
       let receivedLength = 0;
       const contentLength = response.headers.get("content-length");
-      const totalSize = contentLength ? parseInt(contentLength, 10) : undefined;
+      const totalSize = contentLength
+        ? parseInt(contentLength, 10)
+        : engine.jssize;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -186,7 +188,7 @@ const useEngine = () => {
       const contentLength2 = response2.headers.get("content-length");
       const totalSize2 = contentLength2
         ? parseInt(contentLength2, 10)
-        : undefined;
+        : engine.wasmsize;
 
       while (true) {
         const { done, value } = await reader2.read();

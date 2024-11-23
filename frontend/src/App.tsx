@@ -24,7 +24,7 @@ function App() {
           }
         />
         <Route
-          path="/engine"
+          path="/computer"
           element={
             <Suspense fallback={<div>Loading...</div>}>
               <ComputerPlay />

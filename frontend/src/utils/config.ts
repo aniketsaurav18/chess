@@ -10,8 +10,8 @@ export const GameTimeLimit = [
 export const CACHE_NAME = "chess-engine-cache";
 
 export const DEFAULT_ENGINE_CONFIG = {
-  key: "stockfish-16.1-lite", // key of default engine. (Refer EngineDetails)
-  label: "Stockfish 16.1 Lite Multi-threaded",
+  key: "stockfish-16.1-lite-single",
+  label: "Stockfish 16.1 Lite Single-threaded",
   depth: 20, // engine will search for 20 moves by default
   time: 8000, // engine will search for 8 seconds by default. time in ms
   threads: 1, // only applicable in multithreaded engine.
@@ -19,6 +19,7 @@ export const DEFAULT_ENGINE_CONFIG = {
   elo: 0, // engine strength, 0 means no limit
 };
 
+// All sized of files mentioned is in bytes.
 export const EngineDetails = [
   {
     key: "stockfish-16.1",
@@ -30,6 +31,8 @@ export const EngineDetails = [
     cdn_wasm_path:
       "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1.wasm",
     multiThreaded: true,
+    jssize: 31394,
+    wasmsize: 69305083,
   },
   {
     key: "stockfish-16.1-single",
@@ -41,6 +44,8 @@ export const EngineDetails = [
     cdn_wasm_path:
       "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-single.wasm",
     multiThreaded: false,
+    jssize: 20080,
+    wasmsize: 69434982,
   },
   {
     key: "stockfish-16.1-lite",
@@ -52,6 +57,8 @@ export const EngineDetails = [
     cdn_wasm_path:
       "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite.wasm",
     multiThreaded: true,
+    jssize: 31496,
+    wasmsize: 7007734,
   },
   {
     key: "stockfish-16.1-lite-single",
@@ -63,6 +70,8 @@ export const EngineDetails = [
     cdn_wasm_path:
       "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-lite-single.wasm",
     multiThreaded: false,
+    jssize: 20183,
+    wasmsize: 7157593,
   },
   {
     key: "stockfish-16.1-asm",
@@ -73,5 +82,6 @@ export const EngineDetails = [
       "https://chess-engine.s3.ap-south-1.amazonaws.com/stockfish-16.1-asm.js",
     cdn_wasm_path: "", // No WASM for this engine
     multiThreaded: false,
+    jssize: 9876256,
   },
 ];
