@@ -4,9 +4,11 @@ import { Input } from "@nextui-org/input";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Link } from "@nextui-org/link";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
   const [isVisible, setIsVisible] = useState(false);
+  const navigate = useNavigate();
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -71,8 +73,8 @@ export function LoginPage() {
           <p className="mt-2 text-sm text-gray-400">
             Don't have an account?
             <Link
-              href="/signup"
               className="ml-1 text-green-400 hover:text-green-300"
+              onClick={() => navigate("/signup")}
             >
               Sign up
             </Link>

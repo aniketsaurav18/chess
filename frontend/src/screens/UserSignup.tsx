@@ -4,8 +4,10 @@ import { Input } from "@nextui-org/input";
 import { Link } from "@nextui-org/link";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function SignupPage() {
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
   const [name, setName] = useState("");
@@ -88,8 +90,8 @@ export function SignupPage() {
           <p className="mt-2 text-sm text-gray-400">
             Already have an account?
             <Link
-              href="/login"
               className="ml-1 text-green-400 hover:text-green-300"
+              onClick={() => navigate("/login")}
             >
               Login
             </Link>
