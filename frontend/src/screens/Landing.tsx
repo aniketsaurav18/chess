@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import FeatureList from "../components/FeatureList";
 import { Navbar } from "../components/Navbar";
+import { FaGithub } from "react-icons/fa";
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -15,21 +16,35 @@ const LandingPage = () => {
 
       <div className="flex min-h-[650px] items-center px-6 lg:px-8">
         <div className="w-full flex flex-col items-center">
-          <h1 className="text-6xl font-bold tracking-tight">
+          <h1 className="text-6xl sm:text-4xl font-bold tracking-tight">
             Play Chess With your Friends
           </h1>
-          <p className="mt-6 text-xl text-gray-600">
+          <p className="mt-6 text-xl sm:text-lg text-gray-600">
             Master the board your way - Play online or challenge our powerful
             chess engine!
           </p>
 
           {/* Buttons */}
           <div className="mt-8 flex items-center gap-4">
-            <button className="rounded-lg bg-gray-600 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700">
-              Sign Up
+            {/* <button
+              className="rounded-lg bg-gray-600 px-6 sm:px-4 sm:py-2 py-3 text-sm font-semibold text-white transition-colors hover:bg-gray-700"
+              onClick={() => navigate("/signup")}
+            >
+              Star on Github
+            </button> */}
+            <button
+              className="flex items-center justify-center gap-2 border-none bg-gray-600 hover:bg-gray-700 px-5 sm:px-4 sm:py-[0.5rem] py-[0.6rem] transition duration-300 rounded-lg"
+              onClick={() => {
+                window.open("https://github.com/aniketsaurav18/chess");
+              }}
+            >
+              <FaGithub className="text-white text-2xl" />
+              <p className="text-white text-sm font-bold transition duration-300">
+                Star on Github
+              </p>
             </button>
             <button
-              className="group flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-colors bg-green-600 hover:bg-green-700"
+              className="group flex items-center gap-2 rounded-lg px-6 sm:px-4 sm:py-2 py-3 text-sm font-semibold transition-colors bg-green-600 hover:bg-green-700"
               onClick={handlePlayNow}
             >
               Get Started
