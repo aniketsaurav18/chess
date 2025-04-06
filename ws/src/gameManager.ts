@@ -11,12 +11,16 @@ import {
 } from "./messages";
 import Producer from "./kafka/producer";
 import pool from "./db/db";
+import { verifyToken } from "./jwt";
 
 const TimeLimitAllowed: number[] = [2, 5, 10, 15]; //minutes
 
 export class GameManager {
   private games: Game[];
-  private pendingUser: WebSocket | null;
+  private pendingUser: {
+    socket: WebSocket;
+    userId: string | null;
+  } | null;
   private users: WebSocket[];
   private producer: Producer;
 
@@ -89,49 +93,80 @@ export class GameManager {
   private async handleInitGame(socket: WebSocket, msg: any) {
     // NOTE: time match match making is not being handled here.
     // TODO: add a time based match making.
-    if (this.pendingUser !== null) {
-      let timeLimit = 10; //timelimit should be in minutes
-      try {
-        timeLimit = Number(msg.d.tl);
-        const match = TimeLimitAllowed.filter((t) => {
-          t === timeLimit;
-        });
-        if (!match) {
-          throw new Error("Time Limit now allowed");
-        }
-      } catch (e: any) {
-        this.handleError("Invalid time limit", e, socket);
+    let timeLimit = 10; //timelimit should be in minutes
+    let extractedUserId: string | null = null;
+    try {
+      timeLimit = Number(msg.d.tl);
+      const userid = msg.d.userId;
+      const match = TimeLimitAllowed.filter((t) => {
+        t === timeLimit;
+      });
+      if (!match) {
+        throw new Error("Time Limit now allowed");
       }
-      const gameId = await this.createGameDB(timeLimit, "IN_PROGRESS");
+
+      if (userid !== "" && userid !== null) {
+        console.log(userid);
+        const token = msg.d.token;
+        const decodedToken = verifyToken(token);
+
+        if (!decodedToken || decodedToken.id !== userid) {
+          this.handleError("Invalid token", new Error("Invalid token"), socket);
+          return;
+        }
+        extractedUserId = userid;
+      }
+    } catch (e: any) {
+      this.handleError("Invalid time limit or token", e, socket);
+      return;
+    }
+    if (this.pendingUser !== null) {
+      const gameId = await this.createGameDB(
+        timeLimit,
+        "IN_PROGRESS",
+        this.pendingUser.userId ?? undefined,
+        extractedUserId ?? undefined
+      );
+      if (!gameId) {
+        this.handleError(
+          "error while creating new game",
+          new Error("Error while creating game on db"),
+          socket
+        );
+      }
       const game = new Game(
-        this.pendingUser,
+        this.pendingUser.socket,
         socket,
         this.producer,
         timeLimit,
-        gameId
+        gameId,
+        this.pendingUser.userId ?? undefined,
+        extractedUserId ?? undefined
       );
       this.games.push(game);
       this.pendingUser = null;
     } else {
-      this.pendingUser = socket;
+      this.pendingUser = { socket, userId: extractedUserId };
     }
   }
 
   private async createGameDB(
     timecontrol: number,
     status: "IN_PROGRESS" | "OPEN" | "FINISHED",
-    whitePlayerId?: string,
-    blackPlayerId?: string
+    whitePlayerId?: string | null | undefined,
+    blackPlayerId?: string | null | undefined
   ): Promise<string> {
     const id = cuid();
     const column = ["id", "status", "time_control"];
     const values = [id, status, timecontrol];
     const placeholder = ["$1", "$2", "$3"];
 
-    if (whitePlayerId && blackPlayerId) {
+    if (whitePlayerId) {
       column.push("white_player_id");
       values.push(whitePlayerId);
       placeholder.push(`$${values.length}`);
+    }
+    if (blackPlayerId) {
       column.push("black_player_id");
       values.push(blackPlayerId);
       placeholder.push(`$${values.length}`);

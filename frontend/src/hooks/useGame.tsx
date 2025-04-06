@@ -14,10 +14,11 @@ import {
   RESIGN,
   DRAW_DECLINED,
 } from "../utils/messages";
+import { User } from "./useUser";
 
 // const GAME_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 
-export function useChessGame(user: any) {
+export function useChessGame(user: User) {
   const socket = useSocket();
   const chessboardRef = useRef<any>();
   const [game, _setGame] = useState(new Chess());
@@ -46,16 +47,46 @@ export function useChessGame(user: any) {
     gameStatusRef.current = gameStatus;
   }, [gameStatus]);
 
-  useEffect(() => {
-    if (!socket) {
-      return;
-    }
-    socket.onmessage = (event) => {
+  const gameEndfn = useCallback(
+    (msgPayload: any) => {
+      if (msgPayload == null) {
+        return;
+      }
+      if (gameStatus === "STARTED") {
+        setGameStatus("OVER");
+      }
+      setTimeout(() => {
+        setGameResult(msgPayload.msg);
+        setIsGameOver(true);
+        setWinner(msgPayload.winner);
+      }, 500);
+    },
+    [setGameStatus, setGameResult, setIsGameOver, setWinner, gameStatus]
+  );
+
+  const updateHistory = useCallback(
+    (move: any) => {
+      setGameHistory((history: any) => {
+        const lastMoveWithTime = {
+          ...game.history({ verbose: true })[game.history().length - 1],
+          time: move.color === "w" ? player1clock : player2clock,
+        };
+        return [...history, lastMoveWithTime];
+      });
+    },
+    [setGameHistory, game, player1clock, player2clock]
+  );
+
+  const handleSocketMessage = useCallback(
+    (event: MessageEvent) => {
+      if (!socket) return;
       const message = JSON.parse(event.data);
       console.log("incoming message", message);
       switch (message.t) {
         case INIT_GAME:
           setSide(message.d.color);
+          console.log(side);
+          console.log(message.d.color);
           setGameID(message.d.id);
           setplayer1clock(message.d.clock.w);
           setplayer2clock(message.d.clock.b);
@@ -66,9 +97,13 @@ export function useChessGame(user: any) {
         case MOVE:
           // if it is just an echo of the move, ignore it.
           if ((message.d.c as string) === side[0]) {
+            console.log("message side:", message.d.c);
+            console.log("side", side);
+            console.log("echo move");
             break;
           }
           const move = game.move(message.d.san);
+          console.log("played move:", move);
           if (!move) {
             break;
           }
@@ -76,6 +111,8 @@ export function useChessGame(user: any) {
           setplayer1clock(message.d.clock.w);
           setplayer2clock(message.d.clock.b);
           updateHistory(move);
+          console.log("turn changes", game.turn());
+          setTurn(game.turn());
           break;
         case GAME_OVER:
           gameEndfn(message.d);
@@ -88,65 +125,82 @@ export function useChessGame(user: any) {
           }, 5000);
           break;
       }
-    };
-  }, [socket]);
+    },
+    [
+      socket,
+      setSide,
+      setGameID,
+      setplayer1clock,
+      setplayer2clock,
+      setGameStatus,
+      setWaiting,
+      side,
+      turn,
+      setTurn,
+      gameStatus,
+      setGameState,
+      setGameResult,
+      setIsGameOver,
+      setWinner,
+      setGameHistory,
+      setOfferDraw,
+      setDrawOffered,
+      updateHistory,
+      game,
+      setGameState,
+      updateHistory,
+      gameEndfn,
+      drawOffered,
+      setDrawOffered,
+    ]
+  );
 
   useEffect(() => {
-    if (gameStatus !== "STARTED") {
+    if (!socket || !user) {
+      console.log("either socker or user is invalid", user);
       return;
     }
-    console.log("status", gameStatus, "game turn", game.turn());
-    setTurn(game.turn());
-  }, [gameStatus, game.turn()]);
+    socket.onmessage = handleSocketMessage;
+  }, [socket, handleSocketMessage, user]);
 
-  const gameEndfn = (msgPayload: any) => {
-    if (msgPayload == null) {
-      return;
-    }
-    if (gameStatus === "STARTED") {
-      setGameStatus("OVER");
-    }
-    setTimeout(() => {
-      setGameResult(msgPayload.msg);
-      setIsGameOver(true);
-      setWinner(msgPayload.winner);
-    }, 500);
-  };
-
-  const makeMove = (sourceSquare: Square, targetSquare: Square) => {
-    if (
-      game.get(sourceSquare)?.color !== game.turn() ||
-      game.turn() !== side[0] ||
-      gameStatus !== "STARTED"
-    )
-      return false;
-    if (!socket) return false;
-    const move = game.move({
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: "q", // always promote to a queen for simplicity
-    });
-    if (!move) {
-      return false;
-    }
-    setGameState(game.fen());
-    try {
-      socket?.send(
-        JSON.stringify({
-          t: MOVE,
-          d: {
-            gameId: gameId,
-            m: move.san,
-          },
-        })
-      );
-    } catch (e: any) {
-      console.log(e);
-      return false;
-    }
-    updateHistory(move);
-    return true;
-  };
+  const makeMove = useCallback(
+    (sourceSquare: Square, targetSquare: Square) => {
+      if (
+        game.get(sourceSquare)?.color !== game.turn() ||
+        game.turn() !== side[0] ||
+        gameStatus !== "STARTED"
+      )
+        return false;
+      if (!socket) return false;
+      const move = game.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: "q", // always promote to a queen for simplicity
+      });
+      if (!move) {
+        return false;
+      }
+      setGameState(game.fen());
+      setTurn(game.turn()); // important the timer depents on this
+      try {
+        socket?.send(
+          JSON.stringify({
+            t: MOVE,
+            d: {
+              gameId: gameId,
+              m: move.san,
+            },
+          })
+        );
+      } catch (e: any) {
+        console.log(e);
+        return false;
+      }
+      updateHistory(move);
+      return true;
+    },
+    [socket, game, side, gameStatus, gameId, setGameState, updateHistory, turn]
+  );
 
   const gameResign = useCallback(() => {
     if (gameStatus !== "STARTED") {
@@ -188,7 +242,7 @@ export function useChessGame(user: any) {
     } catch (e) {
       console.log("error while offering draw", e);
     }
-  }, [socket, gameId, side]);
+  }, [socket, gameId, side, offerDraw, setOfferDraw]);
 
   const drawAcceptedfn = useCallback(() => {
     if (gameStatus !== "STARTED" || !socket) {
@@ -202,7 +256,7 @@ export function useChessGame(user: any) {
     );
     setDrawOffered(false);
     gameEndfn(null);
-  }, [socket, gameStatus, gameId, side, gameEndfn]);
+  }, [socket, gameStatus, gameId, side, gameEndfn, setDrawOffered]);
 
   const drawDeclinedfn = useCallback(() => {
     if (gameStatus !== "STARTED" || !socket) {
@@ -210,7 +264,7 @@ export function useChessGame(user: any) {
     }
     socket.send(JSON.stringify({ t: DRAW_DECLINED, d: { color: side[0] } }));
     setDrawOffered(false);
-  }, [socket, gameStatus, side]);
+  }, [socket, gameStatus, side, setDrawOffered]);
 
   const startGame = useCallback(
     (timeLimit: number): boolean => {
@@ -225,6 +279,8 @@ export function useChessGame(user: any) {
             t: INIT_GAME,
             d: {
               tl: timeLimit,
+              userId: user.userId ?? null,
+              token: user.token ?? null,
             },
           })
         );
@@ -239,16 +295,6 @@ export function useChessGame(user: any) {
     },
     [socket, game, chessboardRef]
   );
-
-  const updateHistory = (move: any) => {
-    setGameHistory((history: any) => {
-      const lastMoveWithTime = {
-        ...game.history({ verbose: true })[game.history().length - 1],
-        time: move.color === "w" ? player1clock : player2clock,
-      };
-      return [...history, lastMoveWithTime];
-    });
-  };
 
   return {
     gameId,

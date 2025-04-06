@@ -15,6 +15,8 @@ import Producer from "./kafka/producer";
 export const TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
 export class Game {
   public gameId: string;
+  public player1UserId: string | null;
+  public player2UserId: string | null;
   private gameSocket: Socket;
   public gameResult: Result | null = null;
   public gameStatus: GameStatus = "active";
@@ -34,9 +36,13 @@ export class Game {
     p2: WebSocket,
     producer: Producer,
     timeLimit?: number,
-    gameId?: string
+    gameId?: string,
+    player1UserId?: string,
+    player2UserId?: string
   ) {
     this.gameId = gameId ? gameId : (cuid() as string);
+    this.player1UserId = player1UserId ? player1UserId : null;
+    this.player2UserId = player2UserId ? player2UserId : null;
     this.gameSocket = new Socket(this.gameId, p1, p2);
     this.board = new Chess();
     this.gameTimeLimit = timeLimit ? timeLimit * 60 * 1000 : TIME_LIMIT; //time limit should be in miliseconds
