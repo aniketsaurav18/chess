@@ -13,6 +13,7 @@ const GameTimer = ({ time, side, turn, gameStatus }: GameTimerProps) => {
   const timerRef = useRef<NodeJS.Timeout | null>(null); // useRef to avoid re-renders
 
   useEffect(() => {
+    console.log("timer", turn, side, gameStatus);
     setClock(time);
     if (side === turn && gameStatus === "STARTED") {
       if (!timerRef.current) {
@@ -25,7 +26,7 @@ const GameTimer = ({ time, side, turn, gameStatus }: GameTimerProps) => {
     return () => {
       stopTimer();
     };
-  }, [turn, gameStatus]);
+  }, [turn, gameStatus, side, time]);
 
   useEffect(() => {
     setClock(time);
