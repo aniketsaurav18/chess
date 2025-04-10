@@ -68,7 +68,11 @@ export default function GameModal({
                 </span>
               </div>
               <div className="text-3xl font-bold">
-                {winner === "white" ? "1-0" : "0-1"}
+                {winner === "draw"
+                  ? "1/2 - 1/2"
+                  : winner === "white"
+                  ? "1-0"
+                  : "0-1"}
               </div>
               <div className="w-16 h-16 bg-gray-950 rounded-full flex items-center justify-center shadow">
                 <span
