@@ -5,6 +5,7 @@ import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { Link } from "@nextui-org/link";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SocialSignIn } from "../components/auth/social-signin";
 
 export function LoginPage() {
   const [isVisible, setIsVisible] = useState(false);
@@ -65,6 +66,7 @@ export function LoginPage() {
       setLoading(false);
     }
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#121212]">
       <Card className="w-full max-w-md bg-[#1a1a1a] border border-[#2e2e2e]">
@@ -139,9 +141,12 @@ export function LoginPage() {
               </span>
             </div>
           </div>
-          <Button className="w-full font-medium bg-[#2e2e2e] text-white hover:bg-[#3b3b3b]">
+          <div className="flex flex-col gap-2">
+            <SocialSignIn />
+          </div>
+          {/* <Button className="w-full font-medium bg-[#2e2e2e] text-white hover:bg-[#3b3b3b]">
             GitHub
-          </Button>
+          </Button> */}
         </CardBody>
       </Card>
     </div>

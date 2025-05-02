@@ -109,6 +109,14 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
               Play with AI
             </Button>
           </Link>
+          <Link to="/profile" className="block w-[90%] text-left">
+            <Button
+              startContent={<FaUser />}
+              className="flex items-center justify-start w-full text-left bg-transparent hover:text-green-400 hover:bg-[#2e2e2e] text-base text-gray-300 px-4 rounded-md transition duration-300 ease-in-out"
+            >
+              My Profile
+            </Button>
+          </Link>
           <Link to="/analysis" className="block w-[90%] text-left">
             <Button
               startContent={<FaMagnifyingGlass />}

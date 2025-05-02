@@ -5,6 +5,7 @@ import { SignupPage } from "./screens/UserSignup";
 import LandingPage from "./screens/Landing";
 import EvalBarPage from "./screens/Evalbartest";
 import { Suspense, lazy } from "react";
+import ProfilePage from "./screens/ProfilePage";
 
 // Lazy loading the Game and ComputerPlay2 components
 const Game = lazy(() => import("./screens/Game"));
@@ -31,6 +32,7 @@ function App() {
             </Suspense>
           }
         />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/evalbar" element={<EvalBarPage />} />

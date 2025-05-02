@@ -7,7 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/index.ts",
     "prisma": "npx prisma",
-    "migrate": "npx prisma migrate dev"
+    "migrate": "npx prisma migrate dev",
+    "start": "node dist/index.js",
+    "prisma:generate": "prisma generate",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +23,7 @@
     "cuid": "^3.0.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "google-auth-library": "^9.15.1",
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4"
   },
@@ -30,6 +34,7 @@
     "@types/node": "^20.12.13",
     "nodemon": "^3.1.2",
     "prisma": "^5.15.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }

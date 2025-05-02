@@ -5,6 +5,7 @@ import { Link } from "@nextui-org/link";
 import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { SocialSignIn } from "../components/auth/social-signin";
 
 export function SignupPage() {
   const navigate = useNavigate();
@@ -213,13 +214,16 @@ export function SignupPage() {
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-2 text-gray-500 bg-[#1a1a1a]">
-                Or sign up with
+                Or continue with
               </span>
             </div>
           </div>
-          <Button className="w-full font-medium bg-[#2e2e2e] text-white hover:bg-[#3b3b3b]">
+          <div className="flex flex-col gap-2">
+            <SocialSignIn />
+          </div>
+          {/* <Button className="w-full font-medium bg-[#2e2e2e] text-white hover:bg-[#3b3b3b]">
             GitHub
-          </Button>
+          </Button> */}
         </CardBody>
       </Card>
     </div>
