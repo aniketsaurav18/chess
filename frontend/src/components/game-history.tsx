@@ -1,241 +1,197 @@
 "use client";
 
-import { useState } from "react";
-import { Clock, Download, History } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Clock } from "lucide-react";
+import useUser from "../hooks/useUser";
+import { format } from "date-fns";
+
+interface Player {
+  username: string;
+  avatar_url: string | null;
+}
+
+interface Game {
+  id: string;
+  whitePlayer: Player;
+  blackPlayer: Player | null;
+  result: "white" | "black" | "draw";
+  time_control: number;
+  moves: string | null;
+  start_at: string;
+  end_at: string | null;
+}
 
 export default function GameHistory() {
-  const [activeTab, setActiveTab] = useState("recent");
+  const [userDetails, setUserDetails] = useState<any>({});
+  const [gameHistory, setGameHistory] = useState<Game[]>([]);
+  const user = useUser();
 
-  // Sample game history data
-  const games = [
-    {
-      id: 1,
-      player1: { name: "aniketsaurav", rating: 1396, country: "in" },
-      player2: { name: "chris_izur", rating: 1421, country: "br" },
-      result: "0-1",
-      accuracy: "Review",
-      moves: 11,
-      date: "5/2/2025",
-    },
-    {
-      id: 2,
-      player1: { name: "R7_Knights", rating: 1407, country: "in" },
-      player2: { name: "aniketsaurav", rating: 1404, country: "in" },
-      result: "1-0",
-      accuracy: "Review",
-      moves: 26,
-      date: "5/2/2025",
-    },
-    {
-      id: 3,
-      player1: { name: "sunnyminister", rating: 1415, country: "us" },
-      player2: { name: "aniketsaurav", rating: 1413, country: "in" },
-      result: "1-0",
-      accuracy: { player1: "89.3", player2: "77" },
-      moves: 22,
-      date: "5/2/2025",
-    },
-    {
-      id: 4,
-      player1: { name: "aniketsaurav", rating: 1422, country: "in" },
-      player2: { name: "TheSanRoman", rating: 1416, country: "mx" },
-      result: "0-1",
-      accuracy: "Review",
-      moves: 12,
-      date: "5/2/2025",
-    },
-    {
-      id: 5,
-      player1: { name: "aniketsaurav", rating: 1431, country: "in" },
-      player2: { name: "wolfman", rating: 1408, country: "ie" },
-      result: "1-0",
-      accuracy: { player1: "72.3", player2: "61.5" },
-      moves: 28,
-      date: "5/2/2025",
-    },
-  ];
+  useEffect(() => {
+    if (user.type !== "user") {
+      return;
+    }
+
+    async function fetchUserDetails() {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/user/${user.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
+        if (!res.ok) {
+          console.error(`Failed to fetch user details: ${res.status}`);
+          return;
+        }
+        const data = await res.json();
+        setUserDetails(data);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    }
+
+    async function fetchGames() {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/game/${user.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
+        if (!res.ok) {
+          console.error(`Failed to fetch games: ${res.status}`);
+          return;
+        }
+        const data = await res.json();
+        setGameHistory(data.games);
+      } catch (error) {
+        console.error("Error fetching game history:", error);
+      }
+    }
+
+    fetchUserDetails();
+    fetchGames();
+  }, [user]);
 
   return (
-    <div className="bg-[#1a1a1a] text-gray-200 min-h-screen">
-      {/* Profile section - simplified */}
-      <div className="border-b border-gray-700 p-6">
+    <div className="text-gray-200 min-h-screen p-6 min-w-[1000px] lg:min-w-[1000px] md:w-auto">
+      {/* Profile section */}
+      <div className="border-b border-gray-700 pb-6 mb-6">
         <div className="flex items-start gap-4">
-          <div className="w-32 h-32 bg-red-900 rounded"></div>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold">aniketsaurav</h1>
+          <div className="w-32 h-32 rounded overflow-hidden bg-gray-800 flex items-center justify-center">
+            {user?.avatarUrl ? (
               <img
-                src="/placeholder.svg?height=20&width=30"
-                alt="India flag"
-                className="h-5"
+                src={user.avatarUrl}
+                alt={user.username}
+                className="w-full h-full object-cover"
               />
-              <button className="ml-2 px-3 py-1 bg-[#444] text-sm rounded hover:bg-[#555]">
-                Add flair
-              </button>
-              <button className="ml-auto px-4 py-1 bg-[#444] text-sm rounded hover:bg-[#555]">
-                Edit Profile
-              </button>
-            </div>
-            <p className="text-gray-400 mt-2">Enter a status here</p>
-
-            <div className="flex gap-6 mt-6 text-sm">
-              <div>Jul 30, 2015 Joined</div>
-              <div>9 Friends</div>
-              <div>52 Views</div>
-              <div className="text-green-500">Online now</div>
+            ) : (
+              <span className="text-gray-400 text-xl font-semibold">
+                {user?.username?.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col justify-start items-start">
+            <h1 className="text-2xl font-bold mb-1">{user?.username}</h1>
+            <div className="flex gap-4 mt-2 text-sm text-gray-400">
+              {userDetails.createdAt && (
+                <div>
+                  Joined: {format(new Date(userDetails.createdAt), "MMM yyyy")}
+                </div>
+              )}
+              {userDetails.gameCount !== undefined && (
+                <div>{userDetails.gameCount} Games Played</div>
+              )}
+              {/* You can add more profile information here if available in userDetails */}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Navigation tabs */}
-      <div className="border-b border-gray-700">
-        <div className="flex">
-          {["Overview", "Games", "Stats", "Friends", "Awards", "Clubs"].map(
-            (tab) => (
-              <button
-                key={tab}
-                className={`px-6 py-3 font-medium ${
-                  tab === "Games" ? "border-b-2 border-green-500" : ""
-                }`}
-              >
-                {tab}
-              </button>
-            )
-          )}
         </div>
       </div>
 
       {/* Game history section */}
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">
-            Game History <span className="text-gray-400 text-lg">(3,034)</span>
-          </h2>
-          <div className="flex gap-2">
-            <button className="p-2 text-gray-400 hover:text-white">
-              <History size={18} />
-            </button>
-            <button className="p-2 text-gray-400 hover:text-white">
-              <Download size={18} />
-            </button>
-          </div>
-        </div>
+      <div>
+        <h2 className="text-xl font-bold mb-4">
+          Game History{" "}
+          <span className="text-gray-400 text-lg">({gameHistory.length})</span>
+        </h2>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-700">
-          <div className="flex">
-            {["Recent", "Daily", "Live", "Bot"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab.toLowerCase())}
-                className={`px-6 py-3 font-medium ${
-                  activeTab === tab.toLowerCase()
-                    ? "border-b-2 border-white"
-                    : "text-gray-400"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Game list */}
         <div>
           {/* Headers */}
-          <div className="grid grid-cols-12 py-3 border-b border-gray-700 text-gray-400 text-sm">
-            <div className="col-span-5 pl-10">Players</div>
-            <div className="col-span-1 text-center">Result</div>
-            <div className="col-span-2 text-center">Accuracy</div>
-            <div className="col-span-1 text-center">Moves</div>
-            <div className="col-span-2 text-center">Date</div>
-            <div className="col-span-1 text-center"></div>
+          <div className="grid grid-cols-6 py-3 border-b border-gray-700 text-gray-400 text-sm">
+            <div className="col-span-2 pl-6">Players</div>
+            <div className="text-center">Result</div>
+            <div className="text-center">Time Control</div>
+            <div className="text-center">Date</div>
+            <div className="text-center">Details</div>
           </div>
 
           {/* Game rows */}
-          {games.map((game) => (
+          {gameHistory.map((game) => (
             <div
               key={game.id}
-              className="grid grid-cols-12 py-4 border-b border-gray-700 items-center hover:bg-[#252525]"
+              className="grid grid-cols-6 py-4 border-b border-gray-700 items-center hover:bg-[#252525]"
             >
-              {/* Clock icon */}
-              <div className="col-span-1 flex justify-center">
-                <Clock className="text-green-500" size={20} />
-              </div>
-
               {/* Players */}
-              <div className="col-span-4">
-                <div className="flex items-center mb-1">
-                  <div className="w-4 h-4 bg-white mr-2"></div>
-                  <span className="font-medium">{game.player1.name}</span>
-                  <span className="text-gray-400 ml-2">
-                    ({game.player1.rating})
-                  </span>
-                  <img
-                    src={`/placeholder.svg?height=15&width=20`}
-                    alt={`${game.player1.country} flag`}
-                    className="ml-2 h-3"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-black border border-white mr-2"></div>
-                  <span className="font-medium">{game.player2.name}</span>
-                  <span className="text-gray-400 ml-2">
-                    ({game.player2.rating})
-                  </span>
-                  <img
-                    src={`/placeholder.svg?height=15&width=20`}
-                    alt={`${game.player2.country} flag`}
-                    className="ml-2 h-3"
-                  />
+              <div className="col-span-2 flex items-center pl-6">
+                <div className="flex flex-col">
+                  <div className="flex items-center mb-1">
+                    <div className="w-3 h-3 rounded-full bg-white mr-2"></div>
+                    <span className="font-medium">
+                      {game.whitePlayer.username}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-3 h-3 rounded-full bg-black border border-white mr-2"></div>
+                    <span className="font-medium">
+                      {game.blackPlayer?.username || "Guest"}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Result */}
-              <div className="col-span-1 text-center">
-                {game.result === "1-0" ? (
-                  <div className="flex flex-col items-center">
-                    <span className="text-green-500">1</span>
-                    <span className="text-red-500">0</span>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center">
-                    <span className="text-red-500">0</span>
-                    <span className="text-green-500">1</span>
-                  </div>
+              <div className="text-center">
+                {game.result === "white" && (
+                  <span className="text-green-500 font-semibold">Won</span>
+                )}
+                {game.result === "black" && (
+                  <span className="text-red-500 font-semibold">Lost</span>
+                )}
+                {game.result === "draw" && (
+                  <span className="text-gray-400 font-semibold">Draw</span>
                 )}
               </div>
 
-              {/* Accuracy */}
-              <div className="col-span-2 text-center">
-                {typeof game.accuracy === "string" ? (
-                  <span className="text-blue-400 hover:underline cursor-pointer">
-                    {game.accuracy}
-                  </span>
-                ) : (
-                  <div className="flex flex-col">
-                    <span>{game.accuracy.player1}</span>
-                    <span>{game.accuracy.player2}</span>
-                  </div>
-                )}
+              {/* Time Control */}
+              <div className="text-center">
+                {game.time_control}{" "}
+                {game.time_control > 1 ? "minutes" : "minute"}
               </div>
-
-              {/* Moves */}
-              <div className="col-span-1 text-center">{game.moves}</div>
 
               {/* Date */}
-              <div className="col-span-2 text-center">{game.date}</div>
+              <div className="text-center">
+                {format(new Date(game.start_at), "MMM dd, yyyy")}
+              </div>
 
-              {/* Checkbox */}
-              <div className="col-span-1 flex justify-center">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-gray-600 bg-gray-800"
+              {/* Details */}
+              <div className="text-center">
+                <Clock
+                  className="text-gray-400 hover:text-white cursor-pointer mx-auto"
+                  size={20}
                 />
               </div>
             </div>
           ))}
+
+          {gameHistory.length === 0 && (
+            <div className="py-6 text-center text-gray-500">
+              No game history available.
+            </div>
+          )}
         </div>
       </div>
     </div>

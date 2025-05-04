@@ -32,7 +32,7 @@ export function LoginPage() {
     try {
       setLoading(true);
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/login`,
+        `${import.meta.env.VITE_BACKEND_URL}/api/auth/login`,
         {
           method: "POST",
           headers: {

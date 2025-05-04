@@ -42,6 +42,7 @@ router.post("/login", async (req: Request, res: Response) => {
     username: user.username,
     token: token,
     email: user.email,
+    avatarUrl: user.avatar_url,
   });
 });
 
@@ -73,6 +74,7 @@ router.post("/signup", async (req: Request, res: Response) => {
       username: user.username,
       userId: user.id,
       email: user.email,
+      avatarUrl: user.avatar_url,
     });
   } catch (err: any) {
     console.log(err);

@@ -54,7 +54,7 @@ export function SignupPage() {
       const backendURL = import.meta.env.VITE_BACKEND_URL;
       try {
         setLoading(true);
-        const response = await fetch(`${backendURL}/api/signup`, {
+        const response = await fetch(`${backendURL}/api/auth/signup`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
