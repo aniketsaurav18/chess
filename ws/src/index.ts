@@ -21,10 +21,21 @@ async function initKafka(): Promise<Producer> {
   }
 }
 
+async function checkDBConnection() {
+  try {
+    await pool.query("SELECT current_database(), current_user, now();");
+    console.log("Database connected.");
+  } catch (e: any) {
+    console.log("Database connection failed.");
+    throw new Error(`Error connecting to database: ${e.message}`);
+  }
+}
+
 async function startServer() {
   try {
     const producer = await initKafka();
-    const p = pool;
+    await checkDBConnection();
+
     console.log("Producer connected.");
 
     const wss = new WebSocketServer({ port: 8080 });

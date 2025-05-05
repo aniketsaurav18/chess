@@ -6,8 +6,7 @@ const pool = new Pool({
   database: process.env.DB_NAME || "postgres",
   password: process.env.DB_PASSWORD || "password",
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
+  ssl: true,
 });
-
-pool.query("select * from game");
 
 export default pool;
