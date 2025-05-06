@@ -1,0 +1,27 @@
+# Dependencies
+node_modules
+yarn.lock
+package-lock.json
+
+# IDE
+.vscode
+
+# Build
+build
+
+# Logs
+logs
+
+# Environment
+.env
+.env.local
+
+# Temporary files
+tmp
+
+# Cache
+cache
+
+# Other
+.DS_Store
+Thumbs.db

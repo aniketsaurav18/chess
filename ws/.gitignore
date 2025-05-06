@@ -25,5 +25,4 @@ dist-ssr
 
 # secrets
 .env
-.env.example
 .env.local
