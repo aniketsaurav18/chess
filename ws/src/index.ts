@@ -35,27 +35,41 @@ async function startServer() {
   try {
     const producer = await initKafka();
     await checkDBConnection();
-
     console.log("Producer connected.");
 
-    const wss = new WebSocketServer({ port: 8080 });
-    const gameManager = new GameManager(producer);
-    console.log("Server Started....");
+    const wss = new WebSocketServer({
+      port: 8080,
+      host: "0.0.0.0", // Critical for Docker
+    });
 
-    wss.on("connection", function connection(ws) {
-      console.log("Client connected");
+    wss.on("error", (error) => {
+      console.error("WebSocket server error:", error);
+    });
+
+    console.log("Server started on ws://0.0.0.0:8080");
+
+    const gameManager = new GameManager(producer);
+
+    wss.on("connection", function connection(ws, req) {
+      console.log(`Client connected from ${req.socket.remoteAddress}`);
       gameManager.addUser(ws);
 
       ws.on("close", () => {
         gameManager.removeUser(ws);
         console.log("Client disconnected");
       });
+
+      ws.on("error", (error) => {
+        console.error("WebSocket error:", error);
+      });
     });
 
     const gracefulShutdown = async () => {
       try {
+        wss.clients.forEach((client) => client.terminate());
         wss.close();
-        console.log("WebSocket server closed.");
+        await producer.disconnect();
+        console.log("Server shut down gracefully");
       } catch (error) {
         console.error("Error during shutdown:", error);
       } finally {
@@ -65,9 +79,9 @@ async function startServer() {
 
     process.on("SIGINT", gracefulShutdown);
     process.on("SIGTERM", gracefulShutdown);
-  } catch (e: any) {
-    console.error("Server initialization error \n");
-    console.log(e);
+  } catch (e) {
+    console.error("Server initialization error:", e);
+    process.exit(1);
   }
 }
 

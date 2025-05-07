@@ -141,7 +141,7 @@ export default function GameHistory() {
                   <div className="flex items-center mb-1">
                     <div className="w-3 h-3 rounded-full bg-white mr-2"></div>
                     <span className="font-medium">
-                      {game.whitePlayer.username}
+                      {game.whitePlayer?.username || "Guest"}
                     </span>
                   </div>
                   <div className="flex items-center">

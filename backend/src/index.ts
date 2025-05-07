@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import morgan from "morgan";
 import authRouter from "./routers/auth";
 import prisma from "./db";
 import gameRouter from "./routers/game";
@@ -9,9 +10,24 @@ import userRouter from "./routers/user";
 
 const app = express();
 dotenv.config();
+
+// Configure morgan
+morgan.token("body", (req: any) => JSON.stringify(req.body));
+morgan.token("response-time", (req: any, res: any) => {
+  if (!res._header || !req._startAt) return "";
+  const diff = process.hrtime(req._startAt);
+  const time = diff[0] * 1e3 + diff[1] * 1e-6;
+  return time.toFixed(2);
+});
+
+// Custom format
+const customFormat =
+  ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :response-time ms :body';
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(morgan(customFormat));
 
 app.get("/health-check", (req, res) => {
   res.send("Hello World!");

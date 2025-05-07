@@ -37,12 +37,10 @@ services:
       - "8000"
 
   ws:
-    build:
-      context: ./ws
+    build: ./ws
     container_name: ws
-    restart: always
-    env_file:
-      - ./ws/.env
+    restart: unless-stopped # Better than always
+    env_file: ./ws/.env
     depends_on:
       - kafka
     expose:

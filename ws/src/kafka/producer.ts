@@ -34,6 +34,9 @@ class Producer {
       console.error("Error sending message: ", error);
     }
   }
+  async disconnect() {
+    await this.producer.disconnect();
+  }
 }
 
 export default Producer;
