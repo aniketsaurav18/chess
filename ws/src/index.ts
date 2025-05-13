@@ -10,7 +10,7 @@ async function initKafka(): Promise<Producer> {
   try {
     const kafka = new Kafka({
       clientId: "chess-game-server",
-      brokers: [`${process.env.KAFKA_HOST}:${process.env.KAFKA_HOST_PORT}`],
+      brokers: [`${process.env.KAFKA_HOST}`],
     });
     const producer = new Producer(kafka);
     await producer.connect();

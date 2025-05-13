@@ -58,3 +58,16 @@ checkDatabaseConnection()
     console.error("Error checking database connection:", err);
     process.exit(1); // Exit the process if there's an error during database connection check
   });
+
+// graceful shutdown
+process.on("SIGINT", async () => {
+  await prisma.$disconnect();
+  console.log("Database connection closed.");
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  await prisma.$disconnect();
+  console.log("Database connection closed.");
+  process.exit(0);
+});
