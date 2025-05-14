@@ -16,6 +16,9 @@ const consumer = kafka.consumer({ groupId: GroupId });
 
 const startConsumer = async () => {
   try {
+    console.log("Connecting to Kafka consumer...");
+    console.log("Broker", Broker);
+    console.log("GroupId", GroupId);
     await consumer.connect();
     console.log("Consumer connected");
 
