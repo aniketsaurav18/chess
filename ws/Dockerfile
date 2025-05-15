@@ -12,6 +12,8 @@ RUN npm run build
 
 FROM node:22-slim
 WORKDIR /app
+# install ping or curl here
+RUN apt-get update && apt-get install -y curl
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
