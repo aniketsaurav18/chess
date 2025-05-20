@@ -22,22 +22,19 @@ const useUser = (): User => {
   });
 
   useEffect(() => {
-    const userId = localStorage.getItem("userId");
-    const email = localStorage.getItem("email");
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    console.log("user", user);
     const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
-    const name = localStorage.getItem("name");
-    const avatarUrl = localStorage.getItem("avatarUrl");
-
-    if (userId && email && token && username && name) {
+    console.log("token", token);
+    if (user && token) {
       setUser(() => {
         return {
-          userId: userId,
-          name: name,
-          email: email,
+          userId: user.userId,
+          name: user.name,
+          email: user.email,
           token: token,
-          username: username,
-          avatarUrl: avatarUrl ?? undefined,
+          username: user.username,
+          avatarUrl: user.avatarUrl ?? undefined,
           type: "user",
         };
       });

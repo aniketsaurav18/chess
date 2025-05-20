@@ -67,8 +67,13 @@ export function SignupPage() {
           }),
         });
         if (response.ok) {
-          window.location.href = "/login";
-          return;
+          const data = await response.json();
+          if (data.success) {
+            localStorage.setItem("user", JSON.stringify(data));
+            localStorage.setItem("token", data.token);
+            window.location.href = "/login";
+            return;
+          }
         } else {
           const data = await response.json();
           setSignUpError(data.message);

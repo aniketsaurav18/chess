@@ -34,7 +34,7 @@ export function SocialSignIn() {
         localStorage.setItem("user", JSON.stringify(data));
 
         // Redirect to /home
-        window.location.href = "/home";
+        window.location.href = "/game";
       } else {
         console.error("Login Failed:", data.message);
         // Optionally display an error message to the user

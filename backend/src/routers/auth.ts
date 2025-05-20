@@ -35,14 +35,17 @@ router.post("/login", async (req: Request, res: Response) => {
 
   const token = createToken({ id: user.id, email: user.email }, "30d");
 
-  res.status(200).json({
-    message: "Login successful",
-    name: user.name,
-    userId: user.id,
-    username: user.username,
-    token: token,
+  const userPayload: UserPayloadResponse = {
+    id: user.id,
     email: user.email,
-    avatarUrl: user.avatar_url,
+    name: user.name ?? "",
+    avatarUrl: user.avatar_url ?? "",
+    token: token,
+  };
+
+  res.status(200).json({
+    success: true,
+    ...userPayload,
   });
 });
 
@@ -67,14 +70,17 @@ router.post("/signup", async (req: Request, res: Response) => {
 
     const token = createToken({ id: user.id, email: user.email }, "30d");
 
-    res.status(200).json({
-      message: "Signup successful",
-      token: token,
-      name: user.name,
-      username: user.username,
-      userId: user.id,
+    const userPayload: UserPayloadResponse = {
+      id: user.id,
       email: user.email,
-      avatarUrl: user.avatar_url,
+      name: user.name ?? "",
+      avatarUrl: user.avatar_url ?? "",
+      token: token,
+    };
+
+    res.status(200).json({
+      success: true,
+      ...userPayload,
     });
   } catch (err: any) {
     console.log(err);
@@ -110,7 +116,7 @@ const googleClient = new OAuth2Client(
 );
 
 router.post(
-  "/auth/google-login",
+  "/google-login",
   async (req: Request, res: Response): Promise<any> => {
     try {
       // Expect 'code' from the frontend

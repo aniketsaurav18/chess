@@ -52,13 +52,11 @@ export function LoginPage() {
         setLoading(false);
         return;
       }
-
-      localStorage.setItem("userId", data.userId);
-      localStorage.setItem("email", data.email);
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("name", data.name);
-      window.location.href = "/game";
+      if (data.success) {
+        localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("token", data.token);
+        window.location.href = "/game";
+      }
       setLoading(false);
     } catch (err: any) {
       console.log(err);

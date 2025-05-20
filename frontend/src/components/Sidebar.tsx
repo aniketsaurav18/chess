@@ -36,11 +36,8 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("name");
-    localStorage.removeItem("email");
+    localStorage.removeItem("user");
     localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("userId");
     window.location.href = "/";
   };
 
@@ -152,10 +149,9 @@ const Sidebar = ({ windowSize, user }: { windowSize: number; user: any }) => {
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-2 w-full">
+            <div className="flex flex-col gap-2 w-full items-start">
               <User
                 name={user.name}
-                description={user.email}
                 avatarProps={{
                   radius: "sm",
                   src: "/default-user.jpg",
