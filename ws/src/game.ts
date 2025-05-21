@@ -64,10 +64,11 @@ export class Game {
         t: "init_game",
         d: {
           gameId: this.gameId,
+          whitePlayerId: this.player1UserId ?? "",
+          blackPlayerId: this.player2UserId ?? "",
           startTime: this.startTime,
           timeControl: this.gameTimeLimit,
-          currentFen:
-            "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          currentFen: this.board.fen(),
         },
       },
       this.gameId

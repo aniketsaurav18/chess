@@ -99,6 +99,39 @@ const insertResult = async (id: string, payload: GameOverPayload) => {
   }
 };
 
+const insertInitGame = async (id: string, payload: InitGamePayload) => {
+  const column = [
+    "id",
+    "white_player_id",
+    "black_player_id",
+    "status",
+    "start_time",
+    "time_control",
+    "current_fen",
+  ];
+  const values = [
+    id,
+    payload.d.whitePlayerId,
+    payload.d.blackPlayerId,
+    "ACTIVE",
+    payload.d.startTime,
+    payload.d.timeControl,
+    payload.d.currentFen,
+  ];
+  const query = `INSERT INTO game (${column.join(", ")}) VALUES (${values
+    .map((_, index) => `$${index + 1}`)
+    .join(", ")})`;
+  const res = await queryDB(query, values);
+  if (res.result === "error") {
+    console.error("Error inserting init game:", res.errorMessage);
+    if (res.details) {
+      console.error("Details:", res.details);
+    }
+  } else {
+    console.log("Init game inserted successfully");
+  }
+};
+
 export const Processor = async (message: string) => {
   let data;
   try {
@@ -124,6 +157,9 @@ export const Processor = async (message: string) => {
 
   try {
     switch (payload.t) {
+      case "init_game":
+        await insertInitGame(id, payload as InitGamePayload);
+        break;
       case "move":
         await insertMove(id, payload as MovePayload);
         break;

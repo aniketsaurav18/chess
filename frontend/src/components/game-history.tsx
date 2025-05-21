@@ -34,7 +34,7 @@ export default function GameHistory() {
     async function fetchUserDetails() {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/user/${user.userId}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/user/${user.id}`,
           {
             headers: {
               Authorization: `Bearer ${user.token}`,
@@ -55,7 +55,7 @@ export default function GameHistory() {
     async function fetchGames() {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/api/game/${user.userId}`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/game/${user.id}`,
           {
             headers: {
               Authorization: `Bearer ${user.token}`,

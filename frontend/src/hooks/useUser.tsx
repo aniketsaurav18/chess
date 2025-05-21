@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 export interface User {
-  userId: string;
+  id: string;
   email: string;
   token: string;
   name: string;
@@ -12,7 +12,7 @@ export interface User {
 
 const useUser = (): User => {
   const [user, setUser] = useState<User>({
-    userId: "",
+    id: "",
     email: "",
     name: "Guest",
     token: "",
@@ -29,7 +29,7 @@ const useUser = (): User => {
     if (user && token) {
       setUser(() => {
         return {
-          userId: user.userId,
+          id: user.id,
           name: user.name,
           email: user.email,
           token: token,

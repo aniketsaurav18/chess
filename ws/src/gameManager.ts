@@ -12,7 +12,7 @@ import {
 import Producer from "./kafka/producer";
 import pool from "./db/db";
 import { verifyToken } from "./jwt";
-
+import { v4 as uuidv4 } from "uuid";
 const TimeLimitAllowed: number[] = [2, 5, 10, 15]; //minutes
 
 export class GameManager {
@@ -156,7 +156,7 @@ export class GameManager {
     whitePlayerId?: string | null | undefined,
     blackPlayerId?: string | null | undefined
   ): Promise<string> {
-    const id = cuid();
+    const id = uuidv4();
     const column = ["id", "status", "time_control"];
     const values = [id, status, timecontrol];
     const placeholder = ["$1", "$2", "$3"];

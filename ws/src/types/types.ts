@@ -16,6 +16,8 @@ export interface InitGamePayloadProducer {
   t: string;
   d: {
     gameId: string;
+    whitePlayerId: string;
+    blackPlayerId: string;
     startTime: Date;
     timeControl: number;
     currentFen: string;
