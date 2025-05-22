@@ -279,7 +279,7 @@ export function useChessGame(user: User) {
             t: INIT_GAME,
             d: {
               tl: timeLimit,
-              userId: user.userId ?? null,
+              userId: user.id ?? null,
               token: user.token ?? null,
             },
           })

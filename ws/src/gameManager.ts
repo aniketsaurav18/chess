@@ -91,7 +91,7 @@ export class GameManager {
     }
   }
   private async handleInitGame(socket: WebSocket, msg: any) {
-    // NOTE: time match match making is not being handled here.
+    // NOTE: time based match making is not being handled here.
     // TODO: add a time based match making.
     let timeLimit = 10; //timelimit should be in minutes
     let extractedUserId: string | null = null;

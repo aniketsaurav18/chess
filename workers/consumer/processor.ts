@@ -105,7 +105,7 @@ const insertInitGame = async (id: string, payload: InitGamePayload) => {
     "white_player_id",
     "black_player_id",
     "status",
-    "start_time",
+    "start_at",
     "time_control",
     "current_fen",
   ];
@@ -157,9 +157,9 @@ export const Processor = async (message: string) => {
 
   try {
     switch (payload.t) {
-      case "init_game":
-        await insertInitGame(id, payload as InitGamePayload);
-        break;
+      // case "init_game":
+      //   await insertInitGame(id, payload as InitGamePayload);
+      //   break;
       case "move":
         await insertMove(id, payload as MovePayload);
         break;
