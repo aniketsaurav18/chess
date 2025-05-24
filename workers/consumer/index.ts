@@ -1,22 +1,32 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { Kafka } from "kafkajs";
+import { Consumer, Kafka } from "kafkajs";
 import { Processor } from "./processor";
 import { checkDBConnection } from "./db";
 
 const Broker = process.env.KAFKA_BROKER || "localhost:9092";
 const GroupId = process.env.KAFKA_GROUP_ID || "my-group";
 
-const kafka = new Kafka({
-  clientId: "my-app",
-  brokers: [Broker],
-});
+let kafka: Kafka;
+let consumer: Consumer;
 
-const consumer = kafka.consumer({ groupId: GroupId });
+const initKafka = async () => {
+  try {
+    kafka = new Kafka({
+      clientId: "chess-game-server",
+      brokers: [`${process.env.KAFKA_HOST}`],
+    });
+    consumer = kafka.consumer({ groupId: GroupId });
+  } catch (error) {
+    console.error("Error in Kafka consumer:", error);
+    throw error;
+  }
+};
 
 const startConsumer = async () => {
   try {
+    await initKafka();
     await checkDBConnection();
     console.log("Connecting to Kafka consumer...");
     console.log("Broker", Broker);
