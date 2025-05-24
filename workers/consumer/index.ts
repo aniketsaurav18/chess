@@ -3,6 +3,7 @@ dotenv.config();
 
 import { Kafka } from "kafkajs";
 import { Processor } from "./processor";
+import { checkDBConnection } from "./db";
 
 const Broker = process.env.KAFKA_BROKER || "localhost:9092";
 const GroupId = process.env.KAFKA_GROUP_ID || "my-group";
@@ -16,6 +17,7 @@ const consumer = kafka.consumer({ groupId: GroupId });
 
 const startConsumer = async () => {
   try {
+    await checkDBConnection();
     console.log("Connecting to Kafka consumer...");
     console.log("Broker", Broker);
     console.log("GroupId", GroupId);

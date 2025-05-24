@@ -162,11 +162,13 @@ export class GameManager {
     const placeholder = ["$1", "$2", "$3"];
 
     if (whitePlayerId) {
+      console.log("whitePlayerId", whitePlayerId);
       column.push("white_player_id");
       values.push(whitePlayerId);
       placeholder.push(`$${values.length}`);
     }
     if (blackPlayerId) {
+      console.log("blackPlayerId", blackPlayerId);
       column.push("black_player_id");
       values.push(blackPlayerId);
       placeholder.push(`$${values.length}`);
@@ -176,6 +178,8 @@ export class GameManager {
       const dbQuery = `INSERT INTO game (${column.join(
         ", "
       )}) VALUES (${placeholder.join(", ")}) RETURNING id`;
+      console.log("dbQuery", dbQuery);
+      console.log("values", values);
       const dbRes = await pool.query(dbQuery, values);
 
       if (dbRes.rows.length === 0) {
