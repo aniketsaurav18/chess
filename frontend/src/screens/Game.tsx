@@ -41,9 +41,9 @@ export default function Game() {
   // const [user, setUser] = useState<User | null>(null);
   const windowDimensions = useWindowDimensions();
   const [boardWidth, setBoardWidth] = useState<number>(500);
-  useEffect(() => {
-    console.log("user details", user);
-  }, []);
+  // useEffect(() => {
+  //   console.log("user details", user);
+  // }, []);
 
   useEffect(() => {
     if (windowDimensions.width === null || windowDimensions.height === null)
