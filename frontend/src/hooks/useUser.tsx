@@ -23,9 +23,9 @@ const useUser = (): User => {
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user") || "{}");
-    console.log("user", user);
+    // console.log("user", user);
     const token = localStorage.getItem("token");
-    console.log("token", token);
+    // console.log("token", token);
     if (user && token) {
       setUser(() => {
         return {

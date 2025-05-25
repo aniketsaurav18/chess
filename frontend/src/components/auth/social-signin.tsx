@@ -11,7 +11,7 @@ export function SocialSignIn() {
 
     onSuccess: async (codeResponse: CodeResponse) => {
       // Expect CodeResponse now
-      console.log("Authorization Code Response:", codeResponse);
+      // console.log("Authorization Code Response:", codeResponse);
       // Send the 'code' to your backend
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/auth/google-login`,
@@ -26,7 +26,7 @@ export function SocialSignIn() {
         }
       );
       const data = await res.json();
-      console.log("Backend Response:", data);
+      // console.log("Backend Response:", data);
 
       if (data.success) {
         // Store user data and token in local storage

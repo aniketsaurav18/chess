@@ -81,10 +81,10 @@ export function SignupPage() {
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        console.log(error);
+        // console.log(error);
       }
 
-      console.log("Sign up successful");
+      // console.log("Sign up successful");
     }
   };
 

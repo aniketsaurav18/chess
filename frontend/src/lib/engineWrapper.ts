@@ -38,7 +38,7 @@ class EngineWrapper {
     this.engine = engine;
     this.queue = new Queue<string>();
     this.engine.addEventListener("message", (event: any) => {
-      console.log("Event data", event.data);
+      // console.log("Event data", event.data);
       this.queue.put(event.data);
     });
     this.log = log;
@@ -118,7 +118,7 @@ class EngineWrapper {
     const searchCommand = `go ${this.Depth ? `depth ${this.Depth}` : ""} ${
       this.SearchTime ? `movetime ${this.SearchTime}` : ""
     }`;
-    console.log("Search Command", searchCommand);
+    // console.log("Search Command", searchCommand);
     this.send(searchCommand);
     const lines = await this.receiveUntil((line) =>
       line.startsWith("bestmove")

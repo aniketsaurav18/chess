@@ -59,7 +59,7 @@ export function LoginPage() {
       }
       setLoading(false);
     } catch (err: any) {
-      console.log(err);
+      // console.log(err);
       setLoginError("Some error occured");
       setLoading(false);
     }

@@ -39,9 +39,9 @@ export function useChessGame(user: User) {
   const [gameResult, setGameResult] = useState<string | null>(null);
   const [winner, setWinner] = useState<string | null>(null);
 
-  useEffect(() => {
-    console.log("user details", user);
-  }, [user]);
+  // useEffect(() => {
+  //   console.log("user details", user);
+  // }, [user]);
 
   useEffect(() => {
     gameStatusRef.current = gameStatus;
@@ -81,29 +81,29 @@ export function useChessGame(user: User) {
     (event: MessageEvent) => {
       if (!socket) return;
       const message = JSON.parse(event.data);
-      console.log("incoming message", message);
+      // console.log("incoming message", message);
       switch (message.t) {
         case INIT_GAME:
           setSide(message.d.color);
-          console.log(side);
-          console.log(message.d.color);
+          // console.log(side);
+          // console.log(message.d.color);
           setGameID(message.d.id);
           setplayer1clock(message.d.clock.w);
           setplayer2clock(message.d.clock.b);
           setGameStatus("STARTED");
-          console.log("game status", gameStatus);
+          // console.log("game status", gameStatus);
           setWaiting(false);
           break;
         case MOVE:
           // if it is just an echo of the move, ignore it.
           if ((message.d.c as string) === side[0]) {
-            console.log("message side:", message.d.c);
-            console.log("side", side);
-            console.log("echo move");
+            // console.log("message side:", message.d.c);
+            // console.log("side", side);
+            // console.log("echo move");
             break;
           }
           const move = game.move(message.d.san);
-          console.log("played move:", move);
+          // console.log("played move:", move);
           if (!move) {
             break;
           }
@@ -111,7 +111,7 @@ export function useChessGame(user: User) {
           setplayer1clock(message.d.clock.w);
           setplayer2clock(message.d.clock.b);
           updateHistory(move);
-          console.log("turn changes", game.turn());
+          // console.log("turn changes", game.turn());
           setTurn(game.turn());
           break;
         case GAME_OVER:
@@ -157,7 +157,7 @@ export function useChessGame(user: User) {
 
   useEffect(() => {
     if (!socket || !user) {
-      console.log("either socker or user is invalid", user);
+      // console.log("either socker or user is invalid", user);
       return;
     }
     socket.onmessage = handleSocketMessage;
@@ -193,7 +193,7 @@ export function useChessGame(user: User) {
           })
         );
       } catch (e: any) {
-        console.log(e);
+        // console.log(e);
         return false;
       }
       updateHistory(move);
@@ -218,13 +218,13 @@ export function useChessGame(user: User) {
       );
       // clearAllInterval();
     } catch (e: any) {
-      console.log(e.message);
+      // console.log(e.message);
     }
   }, [socket, gameStatus, gameId, side]);
 
   const offerDrawfn = useCallback(() => {
     if (offerDraw) return;
-    console.log("draw offered");
+    // console.log("draw offered");
     setOfferDraw(true);
     try {
       socket?.send(
@@ -240,7 +240,7 @@ export function useChessGame(user: User) {
         setOfferDraw(false);
       }, 5000);
     } catch (e) {
-      console.log("error while offering draw", e);
+      // console.log("error while offering draw", e);
     }
   }, [socket, gameId, side, offerDraw, setOfferDraw]);
 
@@ -269,7 +269,7 @@ export function useChessGame(user: User) {
   const startGame = useCallback(
     (timeLimit: number): boolean => {
       if (!socket) {
-        console.log("no socket found");
+        // console.log("no socket found");
         return false;
       }
       try {
@@ -288,7 +288,7 @@ export function useChessGame(user: User) {
         chessboardRef.current.clearPremoves();
         return true;
       } catch (e) {
-        console.log("start Game error:", e);
+        // console.log("start Game error:", e);
         setWaiting(false);
         return false;
       }

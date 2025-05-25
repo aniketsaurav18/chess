@@ -70,24 +70,24 @@ const useEngine = () => {
   }, [engineStatus, side, boardState]);
 
   const initiateEngineMove = async (fen: string) => {
-    console.log("initiating engine move");
+    // console.log("initiating engine move");
     if (engineWrapper === null) {
       console.error("Engine not initialized");
       return;
     }
     const move = await engineWrapper.search(fen);
-    console.log("move", move);
+    // console.log("move", move);
 
     let from = move?.slice(0, 2) as Square;
     let to = move?.slice(2, 4) as Square;
-    console.log("from", from, "to", to);
+    // console.log("from", from, "to", to);
     if (move) {
       const move = game.move({
         from: from,
         to: to,
         promotion: "q",
       });
-      console.log("chess move", move);
+      // console.log("chess move", move);
       setBoardState(game.fen());
       updateHistory(move);
     }
@@ -111,7 +111,7 @@ const useEngine = () => {
     }
     setBoardState(game.fen());
     updateHistory(move);
-    console.log("game history", game.history({ verbose: true }));
+    // console.log("game history", game.history({ verbose: true }));
     return true;
   };
   const updateHistory = (move: any) => {
@@ -149,10 +149,10 @@ const useEngine = () => {
         if (done) break;
 
         receivedLength += value.length;
-        console.log(
-          `Received ${receivedLength} bytes` +
-            (totalSize ? ` of ${totalSize} bytes` : "")
-        );
+        // console.log(
+        //   `Received ${receivedLength} bytes` +
+        //     (totalSize ? ` of ${totalSize} bytes` : "")
+        // );
         setDownloadProgress({
           currentlyDownloading: engine.key,
           progress: totalSize ? (receivedLength / totalSize) * 100 : -1, // Use -1 for unknown progress
@@ -195,10 +195,10 @@ const useEngine = () => {
         if (done) break;
 
         receivedLength2 += value.length;
-        console.log(
-          `Received ${receivedLength2} bytes` +
-            (totalSize2 ? ` of ${totalSize2} bytes` : "")
-        );
+        // console.log(
+        //   `Received ${receivedLength2} bytes` +
+        //     (totalSize2 ? ` of ${totalSize2} bytes` : "")
+        // );
         setDownloadProgress({
           currentlyDownloading: engine.key,
           progress: totalSize2 ? (receivedLength2 / totalSize2) * 100 : -1, // Use -1 for unknown progress
@@ -249,7 +249,7 @@ const useEngine = () => {
         setWorker(stockfishWorker);
         const engineWrapper = new EngineWrapper(stockfishWorker);
         setEngineWrapper(engineWrapper);
-        console.log("config", config);
+        // console.log("config", config);
         const initialized = await engineWrapper.initialize({
           Threads: `${SelectedEngineDetail.multiThreaded ? config.threads : 1}`,
           MultiPV: config.multipv,
@@ -261,7 +261,7 @@ const useEngine = () => {
           console.error("Worker Error:", event.error);
         };
         if (initialized) {
-          console.log("Engine Initialized");
+          // console.log("Engine Initialized");
           dispatch(updateStatus("ready"));
           setGameStatus("STARTED");
         }

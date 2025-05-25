@@ -66,8 +66,8 @@ const GameInfo = memo(
   }: GameInfoProps) => {
     const [selectedTimeLimit, setSelectedTimeLimit] = useState("10");
     const [selectedKey, setSelectedKey] = useState("play");
-    console.log("waiting", waiting);
-    console.log("gameStatue", status);
+    // console.log("waiting", waiting);
+    // console.log("gameStatue", status);
     const [isResignPopoverOpen, setIsResignPopoverOpen] = useState(false);
     useEffect(() => {
       if (status === "STARTED") {
